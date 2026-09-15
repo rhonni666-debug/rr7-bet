@@ -1,0 +1,5 @@
+import { promotions } from '../data/demo';
+
+export function PromotionsPage() {
+  return <div><header><p className="text-xs font-bold uppercase tracking-[.16em] text-amber-300">RR7.BET</p><h1 className="mt-1 text-3xl font-black">Promoções DEMO</h1><p className="mt-2 text-sm text-slate-400">Exemplos de mecânicas visuais sem valor financeiro.</p></header><div className="mt-6 grid gap-4 md:grid-cols-3">{promotions.map((promo, index) => <article key={promo.id} className="relative overflow-hidden rounded-3xl border border-white/8 bg-gradient-to-br from-[#123945] to-[#0a2029] p-5"><div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-300 text-xl font-black text-slate-950">{promo.icon}</div><h2 className="mt-5 text-xl font-black">{promo.title}</h2><p className="mt-2 text-sm leading-6 text-slate-400">{promo.subtitle}</p><span className="mt-5 inline-flex rounded-full bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-300">Campanha {String(index + 1).padStart(2, '0')}</span></article>)}</div></div>;
+}
