@@ -1,11 +1,14 @@
 import { Heart, Play } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { providers } from '../data/demo';
 import { useDemo } from '../lib/demo-store';
+import { useAuth } from '../lib/auth';
 import type { DemoGame } from '../types';
 
 export function GameCard({ game }: { game: DemoGame }) {
-  const { favorites, toggleFavorite, markRecent } = useDemo();
+  const { favorites, toggleFavorite } = useDemo();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const provider = providers.find((item) => item.id === game.providerId);
   const favorite = favorites.includes(game.slug);
 
@@ -22,7 +25,11 @@ export function GameCard({ game }: { game: DemoGame }) {
           type="button"
           onClick={(event) => {
             event.preventDefault();
-            toggleFavorite(game.slug);
+            if (!user) {
+              void navigate({ to: '/auth' });
+              return;
+            }
+            void toggleFavorite(game.slug);
           }}
           className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-slate-950/55 backdrop-blur"
           aria-label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -32,7 +39,6 @@ export function GameCard({ game }: { game: DemoGame }) {
         <Link
           to="/jogo/$slug"
           params={{ slug: game.slug }}
-          onClick={() => markRecent(game.slug)}
           className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-xl bg-slate-950/70 px-3 py-2 text-white backdrop-blur transition hover:bg-slate-950/85"
         >
           <span className="truncate text-sm font-bold">Jogar demo</span>
