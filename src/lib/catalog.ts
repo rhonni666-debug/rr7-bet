@@ -88,6 +88,14 @@ function mapPromotion(row: Record<string, unknown>): Promotion {
   };
 }
 
+function isScheduledNow(item: { active: boolean; startAt: string | null; endAt: string | null }) {
+  if (!item.active) return false;
+  const now = Date.now();
+  if (item.startAt && new Date(item.startAt).getTime() > now) return false;
+  if (item.endAt && new Date(item.endAt).getTime() < now) return false;
+  return true;
+}
+
 export async function fetchCatalog(): Promise<CatalogData> {
   const [providersResult, categoriesResult, gamesResult, bannersResult, promotionsResult] = await Promise.all([
     supabase.from('providers').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }),
@@ -101,13 +109,15 @@ export async function fetchCatalog(): Promise<CatalogData> {
   const failed = results.find((result) => result.error);
   if (failed?.error) throw failed.error;
 
-  return {
-    providers: (providersResult.data ?? []).map((row) => mapProvider(row as Record<string, unknown>)),
-    categories: (categoriesResult.data ?? []).map((row) => mapCategory(row as Record<string, unknown>)),
-    games: (gamesResult.data ?? []).map((row) => mapGame(row as Record<string, unknown>)),
-    banners: (bannersResult.data ?? []).map((row) => mapBanner(row as Record<string, unknown>)),
-    promotions: (promotionsResult.data ?? []).map((row) => mapPromotion(row as Record<string, unknown>)),
-  };
+  const providers = (providersResult.data ?? []).map((row) => mapProvider(row as Record<string, unknown>)).filter((item) => item.status === 'ACTIVE');
+  const categories = (categoriesResult.data ?? []).map((row) => mapCategory(row as Record<string, unknown>)).filter((item) => item.active);
+  const providerIds = new Set(providers.map((item) => item.id));
+  const categoryIds = new Set(categories.map((item) => item.id));
+  const games = (gamesResult.data ?? []).map((row) => mapGame(row as Record<string, unknown>)).filter((item) => item.status === 'ACTIVE' && providerIds.has(item.providerId) && categoryIds.has(item.categoryId));
+  const banners = (bannersResult.data ?? []).map((row) => mapBanner(row as Record<string, unknown>)).filter(isScheduledNow);
+  const promotions = (promotionsResult.data ?? []).map((row) => mapPromotion(row as Record<string, unknown>)).filter(isScheduledNow);
+
+  return { providers, categories, games, banners, promotions };
 }
 
 export function useCatalog() {
