@@ -6,6 +6,8 @@ import { PromotionsPage } from './pages/Promotions';
 import { WalletPage } from './pages/Wallet';
 import { ProfilePage } from './pages/Profile';
 import { GamePage } from './pages/Game';
+import { AuthPage } from './pages/Auth';
+import { ResetPasswordPage } from './pages/ResetPassword';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
 const homeRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomePage });
@@ -14,8 +16,19 @@ const gamesRoute = createRoute({ getParentRoute: () => rootRoute, path: '/jogos'
 const walletRoute = createRoute({ getParentRoute: () => rootRoute, path: '/carteira', component: WalletPage });
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/perfil', component: ProfilePage });
 const gameRoute = createRoute({ getParentRoute: () => rootRoute, path: '/jogo/$slug', component: GamePage });
+const authRoute = createRoute({ getParentRoute: () => rootRoute, path: '/auth', component: AuthPage });
+const resetPasswordRoute = createRoute({ getParentRoute: () => rootRoute, path: '/redefinir-senha', component: ResetPasswordPage });
 
-const routeTree = rootRoute.addChildren([homeRoute, promotionsRoute, gamesRoute, walletRoute, profileRoute, gameRoute]);
+const routeTree = rootRoute.addChildren([
+  homeRoute,
+  promotionsRoute,
+  gamesRoute,
+  walletRoute,
+  profileRoute,
+  gameRoute,
+  authRoute,
+  resetPasswordRoute,
+]);
 
 export const router = createRouter({ routeTree });
 
