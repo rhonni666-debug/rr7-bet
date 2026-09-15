@@ -1,92 +1,148 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { WalletTransaction } from '../types';
+import { supabase } from '../integrations/supabase/client';
+import { useAuth } from './auth';
+
+type PlayResult = { ok: boolean; win: number; message: string; needsAuth?: boolean };
 
 type DemoContextValue = {
   favorites: string[];
   recent: string[];
   transactions: WalletTransaction[];
   balance: number;
-  toggleFavorite: (slug: string) => void;
-  markRecent: (slug: string) => void;
-  playDemo: (slug: string, gameName: string, bet: number) => { ok: boolean; win: number; message: string };
+  loading: boolean;
+  toggleFavorite: (slug: string) => Promise<boolean>;
+  markRecent: (slug: string) => Promise<boolean>;
+  playDemo: (slug: string, gameName: string, bet: number) => Promise<PlayResult>;
+  refresh: () => Promise<void>;
 };
 
 const Context = createContext<DemoContextValue | null>(null);
-const INITIAL = 10_000;
 
-function read<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') return fallback;
-  try {
-    const value = window.localStorage.getItem(key);
-    return value ? (JSON.parse(value) as T) : fallback;
-  } catch {
-    return fallback;
+function relationSlug(value: unknown): string | null {
+  if (Array.isArray(value)) {
+    const first = value[0] as { slug?: unknown } | undefined;
+    return typeof first?.slug === 'string' ? first.slug : null;
   }
-}
-
-function save(key: string, value: unknown) {
-  window.localStorage.setItem(key, JSON.stringify(value));
-}
-
-function tx(type: WalletTransaction['type'], amount: number, description: string): WalletTransaction {
-  return {
-    id: crypto.randomUUID(),
-    type,
-    amount,
-    description,
-    createdAt: new Date().toISOString(),
-  };
+  if (value && typeof value === 'object' && 'slug' in value) {
+    const slug = (value as { slug?: unknown }).slug;
+    return typeof slug === 'string' ? slug : null;
+  }
+  return null;
 }
 
 export function DemoProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<string[]>(() => read('rr7:favorites', []));
-  const [recent, setRecent] = useState<string[]>(() => read('rr7:recent', []));
-  const [transactions, setTransactions] = useState<WalletTransaction[]>(() =>
-    read('rr7:wallet', [tx('INITIAL_BONUS', INITIAL, 'Créditos iniciais DEMO')]),
-  );
+  const { user, loading: authLoading } = useAuth();
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const balance = useMemo(() => transactions.reduce((sum, item) => sum + item.amount, 0), [transactions]);
+  const refresh = useCallback(async () => {
+    if (!user) {
+      setFavorites([]);
+      setRecent([]);
+      setTransactions([]);
+      setBalance(0);
+      setLoading(false);
+      return;
+    }
 
-  const toggleFavorite = (slug: string) => {
-    setFavorites((current) => {
-      const next = current.includes(slug) ? current.filter((item) => item !== slug) : [slug, ...current];
-      save('rr7:favorites', next);
-      return next;
-    });
+    setLoading(true);
+    try {
+      const [favoriteResult, recentResult, transactionResult, balanceResult] = await Promise.all([
+        supabase.from('favorites').select('game_id,games!inner(slug)').eq('user_id', user.id),
+        supabase.from('recent_games').select('game_id,last_played_at,games!inner(slug)').eq('user_id', user.id).order('last_played_at', { ascending: false }).limit(12),
+        supabase.from('wallet_transactions').select('id,type,amount,description,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(100),
+        supabase.rpc('get_my_demo_balance'),
+      ]);
+
+      if (favoriteResult.error) throw favoriteResult.error;
+      if (recentResult.error) throw recentResult.error;
+      if (transactionResult.error) throw transactionResult.error;
+      if (balanceResult.error) throw balanceResult.error;
+
+      setFavorites((favoriteResult.data ?? []).map((row) => relationSlug(row.games)).filter((slug): slug is string => Boolean(slug)));
+      setRecent((recentResult.data ?? []).map((row) => relationSlug(row.games)).filter((slug): slug is string => Boolean(slug)));
+      setTransactions((transactionResult.data ?? []).map((row) => ({
+        id: row.id,
+        type: row.type as WalletTransaction['type'],
+        amount: Number(row.amount),
+        description: row.description,
+        createdAt: row.created_at,
+      })));
+      setBalance(Number(balanceResult.data ?? 0));
+    } catch (error) {
+      console.error('Falha ao sincronizar dados DEMO:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!authLoading) void refresh();
+  }, [authLoading, refresh]);
+
+  const resolveGameId = useCallback(async (slug: string) => {
+    const { data, error } = await supabase.from('games').select('id').eq('slug', slug).single();
+    if (error || !data) return null;
+    return data.id as string;
+  }, []);
+
+  const toggleFavorite = async (slug: string) => {
+    if (!user) return false;
+    const gameId = await resolveGameId(slug);
+    if (!gameId) return false;
+
+    const isFavorite = favorites.includes(slug);
+    const result = isFavorite
+      ? await supabase.from('favorites').delete().eq('user_id', user.id).eq('game_id', gameId)
+      : await supabase.from('favorites').insert({ user_id: user.id, game_id: gameId });
+
+    if (result.error) return false;
+    setFavorites((current) => isFavorite ? current.filter((item) => item !== slug) : [slug, ...current]);
+    return true;
   };
 
-  const markRecent = (slug: string) => {
-    setRecent((current) => {
-      const next = [slug, ...current.filter((item) => item !== slug)].slice(0, 12);
-      save('rr7:recent', next);
-      return next;
-    });
+  const markRecent = async (slug: string) => {
+    if (!user) return false;
+    const { error } = await supabase.rpc('mark_recent_game', { p_game_slug: slug });
+    if (error) return false;
+    setRecent((current) => [slug, ...current.filter((item) => item !== slug)].slice(0, 12));
+    return true;
   };
 
-  const playDemo = (slug: string, gameName: string, bet: number) => {
-    if (bet <= 0 || !Number.isFinite(bet)) return { ok: false, win: 0, message: 'Aposta DEMO inválida.' };
+  const playDemo = async (slug: string, gameName: string, bet: number): Promise<PlayResult> => {
+    if (!user) return { ok: false, win: 0, message: 'Entre na sua conta para usar créditos DEMO.', needsAuth: true };
+    if (bet <= 0 || !Number.isFinite(bet)) return { ok: false, win: 0, message: 'Rodada DEMO inválida.' };
     if (bet > balance) return { ok: false, win: 0, message: 'Créditos DEMO insuficientes.' };
 
-    const random = crypto.getRandomValues(new Uint32Array(1))[0] / 0xffffffff;
-    const multiplier = random > 0.94 ? 5 : random > 0.78 ? 2 : random > 0.62 ? 1 : 0;
-    const win = bet * multiplier;
-    const next = [
-      ...transactions,
-      tx('BET', -bet, `Aposta DEMO — ${gameName}`),
-      ...(win > 0 ? [tx('WIN', win, `Resultado DEMO — ${gameName}`)] : []),
-    ];
-    setTransactions(next);
-    save('rr7:wallet', next);
-    markRecent(slug);
+    const gameId = await resolveGameId(slug);
+    if (!gameId) return { ok: false, win: 0, message: 'Jogo DEMO indisponível.' };
+
+    const { data, error } = await supabase.rpc('play_demo_round', {
+      p_game_id: gameId,
+      p_bet: bet,
+      p_request_id: crypto.randomUUID(),
+    });
+
+    if (error) return { ok: false, win: 0, message: 'Não foi possível concluir a rodada DEMO.' };
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const win = Number(row?.win_amount ?? 0);
+    await refresh();
     return {
       ok: true,
       win,
-      message: win > 0 ? `Você recebeu ${win.toLocaleString('pt-BR')} créditos DEMO.` : 'Rodada DEMO sem prêmio.',
+      message: win > 0
+        ? `${gameName}: você recebeu ${win.toLocaleString('pt-BR')} créditos DEMO.`
+        : `${gameName}: rodada DEMO sem prêmio.`,
     };
   };
 
   return (
-    <Context.Provider value={{ favorites, recent, transactions, balance, toggleFavorite, markRecent, playDemo }}>
+    <Context.Provider value={{ favorites, recent, transactions, balance, loading, toggleFavorite, markRecent, playDemo, refresh }}>
       {children}
     </Context.Provider>
   );

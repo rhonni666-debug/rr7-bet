@@ -26,7 +26,7 @@ export type DemoGame = {
 
 export type WalletTransaction = {
   id: string;
-  type: 'INITIAL_BONUS' | 'BET' | 'WIN' | 'REFUND';
+  type: 'INITIAL_BONUS' | 'BET' | 'WIN' | 'REFUND' | 'PROMO_BONUS' | 'ADMIN_ADJUSTMENT';
   amount: number;
   description: string;
   createdAt: string;

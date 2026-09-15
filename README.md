@@ -6,18 +6,33 @@ Laboratório educacional/demonstrativo de uma plataforma de lobby de jogos, cons
 
 - lobby responsivo RR7.BET;
 - catálogo de jogos e provedores fictícios;
-- busca, categorias, favoritos e recentes;
-- carteira com créditos exclusivamente DEMO;
-- jogo demonstrativo local, sem dinheiro real;
-- arquitetura preparada para Supabase e futuros adapters B2B autorizados.
+- autenticação por e-mail com Supabase Auth;
+- favoritos e recentes persistidos por usuário;
+- carteira com 10.000 créditos exclusivamente DEMO;
+- ledger PostgreSQL imutável para bônus, apostas e resultados DEMO;
+- RLS para isolar dados entre usuários;
+- RPC idempotente para processar rodadas demonstrativas;
+- arquitetura preparada para futuros adapters B2B autorizados.
 
 ## Importante
 
-Este projeto **não processa dinheiro real**, PIX, depósitos ou saques. Os jogos e provedores da versão atual são demonstrativos.
+Este projeto **não processa dinheiro real**, PIX, depósitos ou saques. Os jogos e provedores atuais são fictícios/demonstrativos.
 
 ## Stack
 
-React + TypeScript + Vite + TanStack Router + TanStack Query + Tailwind CSS.
+React + TypeScript + Vite + TanStack Router + TanStack Query + Tailwind CSS + Supabase/PostgreSQL.
+
+## Supabase
+
+Projeto: `tndnqjbkfwongolorvjm`
+
+Somente a chave **publishable** é usada no frontend. Chaves privadas ou `service_role` não pertencem ao código cliente.
+
+Copie `.env.example` para `.env` se quiser sobrescrever as configurações públicas do projeto:
+
+```bash
+cp .env.example .env
+```
 
 ## Desenvolvimento
 
@@ -32,3 +47,5 @@ npm run dev
 npm run typecheck
 npm run build
 ```
+
+O GitHub Actions executa os dois comandos em pushes e pull requests para `main`.
