@@ -21,7 +21,7 @@ export function GamePage() {
 
   useEffect(() => {
     if (user && game) void markRecent(game.slug);
-  }, [game, markRecent, user]);
+  }, [game?.slug, user?.id]);
 
   if (catalog.isLoading) return <div className="rounded-2xl border border-white/10 p-8 text-center text-slate-400">Carregando jogo...</div>;
   if (!game) return <div className="rounded-2xl border border-white/10 p-8 text-center"><p>Jogo demo não encontrado.</p><Link to="/" className="mt-4 inline-flex text-amber-300">Voltar ao lobby</Link></div>;
