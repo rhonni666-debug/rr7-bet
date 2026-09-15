@@ -17,13 +17,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { balance, loading } = useDemo();
   const { user } = useAuth();
+  const adminArea = pathname.startsWith('/admin');
 
   return (
     <div className="min-h-dvh bg-[#06171f] text-white">
       <header className="sticky top-0 z-40 border-b border-white/5 bg-[#071c26]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
           <Link to="/" aria-label="Ir para o início"><Brand compact /></Link>
-          {user ? (
+          {adminArea ? <Link to="/perfil" className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black text-slate-300">Sair do painel</Link> : user ? (
             <Link to="/carteira" className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-right">
               <p className="text-[9px] font-bold uppercase tracking-[.16em] text-amber-300/80">Saldo demo</p>
               <p className="text-sm font-black text-amber-300">{loading ? '...' : balance.toLocaleString('pt-BR')} créditos</p>
@@ -36,9 +37,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-28 pt-5 md:px-6 md:pb-10">{children}</main>
+      <main className={`mx-auto max-w-7xl px-4 pt-5 md:px-6 md:pb-10 ${adminArea ? 'pb-10' : 'pb-28'}`}>{children}</main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#081f29]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
+      {!adminArea && <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#081f29]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5">
           {nav.map((item) => {
             const Icon = item.icon;
@@ -51,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </div>
-      </nav>
+      </nav>}
     </div>
   );
 }
