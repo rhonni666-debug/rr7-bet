@@ -10,6 +10,7 @@ import './bonus-mode.css';
 import './juice.css';
 import './symbol-vfx.css';
 import './mobile-stage8.css';
+import './depth-stage9.css';
 
 const params = new URLSearchParams(window.location.search);
 const playerToken = params.get('play');
