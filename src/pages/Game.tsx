@@ -52,7 +52,7 @@ export function GamePage() {
         else void GameLauncher.closeSession(provider, next.id).catch(() => undefined);
       })
       .catch(() => {
-        if (!cancelled) setSessionError('Não foi possível iniciar a sessão DEMO pelo Provider Gateway.');
+        if (!cancelled) setSessionError(`Não foi possível iniciar a sessão DEMO pela ${provider.name}.`);
       });
 
     return () => {
@@ -65,7 +65,7 @@ export function GamePage() {
   if (!game) return <div className="rounded-2xl border border-white/10 p-8 text-center"><p>Jogo demo não encontrado.</p><Link to="/" className="mt-4 inline-flex text-amber-300">Voltar ao lobby</Link></div>;
 
   const selectedGame = game;
-  const isOriginalSlot = selectedGame.externalGameId?.startsWith('rr7-slot:') ?? false;
+  const isOriginalSlot = selectedGame.externalGameId?.startsWith('rr7-slot:') || selectedGame.externalGameId?.startsWith('ripcom-slot:') || false;
 
   if (isOriginalSlot && provider) {
     return (
@@ -194,14 +194,14 @@ export function GamePage() {
       <section className="mt-5 rounded-3xl border border-white/8 bg-white/[.035] p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Seu saldo</p><p className="mt-1 text-xl font-black text-amber-300">{user ? balance.toLocaleString('pt-BR') : '—'} créditos</p></div>
-          <div className="flex items-center gap-3"><span className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-300"><ShieldCheck className="h-3.5 w-3.5" /> DEMO</span>{user && <span className={`flex items-center gap-1 text-[10px] font-bold uppercase ${session ? 'text-cyan-300' : 'text-slate-500'}`}><CircleDot className="h-3.5 w-3.5" /> {session ? 'Gateway ativo' : 'Abrindo sessão'}</span>}</div>
+          <div className="flex items-center gap-3"><span className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-300"><ShieldCheck className="h-3.5 w-3.5" /> DEMO</span>{user && <span className={`flex items-center gap-1 text-[10px] font-bold uppercase ${session ? 'text-cyan-300' : 'text-slate-500'}`}><CircleDot className="h-3.5 w-3.5" /> {session ? `${provider?.shortName ?? 'Gateway'} ativo` : 'Abrindo sessão'}</span>}</div>
         </div>
         {sessionError && <p className="mt-4 rounded-xl border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">{sessionError}</p>}
         <p className="mt-5 text-xs font-bold uppercase tracking-wider text-slate-500">Valor da rodada</p>
         <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-7">{bets.map((value) => <button key={value} onClick={() => setBet(value)} className={`rounded-xl border py-2.5 text-sm font-black transition ${bet === value ? 'border-amber-300 bg-amber-300 text-slate-950' : 'border-white/10 bg-white/5 text-slate-300'}`}>{value}</button>)}</div>
         <button disabled={busy || Boolean(user && !session)} onClick={() => void runDemo()} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-amber-300 to-yellow-500 py-3.5 text-sm font-black uppercase tracking-wider text-slate-950 shadow-lg shadow-amber-500/10 transition hover:brightness-105 disabled:opacity-60">{busy ? 'Processando...' : !user ? 'Entrar para jogar DEMO' : session ? 'Rodar demonstração' : 'Preparando sessão...'}</button>
         <p className="mt-4 rounded-xl bg-black/20 px-4 py-3 text-center text-sm text-slate-300">{result}</p>
-        {session && <p className="mt-3 text-center text-[10px] uppercase tracking-wider text-slate-600">Sessão {session.id.slice(0, 8)} • Provider Gateway • MockProviderAdapter</p>}
+        {session && <p className="mt-3 text-center text-[10px] uppercase tracking-wider text-slate-600">Sessão {session.id.slice(0, 8)} • {provider?.name ?? 'Provider Gateway'} • {provider?.providerType ?? 'DEMO'}</p>}
       </section>
     </div>
   );
