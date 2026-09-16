@@ -15,6 +15,7 @@ const items = [
   { to: '/admin/transacoes', label: 'Transações', icon: CircleDollarSign },
   { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
   { to: '/admin/ripcom', label: 'RIPCOM B2B', icon: RadioTower },
+  { to: '/admin/ripcom-metricas', label: 'RIPCOM Métricas', icon: Activity },
   { to: '/admin/b2b-sandbox', label: 'B2B Sandbox', icon: Webhook },
   { to: '/admin/hub88-poc', label: 'Hub88 POC', icon: Gauge },
   { to: '/admin/poc-metrics', label: 'POC Benchmark', icon: Activity },
