@@ -82,7 +82,7 @@ games/eclipse-serpent/manifest.json
 Frontend atual:
 
 ```text
-RIPCOM Provider Frontend = 1.0.0-sandbox.5
+RIPCOM Provider Frontend = 1.0.0-sandbox.6
 ```
 
 ---
@@ -112,7 +112,7 @@ Sequência:
 9. aparece `8 RODADAS GRÁTIS`;
 10. HUD mostra `8 → 0`;
 11. as free spins executam automaticamente;
-12. Big/Mega Wins pausam a sequência para celebração;
+12. Great/Big/Mega Wins pausam a sequência para celebração;
 13. a tela final mostra `TOTAL GANHO`.
 
 Especificação completa:
@@ -125,7 +125,7 @@ docs/ECLIPSE_SERPENT_VFX.md
 
 ## 6. Áudio e “juice” visual
 
-Frontend: `1.0.0-sandbox.5`.
+Frontend: `1.0.0-sandbox.6`.
 
 ### Motor de áudio procedural
 
@@ -143,12 +143,12 @@ Eventos:
 - `freeSpin()` — rodada grátis;
 - `tease()` — suspense de quase bônus;
 - `bonusHit()` — confirmação do Eclipse Bonus;
-- `win(multiplier)` — vitória e celebrações;
+- `win(multiplier)` — vitória normal, Great Win, Big Win ou Mega Win;
 - `bonusComplete()` — encerramento do bônus.
 
 O player possui botão de som. O navegador libera áudio após a primeira interação do usuário.
 
-### Big Win / Mega Win
+### GREAT WIN / BIG WIN / MEGA WIN
 
 Arquivos:
 
@@ -159,10 +159,11 @@ ripcom-provider/src/juice.css
 
 Classificação somente visual, sem alterar a matemática:
 
-- `BIG WIN`: multiplicador `>= 8x`;
+- `GREAT WIN`: multiplicador `>= 5x` e `< 10x`;
+- `BIG WIN`: multiplicador `>= 10x` e `< 25x`;
 - `MEGA WIN`: multiplicador `>= 25x`.
 
-A apresentação inclui partículas, anéis de energia, pulso de símbolos vencedores, texto animado, som procedural e pausa temporária das free spins.
+A apresentação inclui partículas, anéis de energia, pulso de símbolos vencedores, texto animado, som procedural próprio por faixa e pausa temporária das free spins.
 
 ---
 
@@ -418,7 +419,7 @@ Executável somente pelo `service_role`.
 
 Diretório: `ripcom-provider/`.
 
-Versão: `1.0.0-sandbox.5`.
+Versão: `1.0.0-sandbox.6`.
 
 Inclui:
 
@@ -432,7 +433,7 @@ Inclui:
 - resumo do bônus;
 - áudio procedural;
 - botão mute/unmute;
-- Big Win / Mega Win;
+- Great Win / Big Win / Mega Win;
 - animação de símbolos vencedores.
 
 Manifest:
