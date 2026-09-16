@@ -76,6 +76,25 @@ class EclipseAudioEngine {
     this.noise(0.18, 0.045);
   }
 
+  reelStop(index: number) {
+    const base = 175 + Math.max(0, Math.min(4, index)) * 42;
+    this.tone(base, 0.09, { type: 'triangle', gain: 0.055, endFreq: base * 0.72 });
+    this.noise(0.045, 0.025);
+  }
+
+  scatterLand(count: number) {
+    const capped = Math.max(1, Math.min(4, count));
+    for (let index = 0; index < capped; index += 1) {
+      const freq = 330 * Math.pow(1.19, index);
+      this.tone(freq, 0.34, { type: 'sine', gain: 0.055 + index * 0.009, when: index * 0.08, endFreq: freq * 1.12 });
+    }
+  }
+
+  wildReveal() {
+    this.tone(240, 0.28, { type: 'triangle', gain: 0.065, endFreq: 620 });
+    this.tone(720, 0.22, { type: 'sine', gain: 0.04, when: 0.07, endFreq: 980 });
+  }
+
   freeSpin() {
     this.tone(320, 0.16, { type: 'triangle', gain: 0.06, endFreq: 720 });
     this.tone(640, 0.14, { type: 'sine', gain: 0.035, when: 0.08, endFreq: 980 });
