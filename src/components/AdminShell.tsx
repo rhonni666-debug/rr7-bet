@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Activity, Blocks, CircleDollarSign, Coins, Gamepad2, Gauge, Gift, Image, LayoutDashboard, ListTree, ScrollText, TimerReset, Users, Webhook } from 'lucide-react';
+import { Activity, Blocks, CircleDollarSign, Coins, Gamepad2, Gauge, Gift, Image, LayoutDashboard, ListTree, RadioTower, ScrollText, TimerReset, Users, Webhook } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
 const items = [
@@ -14,6 +14,7 @@ const items = [
   { to: '/admin/sessoes', label: 'Sessões', icon: TimerReset },
   { to: '/admin/transacoes', label: 'Transações', icon: CircleDollarSign },
   { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
+  { to: '/admin/ripcom', label: 'RIPCOM B2B', icon: RadioTower },
   { to: '/admin/b2b-sandbox', label: 'B2B Sandbox', icon: Webhook },
   { to: '/admin/hub88-poc', label: 'Hub88 POC', icon: Gauge },
   { to: '/admin/poc-metrics', label: 'POC Benchmark', icon: Activity },
