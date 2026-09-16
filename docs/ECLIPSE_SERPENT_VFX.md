@@ -1,107 +1,145 @@
-# Eclipse Serpent — Living Scene & Bonus VFX
+# Eclipse Serpent — Living Scene & Eclipse Bonus
 
 Atualizado em: 16/09/2026  
-Frontend RIPCOM: `1.0.0-sandbox.2`  
-Game release/math: `Eclipse Serpent 1.0.0`  
+Frontend RIPCOM: `1.0.0-sandbox.4`  
+Game release/math: `Eclipse Serpent 1.1.0`  
 Modo: `SANDBOX / DEMO`
 
 ## Objetivo
 
-Dar vida ao Eclipse Serpent sem alterar a matemática da release `1.0.0`. Esta entrega modifica a camada visual do player standalone RIPCOM.
+Dar ao Eclipse Serpent uma experiência de slot viva e cinematográfica, mantendo identidade visual própria da RIPCOM. A referência de ritmo é a categoria de slots mobile de alto impacto, sem copiar imagens, áudio, marca ou assets de terceiros.
+
+## Regra oficial do bônus
+
+- Gatilho: `3 scatters`.
+- Prêmio: **8 rodadas grátis**.
+- Retrigger durante free spins: `desabilitado` nesta release.
+- Aposta das free spins: a mesma aposta do giro pago que ativou o bônus.
+- Débito durante free spins: **nenhum**.
+- Ganhos: creditados normalmente no saldo DEMO.
+- Estado: persistido no backend; recarregar a página não apaga o bônus.
 
 ## Arquivos principais
 
-- `ripcom-provider/src/App.tsx` — máquina de estados visuais e timing do tease/bônus.
-- `ripcom-provider/src/game-vfx.css` — animações, partículas, névoa, halo, transições e responsividade.
-- `ripcom-provider/src/assets/eclipse-temple-bg.svg` — cenário original do templo sob eclipse.
-- `ripcom-provider/src/main.tsx` — carrega a camada VFX.
-- `ripcom-provider/public/provider-manifest.json` — registra capacidades VFX e versão do frontend.
+- `ripcom-provider/src/game/EclipsePlayer.tsx` — player canônico, tease, intro, sequência automática 8→0 e encerramento.
+- `ripcom-provider/src/game/BonusIntroOverlay.tsx` — eclipse do sol/lua + serpente subindo + anúncio das 8 rodadas.
+- `ripcom-provider/src/game/SerpentRise.tsx` — serpente vetorial autoral animada.
+- `ripcom-provider/src/game/AnimatedBackground.tsx` — cenário vivo, parallax, névoa, partículas e eclipse.
+- `ripcom-provider/src/bonus-mode.css` — HUD do bônus, free spins, resumo final e estados visuais.
+- `ripcom-provider/src/cinematic-vfx.css` — animação cinematográfica sol/lua/serpente.
+- `supabase/functions/ripcom-player-runtime/index.ts` — runtime público do player por token de sessão.
+- `public.ripcom_settle_demo_spin_v2` — liquidação atômica de giro pago/free spin.
 
-## Estados visuais do jogo
+## Estados visuais
 
-O player utiliza os estados:
+- `idle` — cenário vivo.
+- `spinning` — giro pago.
+- `tease` — dois scatters visíveis e rolo decisivo em suspense.
+- `bonus` — intro cinematográfica.
+- `free-spins` — intervalo entre rodadas grátis.
+- `free-spinning` — rodada grátis em execução.
+- `bonus-outro` — resumo final do bônus.
+- `reveal` — revelação de resultado normal.
 
-- `idle` — cenário vivo em movimento contínuo.
-- `spinning` — partículas aceleram e o cenário ganha mais saturação/luz.
-- `tease` — ameaça de bônus com dois scatters já visíveis e um rolo decisivo em suspense.
-- `bonus` — entrada cinematográfica do Eclipse Bonus.
-- `reveal` — retorno controlado para exibir o resultado e prêmio.
+## Ameaça de bônus
 
-## Fundo vivo
-
-O cenário foi criado especificamente para o Eclipse Serpent e contém:
-
-- templo antigo;
-- eclipse central;
-- silhuetas de montanhas/ruínas;
-- runas e círculos místicos;
-- névoa em duas profundidades;
-- partículas/brasas verdes subindo;
-- halo respirando ao redor do eclipse;
-- varredura lenta de luz;
-- movimento contínuo do cenário também no celular.
-
-O fundo não depende do mouse para parecer vivo.
-
-## Tease de bônus
-
-O tease não é acionado aleatoriamente.
-
-Ele só acontece quando o **resultado real da rodada contém pelo menos 2 scatters** e existe uma coluna que pode ser usada como rolo decisivo mantendo dois scatters já visíveis.
+O tease só ocorre quando o resultado real possui pelo menos 2 scatters.
 
 Fluxo:
 
-1. o servidor devolve o resultado da rodada;
-2. dois scatters são mantidos visíveis;
-3. o rolo decisivo continua girando visualmente;
-4. o fundo escurece e muda de energia;
-5. o halo do eclipse pulsa em tom dourado;
-6. o rolo decisivo recebe glow/tremor leve;
-7. surge a mensagem `O ECLIPSE ESTÁ ABRINDO`;
-8. depois do suspense o resultado real é revelado.
+1. dois scatters ficam visíveis;
+2. o rolo decisivo continua em movimento;
+3. cenário escurece;
+4. eclipse começa a fechar;
+5. partículas e halo aceleram;
+6. rolo decisivo recebe glow;
+7. aparece `O ECLIPSE ESTÁ ABRINDO`;
+8. o resultado real é revelado.
 
-Isso evita um “quase bônus” falso desconectado do resultado real.
+## Entrada do Eclipse Bonus
 
-## Bônus ativado
+Quando o terceiro scatter confirma o bônus:
 
-Quando `scatterCount >= 3`:
+1. os reels congelam;
+2. o fundo escurece;
+3. o sol aparece;
+4. a lua atravessa o sol e fecha o eclipse;
+5. a corona solar aumenta;
+6. a serpente sobe da parte inferior da tela;
+7. os olhos da serpente brilham;
+8. entra `ECLIPSE BONUS`;
+9. entra `8 RODADAS GRÁTIS`;
+10. o HUD do bônus aparece;
+11. as oito rodadas começam automaticamente.
 
-1. os rolos revelam o resultado real;
-2. o estado muda para `bonus`;
-3. o cenário fica mais brilhante/saturado;
-4. o eclipse ganha halo forte;
-5. partículas aceleram;
-6. anéis de energia se expandem na tela;
-7. partículas explodem radialmente;
-8. entra a tela `ECLIPSE BONUS`;
-9. a quantidade real de scatters aparece na mensagem;
-10. após a intro o jogo entra no estado de revelação da rodada.
+## Durante as 8 rodadas grátis
 
-Esta animação representa o evento de scatter da versão atual. Ela **não afirma free spins** porque a matemática `1.0.0` ainda não possui um modo persistente de free spins separado.
+O player mostra:
 
-## Responsividade e acessibilidade
+- contador `8 → 0`;
+- `ECLIPSE BONUS` sempre visível;
+- aposta usada no bônus;
+- ganho acumulado do bônus;
+- cenário em modo eclipse ativo;
+- reels com iluminação exclusiva;
+- destaque de vitória por free spin.
 
-- O cenário possui movimento específico para mobile.
-- A intensidade visual é reduzida automaticamente quando o dispositivo/usuário utiliza `prefers-reduced-motion`.
-- Nenhuma chave RSA, segredo de operador ou service role entra na camada visual.
+O botão de aposta fica bloqueado enquanto o bônus está ativo.
+
+## Encerramento
+
+Depois da oitava rodada:
+
+- aparece a tela `ECLIPSE BONUS CONCLUÍDO`;
+- mostra `8 RODADAS GRÁTIS`;
+- mostra o total acumulado no bônus;
+- o jogo retorna ao estado normal.
+
+## Persistência no backend
+
+Campos de sessão:
+
+- `free_spins_remaining`
+- `free_spins_total`
+- `bonus_bet`
+- `bonus_total_win`
+- `bonus_rounds_played`
+- `bonus_triggered_at`
+
+Campos de round:
+
+- `is_free_spin`
+- `free_spins_remaining_after`
+- `bonus_awarded`
+- `bonus_bet`
+- `bonus_total_win_after`
+- `bonus_rounds_played_after`
+
+## Validação matemática DEMO
+
+Teste de homologação da release 1.1.0:
+
+- saldo inicial: `1000`;
+- giro pago: aposta `5`;
+- bônus ativado: `8` free spins;
+- saldo após giro pago sem prêmio: `995`;
+- 8 free spins executadas sem novo débito de aposta;
+- prêmio de teste: `1` crédito em cada free spin;
+- ganho total do bônus: `8`;
+- saldo final esperado e obtido: `1003`;
+- rounds registrados: `1 pago + 8 grátis`;
+- `free_spins_remaining` final: `0`.
 
 ## Versionamento
 
-A matemática permanece:
+- `Eclipse Serpent = 1.1.0`
+- `RIPCOM Provider Frontend = 1.0.0-sandbox.4`
+- `ripcom-player-runtime = v1`
 
-`Eclipse Serpent = 1.0.0`
+## Segurança
 
-A camada standalone RIPCOM passa para:
-
-`RIPCOM Provider Frontend = 1.0.0-sandbox.2`
-
-A separação é intencional: mudanças de apresentação podem evoluir sem fingir que a matemática do jogo mudou.
-
-## Próxima evolução visual recomendada
-
-- efeitos sonoros próprios para tease e bônus;
-- animação individual de cada símbolo;
-- contador animado de prêmio;
-- Big Win / Mega Win;
-- modo bônus persistente apenas quando a matemática e o backend tiverem uma feature de bônus real definida;
-- testes em dispositivos móveis reais para calibrar intensidade e performance.
+- continua 100% DEMO/fun-money;
+- private keys B2B não entram no player;
+- service role fica apenas no Edge Runtime;
+- o browser recebe somente token temporário de sessão;
+- o frontend não decide se um giro é grátis: o backend verifica o estado da sessão.
