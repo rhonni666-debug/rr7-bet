@@ -1,0 +1,273 @@
+import { useEffect, useMemo, useState } from 'react';
+import { RefreshCw, ShieldCheck, Sparkles, XCircle } from 'lucide-react';
+import { getPlayerState, spinPlayer, type RipcomPlayerState, type RipcomSpin } from '../api';
+import { AnimatedBackground } from './AnimatedBackground';
+import { BonusIntroOverlay } from './BonusIntroOverlay';
+import { BonusTeaseOverlay } from './BonusTeaseOverlay';
+
+type GamePhase = 'idle' | 'spinning' | 'tease' | 'bonus' | 'free-spins' | 'free-spinning' | 'bonus-outro' | 'reveal';
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function Brand() {
+  return <div className="brand"><div className="brand-mark">R</div><div><strong>RIPCOM</strong><span>ORIGINAL</span></div></div>;
+}
+
+function randomGrid(state: RipcomPlayerState) {
+  const ids = state.config.symbols.map((symbol) => symbol.id);
+  return state.config.layout.map((rows) => Array.from({ length: rows }, () => ids[Math.floor(Math.random() * ids.length)] ?? ''));
+}
+
+function randomColumn(state: RipcomPlayerState, columnIndex: number) {
+  const ids = state.config.symbols.map((symbol) => symbol.id);
+  const rows = state.config.layout[columnIndex] ?? 3;
+  return Array.from({ length: rows }, () => ids[Math.floor(Math.random() * ids.length)] ?? '');
+}
+
+function findTeaseColumn(result: RipcomSpin, scatterId?: string) {
+  if (!scatterId || result.scatterCount < 2) return null;
+  const counts = result.grid.map((column) => column.filter((symbolId) => symbolId === scatterId).length);
+  if (result.scatterCount === 2) {
+    const emptyColumn = counts.findIndex((count) => count === 0);
+    return emptyColumn >= 0 ? emptyColumn : null;
+  }
+  const qualifying = counts.findIndex((count) => result.scatterCount - count >= 2 && count > 0);
+  return qualifying >= 0 ? qualifying : null;
+}
+
+function BonusHud({ state }: { state: RipcomPlayerState }) {
+  const session = state.session;
+  const total = Math.max(8, session.freeSpinsTotal || 8);
+  return (
+    <div className="eclipse-bonus-hud">
+      <div className="bonus-hud-label"><Sparkles size={15} /><span>ECLIPSE BONUS</span></div>
+      <div className="bonus-hud-count"><strong>{session.freeSpinsRemaining}</strong><span>/ {total} FREE SPINS</span></div>
+      <div className="bonus-hud-win"><small>GANHO NO BÔNUS</small><b>{session.bonusTotalWin.toLocaleString('pt-BR')} CR</b></div>
+    </div>
+  );
+}
+
+function BonusOutro({ totalWin }: { totalWin: number }) {
+  return (
+    <div className="bonus-outro-overlay">
+      <div className="bonus-outro-eclipse" />
+      <div className="bonus-outro-card">
+        <small>ECLIPSE BONUS CONCLUÍDO</small>
+        <strong>8 RODADAS GRÁTIS</strong>
+        <span>TOTAL GANHO</span>
+        <b>{totalWin.toLocaleString('pt-BR')} CR</b>
+      </div>
+    </div>
+  );
+}
+
+export function EclipsePlayer({ token }: { token: string }) {
+  const [state, setState] = useState<RipcomPlayerState | null>(null);
+  const [grid, setGrid] = useState<string[][]>([]);
+  const [outcome, setOutcome] = useState<RipcomSpin | null>(null);
+  const [bet, setBet] = useState(10);
+  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<GamePhase>('idle');
+  const [teaseColumn, setTeaseColumn] = useState<number | null>(null);
+  const [bonusScatterCount, setBonusScatterCount] = useState(3);
+  const [error, setError] = useState('');
+  const [loadingText, setLoadingText] = useState('Preparando Eclipse Serpent…');
+
+  const symbols = useMemo(() => new Map((state?.config.symbols ?? []).map((symbol) => [symbol.id, symbol])), [state]);
+  const winning = useMemo(() => new Set(outcome?.wins.map((win) => win.symbolId) ?? []), [outcome]);
+  const scatterId = useMemo(() => state?.config.symbols.find((symbol) => symbol.scatter)?.id, [state]);
+  const bonusActive = Boolean(state?.session.freeSpinsRemaining && state.session.freeSpinsRemaining > 0);
+
+  useEffect(() => {
+    let alive = true;
+    const labels = ['Validando sessão…', 'Carregando matemática…', 'Despertando a serpente…', 'Alinhando sol e lua…'];
+    let index = 0;
+    const timer = window.setInterval(() => {
+      setLoadingText(labels[index % labels.length]);
+      index += 1;
+    }, 520);
+
+    getPlayerState(token)
+      .then((next) => {
+        if (!alive) return;
+        setState(next);
+        setGrid(randomGrid(next));
+        if (next.session.bonusBet) setBet(next.session.bonusBet);
+        if (next.session.freeSpinsRemaining > 0) setPhase('free-spins');
+      })
+      .catch((reason) => {
+        if (alive) setError(reason instanceof Error ? reason.message : 'SESSION_LOAD_FAILED');
+      })
+      .finally(() => window.clearInterval(timer));
+
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+    };
+  }, [token]);
+
+  function applyResult(result: RipcomSpin) {
+    setState((current) => current ? {
+      ...current,
+      session: {
+        ...current.session,
+        balance: result.balance,
+        freeSpinsRemaining: result.freeSpinsRemaining,
+        freeSpinsTotal: result.bonusAwarded > 0 ? result.bonusAwarded : current.session.freeSpinsTotal,
+        bonusBet: result.bonusBet ?? current.session.bonusBet,
+        bonusTotalWin: result.bonusTotalWin,
+        bonusRoundsPlayed: result.bonusRoundsPlayed,
+        bonusActive: result.freeSpinsRemaining > 0,
+      },
+    } : current);
+  }
+
+  async function playRound(freeSpin = false) {
+    if (!state || busy) return;
+    const effectiveBet = freeSpin ? (state.session.bonusBet ?? bet) : bet;
+    if (!freeSpin && effectiveBet > state.session.balance) {
+      setError('INSUFFICIENT_DEMO_CREDITS');
+      return;
+    }
+
+    setBusy(true);
+    setError('');
+    setOutcome(null);
+    setTeaseColumn(null);
+    setPhase(freeSpin ? 'free-spinning' : 'spinning');
+
+    const spinTimer = window.setInterval(() => setGrid(randomGrid(state)), freeSpin ? 58 : 70);
+    let teaseTimer = 0;
+
+    try {
+      const result = await spinPlayer(token, effectiveBet);
+      await sleep(freeSpin ? 480 : 540);
+      window.clearInterval(spinTimer);
+
+      if (!freeSpin) {
+        const decisiveColumn = findTeaseColumn(result, scatterId);
+        if (decisiveColumn !== null) {
+          setGrid(result.grid.map((column, columnIndex) => columnIndex === decisiveColumn ? randomColumn(state, columnIndex) : column));
+          setTeaseColumn(decisiveColumn);
+          setPhase('tease');
+          teaseTimer = window.setInterval(() => {
+            setGrid((current) => current.map((column, columnIndex) => columnIndex === decisiveColumn ? randomColumn(state, columnIndex) : column));
+          }, 86);
+          await sleep(result.bonusAwarded === 8 ? 1650 : 1220);
+          window.clearInterval(teaseTimer);
+        } else {
+          await sleep(260);
+        }
+      } else {
+        await sleep(220);
+      }
+
+      setGrid(result.grid);
+      setOutcome(result);
+      setTeaseColumn(null);
+      applyResult(result);
+
+      if (result.bonusAwarded === 8) {
+        setBonusScatterCount(result.scatterCount);
+        setPhase('bonus');
+        await sleep(4300);
+        setPhase('free-spins');
+      } else if (result.isFreeSpin && result.freeSpinsRemaining === 0) {
+        setPhase('bonus-outro');
+        await sleep(2800);
+        setPhase('idle');
+      } else {
+        setPhase(result.freeSpinsRemaining > 0 ? 'free-spins' : 'reveal');
+        await sleep(result.freeSpinsRemaining > 0 ? 700 : 420);
+        if (result.freeSpinsRemaining === 0) setPhase('idle');
+      }
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'SPIN_FAILED');
+      setPhase(freeSpin ? 'free-spins' : 'idle');
+    } finally {
+      window.clearInterval(spinTimer);
+      if (teaseTimer) window.clearInterval(teaseTimer);
+      setTeaseColumn(null);
+      setBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!state || busy || phase !== 'free-spins' || state.session.freeSpinsRemaining <= 0) return;
+    const timer = window.setTimeout(() => void playRound(true), 780);
+    return () => window.clearTimeout(timer);
+  }, [state?.session.freeSpinsRemaining, phase, busy]);
+
+  function moveParallax(event: React.PointerEvent<HTMLElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    event.currentTarget.style.setProperty('--mx', x.toFixed(3));
+    event.currentTarget.style.setProperty('--my', y.toFixed(3));
+  }
+
+  function resetParallax(event: React.PointerEvent<HTMLElement>) {
+    event.currentTarget.style.setProperty('--mx', '0');
+    event.currentTarget.style.setProperty('--my', '0');
+  }
+
+  if (error && !state) {
+    return <div className="player-loading"><Brand /><XCircle size={46} /><h2>Sessão indisponível</h2><p>{error}</p></div>;
+  }
+
+  if (!state) {
+    return <div className="player-loading"><Brand /><div className="loader-orbit"><span /></div><h2>Eclipse Serpent</h2><p>{loadingText}</p><small>RIPCOM • DEMO</small></div>;
+  }
+
+  const theme = state.config.theme;
+  const visualBonusActive = bonusActive || ['bonus','free-spins','free-spinning','bonus-outro'].includes(phase);
+
+  return (
+    <main
+      onPointerMove={moveParallax}
+      onPointerLeave={resetParallax}
+      className={`game-player eclipse-player-v110 phase-${phase} ${visualBonusActive ? 'bonus-mode-active' : ''}`}
+      style={{ '--primary': theme.primary || '#b9ff43', '--secondary': theme.secondary || '#16a085', '--game-bg': theme.background || '#061713', '--mx': '0', '--my': '0' } as React.CSSProperties & Record<string, string>}
+    >
+      <AnimatedBackground phase={visualBonusActive ? 'bonus' : phase} />
+      {phase === 'tease' && <BonusTeaseOverlay />}
+      {phase === 'bonus' && <BonusIntroOverlay scatterCount={bonusScatterCount} freeSpins={8} />}
+      {phase === 'bonus-outro' && <BonusOutro totalWin={state.session.bonusTotalWin} />}
+      {visualBonusActive && phase !== 'bonus' && phase !== 'bonus-outro' && <BonusHud state={state} />}
+
+      <div className="game-frame">
+        <div className="game-header"><Brand /><div><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div>
+        <div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>{visualBonusActive ? 'ECLIPSE BONUS • 8 FREE SPINS' : 'ECLIPSE WILD • RESPINS • SCATTER BONUS'}</p></div>
+
+        <div className={`reels ${busy ? 'spinning' : ''} ${visualBonusActive ? 'bonus-reels' : ''}`}>
+          {grid.map((column, columnIndex) => (
+            <div className={`reel ${phase === 'tease' && teaseColumn === columnIndex ? 'tease-target' : ''}`} key={columnIndex} style={{ '--delay': `${columnIndex * 90}ms` } as React.CSSProperties}>
+              {column.map((symbolId, rowIndex) => {
+                const symbol = symbols.get(symbolId);
+                const isWinner = winning.has(symbolId);
+                const symbolClasses = ['symbol', isWinner ? 'winner' : '', symbol?.scatter ? 'scatter' : '', symbol?.wild ? 'wild' : '', phase === 'tease' && teaseColumn === columnIndex ? 'tease-hidden' : ''].filter(Boolean).join(' ');
+                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><span>{symbol?.icon ?? '✦'}</span><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
+              })}
+            </div>
+          ))}
+        </div>
+
+        {outcome && outcome.win > 0 && phase !== 'bonus' && phase !== 'bonus-outro' && (
+          <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong>+{outcome.win.toLocaleString('pt-BR')} CR</strong><small>{outcome.multiplier.toFixed(2)}×</small></div>
+        )}
+
+        {error && <div className="game-error">{error}</div>}
+
+        <div className="game-controls">
+          <div className="control"><small>{visualBonusActive ? 'BONUS BET' : 'BET'}</small><select value={visualBonusActive ? (state.session.bonusBet ?? bet) : bet} onChange={(event) => setBet(Number(event.target.value))} disabled={busy || visualBonusActive}>{[1,2,5,10,20,50,100].map((value) => <option key={value}>{value}</option>)}</select></div>
+          <button className={`spin-button ${visualBonusActive ? 'bonus-spin-button' : ''}`} disabled={busy || visualBonusActive} onClick={() => void playRound(false)}><RefreshCw className={busy ? 'rotating' : ''} /><span>{phase === 'tease' ? 'BONUS?' : visualBonusActive ? `${state.session.freeSpinsRemaining} FREE` : busy ? 'SPINNING' : 'SPIN'}</span></button>
+          <div className="control right"><small>{visualBonusActive ? 'FREE SPINS' : 'SESSION'}</small><b>{visualBonusActive ? `${state.session.freeSpinsRemaining}/8` : token.slice(0, 6)}</b></div>
+        </div>
+
+        <div className="game-footer"><ShieldCheck size={13} /><span>RIPCOM Provider Runtime • Fun-money only</span></div>
+      </div>
+    </main>
+  );
+}
