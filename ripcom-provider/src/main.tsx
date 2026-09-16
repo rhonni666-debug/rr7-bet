@@ -12,6 +12,7 @@ import './symbol-vfx.css';
 import './mobile-stage8.css';
 import './depth-stage9.css';
 import './premium-symbols-stage10.css';
+import './symbol-pay-stage11.css';
 
 const params = new URLSearchParams(window.location.search);
 const playerToken = params.get('play');
