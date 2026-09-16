@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { AnimatedAmount } from './AnimatedAmount';
 
 type WinTier = 'normal' | 'great' | 'big' | 'mega';
 
@@ -21,6 +22,7 @@ export function WinCelebration({ amount, multiplier }: { amount: number; multipl
 
   const label = tier === 'mega' ? 'MEGA WIN' : tier === 'big' ? 'BIG WIN' : 'GREAT WIN';
   const subtitle = tier === 'mega' ? 'A SERPENTE DOMINOU O ECLIPSE' : tier === 'big' ? 'PODER DO ECLIPSE' : 'ENERGIA DA SERPENTE';
+  const duration = tier === 'mega' ? 1800 : tier === 'big' ? 1350 : 950;
 
   return (
     <div className={`win-celebration win-${tier}`} aria-hidden="true">
@@ -40,7 +42,7 @@ export function WinCelebration({ amount, multiplier }: { amount: number; multipl
       <div className="win-celebration-copy">
         <small>{subtitle}</small>
         <strong>{label}</strong>
-        <b>+{amount.toLocaleString('pt-BR')} CR</b>
+        <b><AnimatedAmount value={amount} duration={duration} prefix="+" suffix=" CR" /></b>
         <span>{multiplier.toFixed(2)}× A APOSTA</span>
       </div>
     </div>
