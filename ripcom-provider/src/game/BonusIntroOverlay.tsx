@@ -16,11 +16,16 @@ const dust = Array.from({ length: 18 }, (_, index) => ({
 const rays = Array.from({ length: 10 }, (_, index) => `${index * 36}deg`);
 
 export function BonusIntroOverlay({ scatterCount, freeSpins = 8 }: { scatterCount: number; freeSpins?: number }) {
+  const assetBase = import.meta.env.BASE_URL;
+
   return (
-    <div className="bonus-intro-overlay cinematic-bonus-intro" role="presentation">
+    <div className="bonus-intro-overlay cinematic-bonus-intro bonus-intro-v19" role="presentation">
       <div className="cinematic-bonus-darken" />
       <div className="cinematic-bonus-camera-push" />
       <div className="cinematic-bonus-depth depth-far" />
+      <div className="bonus-eclipse-art-v19" aria-hidden="true">
+        <img src={`${assetBase}assets/eclipse-bonus-v19.svg`} alt="" />
+      </div>
       <div className="cinematic-bonus-rays" aria-hidden="true">
         {rays.map((angle) => <i key={angle} style={{ '--ray-angle': angle } as CSSProperties & Record<string, string>} />)}
       </div>
