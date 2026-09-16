@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, ShieldCheck, Sparkles, XCircle } from 'lucide-react';
+import { RefreshCw, ShieldCheck, Sparkles, Volume2, VolumeX, XCircle } from 'lucide-react';
 import { getPlayerState, spinPlayer, type RipcomPlayerState, type RipcomSpin } from '../api';
 import { AnimatedBackground } from './AnimatedBackground';
 import { BonusIntroOverlay } from './BonusIntroOverlay';
 import { BonusTeaseOverlay } from './BonusTeaseOverlay';
+import { eclipseAudio } from './audio';
+import { classifyWin, WinCelebration } from './WinCelebration';
 
 type GamePhase = 'idle' | 'spinning' | 'tease' | 'bonus' | 'free-spins' | 'free-spinning' | 'bonus-outro' | 'reveal';
 
@@ -67,8 +69,10 @@ export function EclipsePlayer({ token }: { token: string }) {
   const [state, setState] = useState<RipcomPlayerState | null>(null);
   const [grid, setGrid] = useState<string[][]>([]);
   const [outcome, setOutcome] = useState<RipcomSpin | null>(null);
+  const [celebration, setCelebration] = useState<RipcomSpin | null>(null);
   const [bet, setBet] = useState(10);
   const [busy, setBusy] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const [phase, setPhase] = useState<GamePhase>('idle');
   const [teaseColumn, setTeaseColumn] = useState<number | null>(null);
   const [bonusScatterCount, setBonusScatterCount] = useState(3);
@@ -79,6 +83,10 @@ export function EclipsePlayer({ token }: { token: string }) {
   const winning = useMemo(() => new Set(outcome?.wins.map((win) => win.symbolId) ?? []), [outcome]);
   const scatterId = useMemo(() => state?.config.symbols.find((symbol) => symbol.scatter)?.id, [state]);
   const bonusActive = Boolean(state?.session.freeSpinsRemaining && state.session.freeSpinsRemaining > 0);
+
+  useEffect(() => {
+    eclipseAudio.setEnabled(soundOn);
+  }, [soundOn]);
 
   useEffect(() => {
     let alive = true;
@@ -124,6 +132,16 @@ export function EclipsePlayer({ token }: { token: string }) {
     } : current);
   }
 
+  async function celebrateWin(result: RipcomSpin) {
+    if (result.win <= 0 || result.bonusAwarded === 8) return;
+    eclipseAudio.win(result.multiplier);
+    const tier = classifyWin(result.multiplier);
+    if (tier === 'normal') return;
+    setCelebration(result);
+    await sleep(tier === 'mega' ? 2700 : 2000);
+    setCelebration(null);
+  }
+
   async function playRound(freeSpin = false) {
     if (!state || busy) return;
     const effectiveBet = freeSpin ? (state.session.bonusBet ?? bet) : bet;
@@ -132,9 +150,13 @@ export function EclipsePlayer({ token }: { token: string }) {
       return;
     }
 
+    if (!freeSpin) await eclipseAudio.unlock();
+    if (freeSpin) eclipseAudio.freeSpin(); else eclipseAudio.spin();
+
     setBusy(true);
     setError('');
     setOutcome(null);
+    setCelebration(null);
     setTeaseColumn(null);
     setPhase(freeSpin ? 'free-spinning' : 'spinning');
 
@@ -149,6 +171,7 @@ export function EclipsePlayer({ token }: { token: string }) {
       if (!freeSpin) {
         const decisiveColumn = findTeaseColumn(result, scatterId);
         if (decisiveColumn !== null) {
+          eclipseAudio.tease();
           setGrid(result.grid.map((column, columnIndex) => columnIndex === decisiveColumn ? randomColumn(state, columnIndex) : column));
           setTeaseColumn(decisiveColumn);
           setPhase('tease');
@@ -170,18 +193,23 @@ export function EclipsePlayer({ token }: { token: string }) {
       applyResult(result);
 
       if (result.bonusAwarded === 8) {
+        eclipseAudio.bonusHit();
         setBonusScatterCount(result.scatterCount);
         setPhase('bonus');
         await sleep(4300);
         setPhase('free-spins');
-      } else if (result.isFreeSpin && result.freeSpinsRemaining === 0) {
-        setPhase('bonus-outro');
-        await sleep(2800);
-        setPhase('idle');
       } else {
-        setPhase(result.freeSpinsRemaining > 0 ? 'free-spins' : 'reveal');
-        await sleep(result.freeSpinsRemaining > 0 ? 700 : 420);
-        if (result.freeSpinsRemaining === 0) setPhase('idle');
+        await celebrateWin(result);
+        if (result.isFreeSpin && result.freeSpinsRemaining === 0) {
+          eclipseAudio.bonusComplete();
+          setPhase('bonus-outro');
+          await sleep(2800);
+          setPhase('idle');
+        } else {
+          setPhase(result.freeSpinsRemaining > 0 ? 'free-spins' : 'reveal');
+          await sleep(result.freeSpinsRemaining > 0 ? 700 : 420);
+          if (result.freeSpinsRemaining === 0) setPhase('idle');
+        }
       }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'SPIN_FAILED');
@@ -213,6 +241,11 @@ export function EclipsePlayer({ token }: { token: string }) {
     event.currentTarget.style.setProperty('--my', '0');
   }
 
+  async function toggleSound() {
+    if (!soundOn) await eclipseAudio.unlock();
+    setSoundOn((current) => !current);
+  }
+
   if (error && !state) {
     return <div className="player-loading"><Brand /><XCircle size={46} /><h2>Sessão indisponível</h2><p>{error}</p></div>;
   }
@@ -226,6 +259,7 @@ export function EclipsePlayer({ token }: { token: string }) {
 
   return (
     <main
+      onPointerDown={() => void eclipseAudio.unlock()}
       onPointerMove={moveParallax}
       onPointerLeave={resetParallax}
       className={`game-player eclipse-player-v110 phase-${phase} ${visualBonusActive ? 'bonus-mode-active' : ''}`}
@@ -236,9 +270,10 @@ export function EclipsePlayer({ token }: { token: string }) {
       {phase === 'bonus' && <BonusIntroOverlay scatterCount={bonusScatterCount} freeSpins={8} />}
       {phase === 'bonus-outro' && <BonusOutro totalWin={state.session.bonusTotalWin} />}
       {visualBonusActive && phase !== 'bonus' && phase !== 'bonus-outro' && <BonusHud state={state} />}
+      {celebration && <WinCelebration amount={celebration.win} multiplier={celebration.multiplier} />}
 
       <div className="game-frame">
-        <div className="game-header"><Brand /><div><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div>
+        <div className="game-header"><Brand /><div><button className={`sound-toggle ${soundOn ? '' : 'is-muted'}`} type="button" onClick={() => void toggleSound()} aria-label={soundOn ? 'Desativar som' : 'Ativar som'}>{soundOn ? <Volume2 size={17} /> : <VolumeX size={17} />}</button><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div>
         <div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>{visualBonusActive ? 'ECLIPSE BONUS • 8 FREE SPINS' : 'ECLIPSE WILD • RESPINS • SCATTER BONUS'}</p></div>
 
         <div className={`reels ${busy ? 'spinning' : ''} ${visualBonusActive ? 'bonus-reels' : ''}`}>
