@@ -7,7 +7,7 @@ const particles = Array.from({ length: 28 }, (_, index) => ({
   delay: `${(index % 7) * 0.08}s`,
 }));
 
-export function BonusIntroOverlay({ scatterCount }: { scatterCount: number }) {
+export function BonusIntroOverlay({ scatterCount, freeSpins = 8 }: { scatterCount: number; freeSpins?: number }) {
   return (
     <div className="bonus-intro-overlay cinematic-bonus-intro" role="presentation">
       <div className="cinematic-bonus-darken" />
@@ -25,6 +25,7 @@ export function BonusIntroOverlay({ scatterCount }: { scatterCount: number }) {
       <div className="cinematic-bonus-copy">
         <small>RIPCOM ORIGINAL</small>
         <strong>ECLIPSE BONUS</strong>
+        <em>{freeSpins} RODADAS GRÁTIS</em>
         <span>{scatterCount} SCATTERS • A SERPENTE DESPERTOU</span>
       </div>
       <div className="cinematic-bonus-flash" />
