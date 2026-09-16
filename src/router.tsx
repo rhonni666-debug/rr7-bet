@@ -10,6 +10,7 @@ import { GamePage } from './pages/Game';
 import { AuthPage } from './pages/Auth';
 import { ResetPasswordPage } from './pages/ResetPassword';
 import { AdminPage } from './pages/Admin';
+import { AdminCreditsPage } from './pages/AdminCredits';
 import { AdminOperationsPage } from './pages/AdminOperations';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
@@ -29,6 +30,7 @@ const adminCategoriesRoute = createRoute({ getParentRoute: () => rootRoute, path
 const adminBannersRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/banners', component: () => <AdminPage section="banners" /> });
 const adminPromotionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/promocoes', component: () => <AdminPage section="promotions" /> });
 const adminUsersRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/usuarios', component: () => <AdminPage section="users" /> });
+const adminCreditsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/creditos', component: AdminCreditsPage });
 const adminSessionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/sessoes', component: () => <AdminOperationsPage section="sessions" /> });
 const adminTransactionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/transacoes', component: () => <AdminOperationsPage section="transactions" /> });
 const adminAuditRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/auditoria', component: () => <AdminPage section="audit" /> });
@@ -50,6 +52,7 @@ const routeTree = rootRoute.addChildren([
   adminBannersRoute,
   adminPromotionsRoute,
   adminUsersRoute,
+  adminCreditsRoute,
   adminSessionsRoute,
   adminTransactionsRoute,
   adminAuditRoute,
