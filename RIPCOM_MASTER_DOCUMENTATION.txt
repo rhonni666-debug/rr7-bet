@@ -27,7 +27,7 @@ Launch Type: PROVIDER_SESSION
 Modo: DEMO
 Release atual: 1.1.0
 Status: SANDBOX
-Frontend RIPCOM: 1.0.0-sandbox.7
+Frontend RIPCOM: 1.0.0-sandbox.8
 
 Manifest jogo:
 games/eclipse-serpent/manifest.json
@@ -109,16 +109,33 @@ A classificação é somente audiovisual.
 Inclui partículas, anéis, texto animado, contador progressivo, som próprio e pausa temporária das free spins.
 
 ============================================================
-7. MOBILE TUNING
+7. MOBILE / PORTRAIT TUNING — SANDBOX.8
 ============================================================
-Versão sandbox.7 otimiza telas pequenas:
-menos partículas
-menos blur/glow pesado
-anel secundário do eclipse removido em telas estreitas
-menos ambient glow
-scatter e wild continuam animados
-touch-action: manipulation
+Arquivo principal:
+ripcom-provider/src/mobile-stage8.css
+
+Objetivo:
+otimizar o Eclipse Serpent para celular real em orientação portrait, com alvo aproximado 9:16.
+
+Ajustes:
+100dvh no player
+safe areas para notch/home indicator
+sem scroll durante o jogo
+reels ocupando mais área útil
+título/header compactados
+controles inferiores compactos
+botão SPIN otimizado para toque
+HUD do bônus reduzido e legível
+serpente/eclipses recalibrados no mobile
+menos partículas e blur pesado no celular
+snap visual dos reels no reveal
+tease reforçado no rolo decisivo
 prefers-reduced-motion respeitado
+
+O vídeo de referência fornecido pelo proprietário foi usado apenas para analisar ritmo e proporção geral. Nenhum asset, som, marca ou animação proprietária foi copiada.
+
+Perfil de QA:
+docs/ECLIPSE_SERPENT_MOBILE_QA.md
 
 ============================================================
 8. PROVIDER RIPCOM
@@ -184,7 +201,7 @@ METHOD\nPATH\nTIMESTAMP\nREQUEST_ID\nSHA256_HEX(BODY_EXATO)
 Tabela: public.ripcom_game_releases
 Status: DRAFT, SANDBOX, RELEASED, RETIRED.
 Release Eclipse Serpent: 1.1.0.
-Frontend provider: 1.0.0-sandbox.7.
+Frontend provider: 1.0.0-sandbox.8.
 
 Pin por operador:
 public.ripcom_operator_games.release_id
@@ -288,7 +305,7 @@ Diretório:
 ripcom-provider/
 
 Versão:
-1.0.0-sandbox.7
+1.0.0-sandbox.8
 
 Launch:
 <provider-base>/?play=<session_token>
@@ -307,6 +324,7 @@ ripcom-provider/src/symbol-vfx.css
 ripcom-provider/src/juice.css
 ripcom-provider/src/bonus-mode.css
 ripcom-provider/src/cinematic-vfx.css
+ripcom-provider/src/mobile-stage8.css
 
 ============================================================
 18. PAINÉIS ADMIN
@@ -347,7 +365,30 @@ RESULTADO: PASSOU.
 Nenhuma das 8 free spins debitou nova aposta.
 
 ============================================================
-21. CI / DEPLOY
+21. QA MOBILE SANDBOX.8
+============================================================
+Documento:
+docs/ECLIPSE_SERPENT_MOBILE_QA.md
+
+Checklist inclui:
+portrait 9:16
+sem scroll
+safe areas
+reels legíveis
+SPIN confortável para toque
+20 giros normais
+tease com 2 scatters
+bônus completo com 8 free spins
+GREAT/BIG/MEGA WIN
+mute/unmute
+rotação landscape/portrait
+reload durante bônus
+saldo sem débito nas free spins
+
+Foi criada uma sessão DEMO temporária de QA vinculada à release 1.1.0 para teste em celular. Tokens de QA são temporários e não devem ser tratados como credenciais permanentes.
+
+============================================================
+22. CI / DEPLOY
 ============================================================
 CI:
 .github/workflows/ci.yml
@@ -358,8 +399,10 @@ Deploy:
 RR7 -> raiz do Pages
 RIPCOM standalone -> /ripcom-provider/
 
+Sandbox.8 passou testes, SDK, assets, TypeScript e build do provider antes da publicação.
+
 ============================================================
-22. SEGURANÇA
+23. SEGURANÇA
 ============================================================
 Private key nunca no frontend.
 Private key nunca no banco RIPCOM.
@@ -376,11 +419,12 @@ Backend decide se giro é grátis.
 Dinheiro real não é habilitado por flag.
 
 ============================================================
-23. DOCUMENTOS IMPORTANTES
+24. DOCUMENTOS IMPORTANTES
 ============================================================
 RIPCOM_MASTER_DOCUMENTATION.md = documento mestre
 RIPCOM_MASTER_DOCUMENTATION.txt = backup
 docs/ECLIPSE_SERPENT_VFX.md = bônus, áudio e animações
+docs/ECLIPSE_SERPENT_MOBILE_QA.md = QA/timing mobile sandbox.8
 games/eclipse-serpent/manifest.json = release 1.1.0
 ripcom-provider/public/provider-manifest.json = capacidades frontend
 docs/RIPCOM_PROVIDER_ARCHITECTURE.md
@@ -391,15 +435,17 @@ docs/ripcom-b2b-openapi.yaml
 sdk/README.md
 
 ============================================================
-24. PRÓXIMOS PASSOS
+25. PRÓXIMOS PASSOS
 ============================================================
-1. Validar sandbox.7 em desktop.
-2. Validar sandbox.7 em celular real.
-3. Calibrar volume por dispositivo.
-4. Medir FPS/performance em aparelhos reais.
-5. Executar smoke HTTP externo completo.
-6. Criar segundo jogo RIPCOM.
-7. Separar staging.
-8. Migrar para domínio próprio.
+1. Testar sandbox.8 em celular real.
+2. Validar tamanho dos símbolos e reels em portrait.
+3. Calibrar velocidade do spin/tease após feedback real.
+4. Calibrar volume por dispositivo.
+5. Medir FPS/performance em aparelhos reais.
+6. Criar sandbox.9 apenas com ajustes de calibração.
+7. Executar smoke HTTP externo completo.
+8. Criar segundo jogo RIPCOM.
+9. Separar staging.
+10. Migrar para domínio próprio.
 
 FIM DO DOCUMENTO
