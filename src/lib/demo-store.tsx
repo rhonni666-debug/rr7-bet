@@ -3,8 +3,6 @@ import type { WalletTransaction } from '../types';
 import { supabase } from '../integrations/supabase/client';
 import { useAuth } from './auth';
 
-type PlayResult = { ok: boolean; win: number; message: string; needsAuth?: boolean };
-
 type DemoContextValue = {
   favorites: string[];
   recent: string[];
@@ -12,8 +10,6 @@ type DemoContextValue = {
   balance: number;
   loading: boolean;
   toggleFavorite: (slug: string) => Promise<boolean>;
-  markRecent: (slug: string) => Promise<boolean>;
-  playDemo: (slug: string, gameName: string, bet: number) => Promise<PlayResult>;
   refresh: () => Promise<void>;
 };
 
@@ -105,44 +101,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
-  const markRecent = async (slug: string) => {
-    if (!user) return false;
-    const { error } = await supabase.rpc('mark_recent_game', { p_game_slug: slug });
-    if (error) return false;
-    setRecent((current) => [slug, ...current.filter((item) => item !== slug)].slice(0, 12));
-    return true;
-  };
-
-  const playDemo = async (slug: string, gameName: string, bet: number): Promise<PlayResult> => {
-    if (!user) return { ok: false, win: 0, message: 'Entre na sua conta para usar créditos DEMO.', needsAuth: true };
-    if (bet <= 0 || !Number.isFinite(bet)) return { ok: false, win: 0, message: 'Rodada DEMO inválida.' };
-    if (bet > balance) return { ok: false, win: 0, message: 'Créditos DEMO insuficientes.' };
-
-    const gameId = await resolveGameId(slug);
-    if (!gameId) return { ok: false, win: 0, message: 'Jogo DEMO indisponível.' };
-
-    const { data, error } = await supabase.rpc('play_demo_round', {
-      p_game_id: gameId,
-      p_bet: bet,
-      p_request_id: crypto.randomUUID(),
-    });
-
-    if (error) return { ok: false, win: 0, message: 'Não foi possível concluir a rodada DEMO.' };
-
-    const row = Array.isArray(data) ? data[0] : data;
-    const win = Number(row?.win_amount ?? 0);
-    await refresh();
-    return {
-      ok: true,
-      win,
-      message: win > 0
-        ? `${gameName}: você recebeu ${win.toLocaleString('pt-BR')} créditos DEMO.`
-        : `${gameName}: rodada DEMO sem prêmio.`,
-    };
-  };
-
   return (
-    <Context.Provider value={{ favorites, recent, transactions, balance, loading, toggleFavorite, markRecent, playDemo, refresh }}>
+    <Context.Provider value={{ favorites, recent, transactions, balance, loading, toggleFavorite, refresh }}>
       {children}
     </Context.Provider>
   );
