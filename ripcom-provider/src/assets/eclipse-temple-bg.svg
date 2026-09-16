@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Eclipse Serpent ancient temple backdrop">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="24%" r="72%">
+      <stop offset="0" stop-color="#234a45"/>
+      <stop offset="0.28" stop-color="#0d2927"/>
+      <stop offset="0.72" stop-color="#071713"/>
+      <stop offset="1" stop-color="#020807"/>
+    </radialGradient>
+    <radialGradient id="eclipse" cx="44%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#f3ffc9"/>
+      <stop offset="0.36" stop-color="#bfff69"/>
+      <stop offset="0.58" stop-color="#4fd8a0"/>
+      <stop offset="0.72" stop-color="#113f34" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#081a16" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="stone" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#18352f"/>
+      <stop offset="1" stop-color="#06110f"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0b231d"/>
+      <stop offset="1" stop-color="#020706"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="800" cy="245" r="220" fill="url(#eclipse)" opacity=".9"/>
+  <circle cx="800" cy="245" r="124" fill="#020706"/>
+  <circle cx="800" cy="245" r="138" fill="none" stroke="#bfff69" stroke-opacity=".2" stroke-width="8"/>
+  <g opacity=".32" fill="#183b31">
+    <path d="M0 510 180 330 330 492 470 305 610 498 780 342 925 505 1105 320 1260 500 1430 350 1600 510V720H0Z"/>
+  </g>
+  <g opacity=".82">
+    <path d="M390 710V345h82v365Zm-34-365h150l-32-58h-86Z" fill="url(#stone)"/>
+    <path d="M1128 710V345h82v365Zm-34-365h150l-32-58h-86Z" fill="url(#stone)"/>
+    <path d="M505 710V470h70v240Zm520 0V470h70v240Z" fill="#0a1d19"/>
+    <path d="M450 520h700v74H450Z" fill="#0b201b"/>
+    <path d="m510 520 290-190 290 190Z" fill="#0c241e"/>
+    <path d="M725 710V525h150v185Z" fill="#030b09"/>
+    <path d="M754 710V565h92v145Z" fill="#07140f"/>
+  </g>
+  <g stroke="#7cffbb" stroke-opacity=".12" fill="none" stroke-width="4">
+    <path d="M420 410c34 24 34 54 0 78s-34 54 0 78"/>
+    <path d="M1180 410c-34 24-34 54 0 78s34 54 0 78"/>
+    <circle cx="800" cy="486" r="45"/>
+    <path d="M770 486c20-30 40-30 60 0-20 30-40 30-60 0Z"/>
+  </g>
+  <rect y="710" width="1600" height="290" fill="url(#floor)"/>
+  <path d="M0 820c250-55 430-20 650 14s420 45 950-35v201H0Z" fill="#061510" opacity=".78"/>
+  <g opacity=".14" filter="url(#soft)" fill="#8bffbb">
+    <ellipse cx="800" cy="760" rx="390" ry="50"/>
+    <ellipse cx="800" cy="885" rx="620" ry="44"/>
+  </g>
+  <g fill="#9dffb4" opacity=".32">
+    <circle cx="235" cy="620" r="3"/><circle cx="302" cy="535" r="2"/><circle cx="1330" cy="585" r="3"/><circle cx="1250" cy="470" r="2"/><circle cx="970" cy="410" r="2"/><circle cx="648" cy="392" r="2"/>
+  </g>
+</svg>
