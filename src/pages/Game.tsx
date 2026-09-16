@@ -2,6 +2,7 @@ import { ArrowLeft, CircleDot, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { OriginalSlotMachine } from '../components/OriginalSlotMachine';
+import { RipcomInternalSlot } from '../components/RipcomInternalSlot';
 import { useDemo } from '../lib/demo-store';
 import { useAuth } from '../lib/auth';
 import { useCatalog } from '../lib/catalog';
@@ -65,9 +66,20 @@ export function GamePage() {
   if (!game) return <div className="rounded-2xl border border-white/10 p-8 text-center"><p>Jogo demo não encontrado.</p><Link to="/" className="mt-4 inline-flex text-amber-300">Voltar ao lobby</Link></div>;
 
   const selectedGame = game;
-  const isOriginalSlot = selectedGame.externalGameId?.startsWith('rr7-slot:') || selectedGame.externalGameId?.startsWith('ripcom-slot:') || false;
+  const isRipcomSlot = selectedGame.externalGameId?.startsWith('ripcom-slot:') ?? false;
+  const isRr7OriginalSlot = selectedGame.externalGameId?.startsWith('rr7-slot:') ?? false;
 
-  if (isOriginalSlot && provider) {
+  if (isRipcomSlot && provider) {
+    return (
+      <div className="mx-auto max-w-5xl">
+        <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white"><ArrowLeft className="h-4 w-4" /> Voltar</Link>
+        {sessionError && <p className="mb-4 rounded-xl border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">{sessionError}</p>}
+        <RipcomInternalSlot game={selectedGame} provider={provider} session={session} />
+      </div>
+    );
+  }
+
+  if (isRr7OriginalSlot && provider) {
     return (
       <div className="mx-auto max-w-3xl">
         <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white"><ArrowLeft className="h-4 w-4" /> Voltar</Link>
