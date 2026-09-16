@@ -13,7 +13,7 @@ type AuthContextValue = {
   loading: boolean;
   profileLoading: boolean;
   refreshProfile: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<ActionResult>;
+  signIn: (identifier: string, password: string) => Promise<ActionResult>;
   signUp: (displayName: string, email: string, password: string) => Promise<ActionResult>;
   signOut: () => Promise<ActionResult>;
   resetPassword: (email: string) => Promise<ActionResult>;
@@ -21,6 +21,12 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+function normalizeLoginIdentifier(identifier: string) {
+  const value = identifier.trim().toLowerCase();
+  if (value === 'rhonni') return 'rhonni@rr7.bet';
+  return value;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -94,10 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     profileLoading,
     refreshProfile,
-    signIn: async (email, password) => {
+    signIn: async (identifier, password) => {
+      const email = normalizeLoginIdentifier(identifier);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       return error
-        ? { ok: false, message: 'Não foi possível entrar. Confira e-mail e senha.' }
+        ? { ok: false, message: 'Não foi possível entrar. Confira usuário/e-mail e senha.' }
         : { ok: true, message: 'Login realizado.' };
     },
     signUp: async (displayName, email, password) => {
