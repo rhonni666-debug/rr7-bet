@@ -7,9 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/core": "latest",
     "@supabase/supabase-js": "^2.116.0",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.101.1",
@@ -20,6 +23,7 @@
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "latest",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
