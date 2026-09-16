@@ -24,6 +24,7 @@ export type Hub88PocGame = Record<string, unknown> & {
   name?: string;
   title?: string;
   product?: string | Record<string, unknown>;
+  product_code?: string;
   url_thumb?: string;
   url_background?: string;
 };
@@ -38,11 +39,12 @@ export const Hub88Poc = {
   listGames(productCode?: string) {
     return invoke<Hub88PocGame[]>({ action: 'list_games', productCode });
   },
-  launchDemo(gameCode: string, deviceType: 'mobile' | 'desktop') {
+  launchDemo(gameCode: string, deviceType: 'mobile' | 'desktop', providerCode?: string) {
     return invoke<{ url: string; gameCode: string; currency: 'XXX'; mode: 'demo' }>({
       action: 'launch_demo',
       gameCode,
       deviceType,
+      providerCode,
     });
   },
 };
