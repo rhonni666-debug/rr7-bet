@@ -13,6 +13,13 @@ export type RipcomPlayerState = {
     currency: string;
     balance: number;
     expiresAt: string;
+    freeSpinsRemaining: number;
+    freeSpinsTotal: number;
+    bonusBet: number | null;
+    bonusTotalWin: number;
+    bonusRoundsPlayed: number;
+    bonusTriggeredAt?: string | null;
+    bonusActive: boolean;
   };
   game: {
     id: string;
@@ -43,14 +50,22 @@ export type RipcomSpin = {
   wins: Array<{ symbolId: string; ways: number; multiplier: number }>;
   scatterCount: number;
   layout: number[];
+  isFreeSpin: boolean;
+  freeSpinsRemaining: number;
+  bonusAwarded: number;
+  bonusTotalWin: number;
+  bonusRoundsPlayed: number;
+  bonusBet: number | null;
 };
 
 const DEFAULT_API_BASE = 'https://tndnqjbkfwongolorvjm.supabase.co/functions/v1/ripcom-b2b';
+const DEFAULT_PLAYER_RUNTIME_BASE = 'https://tndnqjbkfwongolorvjm.supabase.co/functions/v1/ripcom-player-runtime';
 
 export const RIPCOM_API_BASE = (import.meta.env.VITE_RIPCOM_API_BASE_URL || DEFAULT_API_BASE).replace(/\/$/, '');
+export const RIPCOM_PLAYER_RUNTIME_BASE = (import.meta.env.VITE_RIPCOM_PLAYER_RUNTIME_BASE_URL || DEFAULT_PLAYER_RUNTIME_BASE).replace(/\/$/, '');
 
-async function call<T>(body: Record<string, unknown>): Promise<T> {
-  const response = await fetch(RIPCOM_API_BASE, {
+async function callAt<T>(baseUrl: string, body: Record<string, unknown>): Promise<T> {
+  const response = await fetch(baseUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -62,17 +77,17 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
 }
 
 export async function getHealth() {
-  return call<{ provider: string; status: string; api: string; mode: string; timestamp: string }>({ action: 'health' });
+  return callAt<{ provider: string; status: string; api: string; mode: string; timestamp: string }>(RIPCOM_API_BASE, { action: 'health' });
 }
 
 export async function getPlayerState(sessionToken: string) {
-  return call<RipcomPlayerState>({ action: 'player_state', sessionToken });
+  return callAt<RipcomPlayerState>(RIPCOM_PLAYER_RUNTIME_BASE, { action: 'player_state', sessionToken });
 }
 
 export async function spinPlayer(sessionToken: string, bet: number) {
-  return call<RipcomSpin>({ action: 'player_spin', sessionToken, bet, requestId: crypto.randomUUID() });
+  return callAt<RipcomSpin>(RIPCOM_PLAYER_RUNTIME_BASE, { action: 'player_spin', sessionToken, bet, requestId: crypto.randomUUID() });
 }
 
 export async function closePlayer(sessionToken: string) {
-  return call<{ closed: boolean }>({ action: 'player_close', sessionToken });
+  return callAt<{ closed: boolean }>(RIPCOM_PLAYER_RUNTIME_BASE, { action: 'player_close', sessionToken });
 }
