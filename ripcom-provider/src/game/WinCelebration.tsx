@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-type WinTier = 'normal' | 'big' | 'mega';
+type WinTier = 'normal' | 'great' | 'big' | 'mega';
 
 const particles = Array.from({ length: 34 }, (_, index) => ({
   angle: `${(360 / 34) * index}deg`,
@@ -10,13 +10,17 @@ const particles = Array.from({ length: 34 }, (_, index) => ({
 
 export function classifyWin(multiplier: number): WinTier {
   if (multiplier >= 25) return 'mega';
-  if (multiplier >= 8) return 'big';
+  if (multiplier >= 10) return 'big';
+  if (multiplier >= 5) return 'great';
   return 'normal';
 }
 
 export function WinCelebration({ amount, multiplier }: { amount: number; multiplier: number }) {
   const tier = classifyWin(multiplier);
   if (tier === 'normal') return null;
+
+  const label = tier === 'mega' ? 'MEGA WIN' : tier === 'big' ? 'BIG WIN' : 'GREAT WIN';
+  const subtitle = tier === 'mega' ? 'A SERPENTE DOMINOU O ECLIPSE' : tier === 'big' ? 'PODER DO ECLIPSE' : 'ENERGIA DA SERPENTE';
 
   return (
     <div className={`win-celebration win-${tier}`} aria-hidden="true">
@@ -34,8 +38,8 @@ export function WinCelebration({ amount, multiplier }: { amount: number; multipl
         ))}
       </div>
       <div className="win-celebration-copy">
-        <small>{tier === 'mega' ? 'A SERPENTE DOMINOU O ECLIPSE' : 'ENERGIA DO ECLIPSE'}</small>
-        <strong>{tier === 'mega' ? 'MEGA WIN' : 'BIG WIN'}</strong>
+        <small>{subtitle}</small>
+        <strong>{label}</strong>
         <b>+{amount.toLocaleString('pt-BR')} CR</b>
         <span>{multiplier.toFixed(2)}× A APOSTA</span>
       </div>
