@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, ShieldCheck, Sparkles, Volume2, VolumeX, XCircle } from 'lucide-react';
+import { Minus, Plus, RefreshCw, Repeat2, ShieldCheck, Sparkles, Volume2, VolumeX, X, XCircle } from 'lucide-react';
 import { getPlayerState, spinPlayer, type RipcomPlayerState, type RipcomSpin, type RipcomSymbol } from '../api';
 import { AnimatedAmount } from './AnimatedAmount';
 import { AnimatedBackground } from './AnimatedBackground';
@@ -13,6 +13,7 @@ type GamePhase = 'idle' | 'spinning' | 'tease' | 'bonus' | 'free-spins' | 'free-
 type LineWinCue = { line: number; symbolId: string; payPerLine: number; amount: number };
 
 const BET_VALUES = [0.5, 1, 1.5, 2, 2.5, 5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40];
+const AUTO_SPIN_COUNTS = [10, 20, 30, 50, 100];
 const PAYLINES: Record<number, [number, number, number]> = {
   1: [1, 1, 1],
   2: [0, 0, 0],
@@ -37,43 +38,65 @@ function Brand() {
   return <div className="brand"><div className="brand-mark">R</div><div><strong>RIPCOM</strong><span>ORIGINAL</span></div></div>;
 }
 
-function BetPicker({ value, onChange, disabled }: { value: number; onChange: (value: number) => void; disabled: boolean }) {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (disabled) setOpen(false);
-  }, [disabled]);
-
+function AutoSpinPanel({
+  bet,
+  count,
+  onBetChange,
+  onCountChange,
+  onStart,
+  onClose,
+}: {
+  bet: number;
+  count: number;
+  onBetChange: (value: number) => void;
+  onCountChange: (value: number) => void;
+  onStart: () => void;
+  onClose: () => void;
+}) {
   return (
-    <div className={`bet-picker-stage16 ${open ? 'is-open' : ''}`}>
-      <button
-        className="bet-picker-trigger"
-        type="button"
-        disabled={disabled}
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-      >
-        <strong>{formatBet(value)}</strong><span>⌄</span>
-      </button>
-      {open && (
-        <div className="bet-picker-menu" role="listbox" aria-label="Valores de aposta">
+    <div className="auto-spin-panel-stage17" role="dialog" aria-label="Configurar giro automático">
+      <div className="auto-spin-panel-head">
+        <div><small>RIPCOM DEMO</small><strong>GIRO AUTOMÁTICO</strong></div>
+        <button type="button" onClick={onClose} aria-label="Fechar giro automático"><X size={18} /></button>
+      </div>
+
+      <section>
+        <span>APOSTA</span>
+        <div className="auto-bet-grid-stage17">
           {BET_VALUES.map((option) => (
             <button
               type="button"
-              role="option"
-              aria-selected={option === value}
-              className={option === value ? 'active' : ''}
+              className={option === bet ? 'active' : ''}
               key={option}
-              onClick={() => {
-                onChange(option);
-                setOpen(false);
-              }}
+              onClick={() => onBetChange(option)}
             >
               {formatBet(option)}
             </button>
           ))}
         </div>
-      )}
+      </section>
+
+      <section>
+        <span>QUANTIDADE DE GIROS</span>
+        <div className="auto-count-grid-stage17">
+          {AUTO_SPIN_COUNTS.map((option) => (
+            <button
+              type="button"
+              className={option === count ? 'active' : ''}
+              key={option}
+              onClick={() => onCountChange(option)}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <button className="auto-start-stage17" type="button" onClick={onStart}>
+        <Repeat2 size={18} />
+        <span>INICIAR {count} GIROS</span>
+        <strong>{formatBet(bet)} CR</strong>
+      </button>
     </div>
   );
 }
@@ -139,6 +162,9 @@ export function EclipsePlayer({ token }: { token: string }) {
   const [bonusScatterCount, setBonusScatterCount] = useState(3);
   const [activeWinLine, setActiveWinLine] = useState<LineWinCue | null>(null);
   const [shownWinAmount, setShownWinAmount] = useState(0);
+  const [autoPanelOpen, setAutoPanelOpen] = useState(false);
+  const [autoSpinCount, setAutoSpinCount] = useState(20);
+  const [autoSpinsRemaining, setAutoSpinsRemaining] = useState(0);
   const [error, setError] = useState('');
   const [loadingText, setLoadingText] = useState('Preparando Eclipse Serpent…');
 
@@ -146,6 +172,7 @@ export function EclipsePlayer({ token }: { token: string }) {
   const scatterId = useMemo(() => state?.config.symbols.find((symbol) => symbol.scatter)?.id, [state]);
   const wildId = useMemo(() => state?.config.symbols.find((symbol) => symbol.wild)?.id, [state]);
   const bonusActive = Boolean(state?.session.freeSpinsRemaining && state.session.freeSpinsRemaining > 0);
+  const autoRunning = autoSpinsRemaining > 0;
   const activeLineRows = activeWinLine ? PAYLINES[activeWinLine.line] : null;
 
   useEffect(() => {
@@ -196,6 +223,25 @@ export function EclipsePlayer({ token }: { token: string }) {
     } : current);
   }
 
+  function changeBet(direction: -1 | 1) {
+    if (busy || bonusActive || autoRunning) return;
+    const currentIndex = BET_VALUES.findIndex((value) => Math.abs(value - bet) < 0.001);
+    const safeIndex = currentIndex >= 0 ? currentIndex : BET_VALUES.findIndex((value) => value >= bet);
+    const nextIndex = Math.max(0, Math.min(BET_VALUES.length - 1, (safeIndex >= 0 ? safeIndex : 0) + direction));
+    setBet(BET_VALUES[nextIndex]);
+  }
+
+  function startAutoSpins() {
+    if (busy || bonusActive) return;
+    setAutoPanelOpen(false);
+    setAutoSpinsRemaining(autoSpinCount);
+  }
+
+  function stopAutoSpins() {
+    setAutoSpinsRemaining(0);
+    setAutoPanelOpen(false);
+  }
+
   async function presentWinningLines(result: RipcomSpin) {
     const sequence = result.wins
       .flatMap((win) => win.lines.map((line) => ({
@@ -235,11 +281,12 @@ export function EclipsePlayer({ token }: { token: string }) {
     setCelebration(null);
   }
 
-  async function playRound(freeSpin = false) {
+  async function playRound(freeSpin = false, automatic = false) {
     if (!state || busy) return;
     const effectiveBet = freeSpin ? (state.session.bonusBet ?? bet) : bet;
     if (!freeSpin && effectiveBet > state.session.balance) {
       setError('INSUFFICIENT_DEMO_CREDITS');
+      if (automatic) setAutoSpinsRemaining(0);
       return;
     }
 
@@ -260,6 +307,7 @@ export function EclipsePlayer({ token }: { token: string }) {
 
     try {
       const result = await spinPlayer(token, effectiveBet);
+      if (automatic && !freeSpin) setAutoSpinsRemaining((current) => Math.max(0, current - 1));
       await sleep(freeSpin ? 1100 : 1500);
       window.clearInterval(spinTimer);
 
@@ -322,6 +370,7 @@ export function EclipsePlayer({ token }: { token: string }) {
       }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'SPIN_FAILED');
+      if (automatic) setAutoSpinsRemaining(0);
       setPhase(freeSpin ? 'free-spins' : 'idle');
     } finally {
       window.clearInterval(spinTimer);
@@ -337,6 +386,13 @@ export function EclipsePlayer({ token }: { token: string }) {
     const timer = window.setTimeout(() => void playRound(true), 1400);
     return () => window.clearTimeout(timer);
   }, [state?.session.freeSpinsRemaining, phase, busy]);
+
+  useEffect(() => {
+    if (!state || busy || autoSpinsRemaining <= 0 || state.session.freeSpinsRemaining > 0) return;
+    if (phase !== 'idle' && phase !== 'reveal') return;
+    const timer = window.setTimeout(() => void playRound(false, true), 850);
+    return () => window.clearTimeout(timer);
+  }, [autoSpinsRemaining, busy, phase, state?.session.freeSpinsRemaining, bet]);
 
   function moveParallax(event: React.PointerEvent<HTMLElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -366,13 +422,14 @@ export function EclipsePlayer({ token }: { token: string }) {
 
   const theme = state.config.theme;
   const visualBonusActive = bonusActive || ['bonus','free-spins','free-spinning','bonus-outro'].includes(phase);
+  const betLocked = busy || visualBonusActive || autoRunning;
 
   return (
     <main
       onPointerDown={() => void eclipseAudio.unlock()}
       onPointerMove={moveParallax}
       onPointerLeave={resetParallax}
-      className={`game-player eclipse-player-v110 phase-${phase} ${visualBonusActive ? 'bonus-mode-active' : ''}`}
+      className={`game-player eclipse-player-v110 phase-${phase} ${visualBonusActive ? 'bonus-mode-active' : ''} ${autoRunning ? 'auto-running-stage17' : ''}`}
       style={{ '--primary': theme.primary || '#b9ff43', '--secondary': theme.secondary || '#16a085', '--game-bg': theme.background || '#061713', '--mx': '0', '--my': '0' } as React.CSSProperties & Record<string, string>}
     >
       <AnimatedBackground phase={visualBonusActive ? 'bonus' : phase} />
@@ -415,10 +472,32 @@ export function EclipsePlayer({ token }: { token: string }) {
 
         {error && <div className="game-error">{error}</div>}
 
-        <div className="game-controls">
-          <div className="control bet-control-stage16"><small>{visualBonusActive ? 'BONUS BET' : 'BET'}</small><BetPicker value={visualBonusActive ? (state.session.bonusBet ?? bet) : bet} onChange={setBet} disabled={busy || visualBonusActive} /></div>
-          <button className={`spin-button ${visualBonusActive ? 'bonus-spin-button' : ''}`} disabled={busy || visualBonusActive} onClick={() => void playRound(false)}><RefreshCw className={busy ? 'rotating' : ''} /><span>{phase === 'tease' ? 'BONUS?' : visualBonusActive ? `${state.session.freeSpinsRemaining} FREE` : busy ? 'SPINNING' : 'SPIN'}</span></button>
-          <div className="control right"><small>{visualBonusActive ? 'FREE SPINS' : 'PAYOUT'}</small><b>{visualBonusActive ? `${state.session.freeSpinsRemaining}/8` : '5 LINHAS'}</b></div>
+        <div className="game-controls slot-control-deck-stage17">
+          {autoPanelOpen && !autoRunning && (
+            <AutoSpinPanel
+              bet={bet}
+              count={autoSpinCount}
+              onBetChange={setBet}
+              onCountChange={setAutoSpinCount}
+              onStart={startAutoSpins}
+              onClose={() => setAutoPanelOpen(false)}
+            />
+          )}
+
+          <button className="bet-step-stage17 bet-minus-stage17" type="button" disabled={betLocked || bet <= BET_VALUES[0]} onClick={() => changeBet(-1)} aria-label="Diminuir aposta"><Minus size={23} /></button>
+          <div className="bet-readout-stage17"><small>BET</small><strong>{formatBet(visualBonusActive ? (state.session.bonusBet ?? bet) : bet)}</strong></div>
+          <button className={`spin-button ${visualBonusActive ? 'bonus-spin-button' : ''}`} disabled={busy || visualBonusActive || autoRunning} onClick={() => void playRound(false)}><RefreshCw className={busy ? 'rotating' : ''} /><span>{phase === 'tease' ? 'BONUS?' : visualBonusActive ? `${state.session.freeSpinsRemaining} FREE` : busy ? 'SPINNING' : 'SPIN'}</span></button>
+          <button className="bet-step-stage17 bet-plus-stage17" type="button" disabled={betLocked || bet >= BET_VALUES[BET_VALUES.length - 1]} onClick={() => changeBet(1)} aria-label="Aumentar aposta"><Plus size={23} /></button>
+          <button
+            className={`auto-button-stage17 ${autoRunning ? 'is-running' : ''}`}
+            type="button"
+            disabled={visualBonusActive && !autoRunning}
+            onClick={() => autoRunning ? stopAutoSpins() : setAutoPanelOpen((current) => !current)}
+          >
+            <Repeat2 size={20} />
+            <span>{autoRunning ? 'PARAR' : 'AUTO'}</span>
+            <strong>{autoRunning ? autoSpinsRemaining : 'GIROS'}</strong>
+          </button>
         </div>
 
         <div className="game-footer"><ShieldCheck size={13} /><span>RIPCOM Provider Runtime • Fun-money only</span></div>
