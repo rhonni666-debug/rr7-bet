@@ -12,7 +12,8 @@
     "cap:sync": "cap sync android",
     "ripcom:keys": "node scripts/ripcom-generate-operator-keys.mjs",
     "ripcom:smoke": "node scripts/ripcom-b2b-smoke.mjs",
-    "ripcom:sdk:test": "node scripts/ripcom-sdk-selftest.mjs"
+    "ripcom:sdk:test": "node scripts/ripcom-sdk-selftest.mjs",
+    "ripcom:wallet:smoke": "node scripts/ripcom-wallet-callback-smoke.mjs"
   },
   "dependencies": {
     "@capacitor/android": "latest",
