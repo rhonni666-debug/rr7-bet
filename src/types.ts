@@ -40,6 +40,23 @@ export type DemoGame = {
   sortOrder: number;
 };
 
+export type GameSession = {
+  id: string;
+  token: string;
+  status: string;
+  expiresAt: string | null;
+  launchUrl: string | null;
+};
+
+export type RoundOutcome = {
+  roundId: string;
+  bet: number;
+  win: number;
+  result: 'WIN' | 'LOSS' | 'PUSH';
+  multiplier: number;
+  newBalance: number;
+};
+
 export type Banner = {
   id: string;
   title: string;

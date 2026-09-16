@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Blocks, Gamepad2, Gift, Image, LayoutDashboard, ListTree, ScrollText, Users } from 'lucide-react';
+import { Blocks, CircleDollarSign, Gamepad2, Gift, Image, LayoutDashboard, ListTree, ScrollText, TimerReset, Users } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
 const items = [
@@ -10,6 +10,8 @@ const items = [
   { to: '/admin/banners', label: 'Banners', icon: Image },
   { to: '/admin/promocoes', label: 'Promoções', icon: Gift },
   { to: '/admin/usuarios', label: 'Usuários', icon: Users },
+  { to: '/admin/sessoes', label: 'Sessões', icon: TimerReset },
+  { to: '/admin/transacoes', label: 'Transações', icon: CircleDollarSign },
   { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
 ] as const;
 

@@ -1,0 +1,19 @@
+{
+  "name": "RR7.BET Demo",
+  "short_name": "RR7.BET",
+  "description": "Laboratório demonstrativo de lobby de jogos com créditos sem valor monetário.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06171f",
+  "theme_color": "#071c26",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./rr7.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
