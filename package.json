@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview",
-    "cap:sync": "cap sync android"
+    "cap:sync": "cap sync android",
+    "ripcom:smoke": "node scripts/ripcom-b2b-smoke.mjs"
   },
   "dependencies": {
     "@capacitor/android": "latest",
