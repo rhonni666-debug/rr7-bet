@@ -176,6 +176,17 @@ Deno.serve(async (req: Request) => {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) return json({ error: 'AUTH_REQUIRED' }, 401);
 
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', authData.user.id)
+    .maybeSingle();
+  if (profileError) {
+    console.error('hub88_admin_check_failed', { userId: authData.user.id, error: profileError.message });
+    return json({ error: 'ADMIN_CHECK_FAILED' }, 500);
+  }
+  if (profile?.role !== 'ADMIN') return json({ error: 'ADMIN_REQUIRED' }, 403);
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();
