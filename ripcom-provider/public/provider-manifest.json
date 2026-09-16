@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.17",
+  "version": "1.0.0-sandbox.18",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -71,7 +71,17 @@
     "auto-spin-bet-selector",
     "auto-spin-count-selector",
     "auto-spin-stop-control",
-    "auto-spin-resume-after-free-spins"
+    "auto-spin-resume-after-free-spins",
+    "gpu-reel-motion",
+    "strict-equal-3x3-cells",
+    "smooth-reel-settle",
+    "premium-symbol-glint",
+    "symbol-material-depth-polish",
+    "slow-physical-serpent-rise",
+    "animated-serpent-scales",
+    "animated-serpent-head",
+    "bonus-camera-push",
+    "mobile-animation-performance-budget"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -85,7 +95,7 @@
       "name": "Eclipse Serpent",
       "release": "1.3.0",
       "status": "SANDBOX",
-      "presentation": "slot-deck-autospin-v17",
+      "presentation": "fluid-cinematic-v18",
       "mathProfile": {
         "layout": [3,3,3],
         "payoutMode": "FIXED_5_PAYLINES",
@@ -142,20 +152,23 @@
         "accumulateWinPerLine": true
       },
       "visualProfile": {
-        "symbolStyle": "premium-original-jeweled-svg",
+        "symbolStyle": "premium-original-jeweled-svg-v18",
         "flatEmojiSymbols": false,
         "symbolLabelsVisible": false,
         "symbolPayValuesVisible": false,
         "symbolPayValueSource": "slot_game_configs.symbols[].pay",
-        "layout": "3x3 clean centered",
+        "layout": "strict equal 3x3",
         "referencePrinciple": "production mobile slot control hierarchy only; no copied assets or trade dress",
         "materials": ["gold", "emerald", "sapphire", "amethyst", "ruby", "obsidian"],
         "perspectiveReels": true,
         "depthLighting": true,
+        "gpuReelMotion": true,
+        "smoothResultSettle": true,
         "normalSpinDurationMs": 1500,
         "normalReelStopGapMs": 280,
         "bonusIntroDurationMs": 7000,
-        "bonusRealism": ["camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "serpent scales", "slow serpent ascent"]
+        "serpentRiseDurationMs": 5050,
+        "bonusRealism": ["camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "animated serpent scales", "head sway", "eye glow", "tongue motion", "slow serpent ascent"]
       },
       "mobileProfile": {
         "primaryOrientation": "portrait",
@@ -165,7 +178,9 @@
         "reducedParticleBudget": true,
         "cameraTiltDisabled": true,
         "reelPriority": "dominant",
-        "controlDeck": "minus-bet-spin-plus-auto"
+        "controlDeck": "minus-bet-spin-plus-auto",
+        "gpuFriendlyTransforms": true,
+        "layoutContainment": true
       }
     }
   ]
