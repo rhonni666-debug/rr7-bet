@@ -15,6 +15,10 @@ function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+function formatMultiplier(value: number) {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function Brand() {
   return <div className="brand"><div className="brand-mark">R</div><div><strong>RIPCOM</strong><span>ORIGINAL</span></div></div>;
 }
@@ -24,7 +28,7 @@ function formatSymbolPay(symbol?: RipcomSymbol) {
   if (symbol.scatter) return 'BONUS';
   const value = Number(symbol.pay);
   if (!Number.isFinite(value)) return '';
-  return `${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×`;
+  return `${formatMultiplier(value)}×`;
 }
 
 function randomGrid(state: RipcomPlayerState) {
@@ -56,7 +60,7 @@ function BonusHud({ state }: { state: RipcomPlayerState }) {
     <div className="eclipse-bonus-hud">
       <div className="bonus-hud-label"><Sparkles size={15} /><span>ECLIPSE BONUS</span></div>
       <div className="bonus-hud-count"><strong>{session.freeSpinsRemaining}</strong><span>/ {total} FREE SPINS</span></div>
-      <div className="bonus-hud-win"><small>GANHO NO BÔNUS</small><b><AnimatedAmount value={session.bonusTotalWin} duration={520} suffix=" CR" /></b></div>
+      <div className="bonus-hud-win"><small>GANHO NO BÔNUS</small><b><AnimatedAmount value={session.bonusTotalWin} duration={720} suffix=" CR" /></b></div>
     </div>
   );
 }
@@ -69,8 +73,27 @@ function BonusOutro({ totalWin }: { totalWin: number }) {
         <small>ECLIPSE BONUS CONCLUÍDO</small>
         <strong>8 RODADAS GRÁTIS</strong>
         <span>TOTAL GANHO</span>
-        <b><AnimatedAmount value={totalWin} duration={1500} suffix=" CR" /></b>
+        <b><AnimatedAmount value={totalWin} duration={1900} suffix=" CR" /></b>
       </div>
+    </div>
+  );
+}
+
+function WinWaysBreakdown({ outcome, symbols }: { outcome: RipcomSpin; symbols: ReadonlyMap<string, RipcomSymbol> }) {
+  if (!outcome.wins.length) return null;
+  return (
+    <div className="win-ways-breakdown" aria-label="Detalhamento das linhas vencedoras">
+      {outcome.wins.map((win) => {
+        const symbol = symbols.get(win.symbolId);
+        const amount = Math.round(outcome.bet * win.multiplier * 100) / 100;
+        return (
+          <div className="win-way-row" key={win.symbolId}>
+            <span>{symbol?.wild ? 'WILD' : symbol?.label ?? win.symbolId}</span>
+            <strong>{formatMultiplier(win.payPerWay)}× × {win.ways} {win.ways === 1 ? 'LINHA' : 'LINHAS'} = {formatMultiplier(win.multiplier)}×</strong>
+            <em>{amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CR</em>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -106,7 +129,7 @@ export function EclipsePlayer({ token }: { token: string }) {
     const timer = window.setInterval(() => {
       setLoadingText(labels[index % labels.length]);
       index += 1;
-    }, 520);
+    }, 650);
 
     getPlayerState(token)
       .then((next) => {
@@ -149,7 +172,7 @@ export function EclipsePlayer({ token }: { token: string }) {
     const tier = classifyWin(result.multiplier);
     if (tier === 'normal') return;
     setCelebration(result);
-    await sleep(tier === 'mega' ? 2700 : tier === 'big' ? 2250 : 1650);
+    await sleep(tier === 'mega' ? 3400 : tier === 'big' ? 2800 : 2100);
     setCelebration(null);
   }
 
@@ -171,17 +194,22 @@ export function EclipsePlayer({ token }: { token: string }) {
     setTeaseColumn(null);
     setPhase(freeSpin ? 'free-spinning' : 'spinning');
 
-    const spinTimer = window.setInterval(() => setGrid(randomGrid(state)), freeSpin ? 58 : 70);
+    const spinTimer = window.setInterval(() => setGrid(randomGrid(state)), freeSpin ? 78 : 88);
     let teaseTimer = 0;
 
     try {
       const result = await spinPlayer(token, effectiveBet);
-      await sleep(freeSpin ? 480 : 540);
+      await sleep(freeSpin ? 900 : 1200);
       window.clearInterval(spinTimer);
 
       for (let columnIndex = 0; columnIndex < state.config.layout.length; columnIndex += 1) {
+        setGrid((current) => current.map((column, index) => {
+          if (index < columnIndex) return column;
+          if (index === columnIndex) return result.grid[index] ?? column;
+          return randomColumn(state, index);
+        }));
         eclipseAudio.reelStop(columnIndex);
-        await sleep(freeSpin ? 42 : 64);
+        await sleep(freeSpin ? 150 : 220);
       }
 
       if (!freeSpin) {
@@ -193,14 +221,14 @@ export function EclipsePlayer({ token }: { token: string }) {
           setPhase('tease');
           teaseTimer = window.setInterval(() => {
             setGrid((current) => current.map((column, columnIndex) => columnIndex === decisiveColumn ? randomColumn(state, columnIndex) : column));
-          }, 86);
-          await sleep(result.bonusAwarded === 8 ? 1650 : 1220);
+          }, 118);
+          await sleep(result.bonusAwarded === 8 ? 3000 : 2200);
           window.clearInterval(teaseTimer);
         } else {
-          await sleep(180);
+          await sleep(320);
         }
       } else {
-        await sleep(150);
+        await sleep(250);
       }
 
       setGrid(result.grid);
@@ -215,18 +243,18 @@ export function EclipsePlayer({ token }: { token: string }) {
         eclipseAudio.bonusHit();
         setBonusScatterCount(result.scatterCount);
         setPhase('bonus');
-        await sleep(4300);
+        await sleep(6500);
         setPhase('free-spins');
       } else {
         await celebrateWin(result);
         if (result.isFreeSpin && result.freeSpinsRemaining === 0) {
           eclipseAudio.bonusComplete();
           setPhase('bonus-outro');
-          await sleep(2800);
+          await sleep(3600);
           setPhase('idle');
         } else {
           setPhase(result.freeSpinsRemaining > 0 ? 'free-spins' : 'reveal');
-          await sleep(result.freeSpinsRemaining > 0 ? 700 : 420);
+          await sleep(result.freeSpinsRemaining > 0 ? 1050 : 850);
           if (result.freeSpinsRemaining === 0) setPhase('idle');
         }
       }
@@ -243,7 +271,7 @@ export function EclipsePlayer({ token }: { token: string }) {
 
   useEffect(() => {
     if (!state || busy || phase !== 'free-spins' || state.session.freeSpinsRemaining <= 0) return;
-    const timer = window.setTimeout(() => void playRound(true), 780);
+    const timer = window.setTimeout(() => void playRound(true), 1250);
     return () => window.clearTimeout(timer);
   }, [state?.session.freeSpinsRemaining, phase, busy]);
 
@@ -293,11 +321,11 @@ export function EclipsePlayer({ token }: { token: string }) {
 
       <div className="game-frame">
         <div className="game-header"><Brand /><div><button className={`sound-toggle ${soundOn ? '' : 'is-muted'}`} type="button" onClick={() => void toggleSound()} aria-label={soundOn ? 'Desativar som' : 'Ativar som'}>{soundOn ? <Volume2 size={17} /> : <VolumeX size={17} />}</button><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div>
-        <div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>{visualBonusActive ? 'ECLIPSE BONUS • 8 FREE SPINS' : 'ECLIPSE WILD • RESPINS • SCATTER BONUS'}</p></div>
+        <div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>{visualBonusActive ? 'ECLIPSE BONUS • 8 FREE SPINS' : '3 ROLOS • WAYS AGREGADAS • ECLIPSE BONUS'}</p></div>
 
         <div className={`reels ${busy ? 'spinning' : ''} ${visualBonusActive ? 'bonus-reels' : ''}`}>
           {grid.map((column, columnIndex) => (
-            <div className={`reel ${phase === 'tease' && teaseColumn === columnIndex ? 'tease-target' : ''}`} key={columnIndex} style={{ '--delay': `${columnIndex * 90}ms` } as React.CSSProperties}>
+            <div className={`reel ${phase === 'tease' && teaseColumn === columnIndex ? 'tease-target' : ''}`} key={columnIndex} style={{ '--delay': `${columnIndex * 160}ms` } as React.CSSProperties}>
               {column.map((symbolId, rowIndex) => {
                 const symbol = symbols.get(symbolId);
                 const isWinner = winning.has(symbolId);
@@ -309,7 +337,10 @@ export function EclipsePlayer({ token }: { token: string }) {
         </div>
 
         {outcome && outcome.win > 0 && phase !== 'bonus' && phase !== 'bonus-outro' && (
-          <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong><AnimatedAmount value={outcome.win} duration={640} prefix="+" suffix=" CR" /></strong><small>{outcome.multiplier.toFixed(2)}×</small></div>
+          <>
+            <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong><AnimatedAmount value={outcome.win} duration={900} prefix="+" suffix=" CR" /></strong><small>{formatMultiplier(outcome.multiplier)}×</small></div>
+            <WinWaysBreakdown outcome={outcome} symbols={symbols} />
+          </>
         )}
 
         {error && <div className="game-error">{error}</div>}
@@ -317,7 +348,7 @@ export function EclipsePlayer({ token }: { token: string }) {
         <div className="game-controls">
           <div className="control"><small>{visualBonusActive ? 'BONUS BET' : 'BET'}</small><select value={visualBonusActive ? (state.session.bonusBet ?? bet) : bet} onChange={(event) => setBet(Number(event.target.value))} disabled={busy || visualBonusActive}>{[1,2,5,10,20,50,100].map((value) => <option key={value}>{value}</option>)}</select></div>
           <button className={`spin-button ${visualBonusActive ? 'bonus-spin-button' : ''}`} disabled={busy || visualBonusActive} onClick={() => void playRound(false)}><RefreshCw className={busy ? 'rotating' : ''} /><span>{phase === 'tease' ? 'BONUS?' : visualBonusActive ? `${state.session.freeSpinsRemaining} FREE` : busy ? 'SPINNING' : 'SPIN'}</span></button>
-          <div className="control right"><small>{visualBonusActive ? 'FREE SPINS' : 'SESSION'}</small><b>{visualBonusActive ? `${state.session.freeSpinsRemaining}/8` : token.slice(0, 6)}</b></div>
+          <div className="control right"><small>{visualBonusActive ? 'FREE SPINS' : 'PAYOUT'}</small><b>{visualBonusActive ? `${state.session.freeSpinsRemaining}/8` : 'WAYS'}</b></div>
         </div>
 
         <div className="game-footer"><ShieldCheck size={13} /><span>RIPCOM Provider Runtime • Fun-money only</span></div>
