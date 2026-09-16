@@ -18,6 +18,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { balance, loading } = useDemo();
   const { user } = useAuth();
   const adminArea = pathname.startsWith('/admin');
+  const ripcomPlayer = pathname.startsWith('/ripcom/play/');
+
+  if (ripcomPlayer) {
+    return <div className="min-h-dvh bg-[#03040a] text-white">{children}</div>;
+  }
 
   return (
     <div className="min-h-dvh bg-[#06171f] text-white">
