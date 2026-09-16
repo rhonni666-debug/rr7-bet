@@ -1,0 +1,87 @@
+/* Eclipse Serpent sandbox.14 — 3x3 / 5 fixed paylines */
+
+/* Replace the old 3-4-3 cell sizing with a true 3x3 visual board. */
+.eclipse-player-v110 .reels{
+  --stage14-gap:7px;
+  align-items:stretch;
+}
+.eclipse-player-v110 .reel,
+.eclipse-player-v110 .reel:has(.symbol:nth-child(4)),
+.eclipse-player-v110 .reel:not(:has(.symbol:nth-child(4))){
+  height:100%;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:stretch;
+  gap:var(--stage14-gap);
+  padding-block:0!important;
+}
+.eclipse-player-v110 .reel .symbol{
+  flex:1 1 calc((100% - (var(--stage14-gap) * 2)) / 3)!important;
+  min-height:0!important;
+  height:auto!important;
+}
+.eclipse-player-v110 .symbol-art-stage{
+  width:90%!important;
+  height:90%!important;
+  max-width:142px!important;
+  max-height:142px!important;
+}
+
+/* The badge is a base payout per winning line, not a standalone prize. */
+.symbol-pay-value:not(.is-bonus)::after{
+  content:" / LINHA";
+  font-size:.54em;
+  opacity:.58;
+  letter-spacing:.02em;
+}
+
+/* Five-line result block. */
+.win-ways-breakdown{max-height:112px;overflow:auto;scrollbar-width:thin}
+.win-way-row strong{letter-spacing:.015em}
+
+/* Slower physical bonus rise: the player holds the whole intro for about 7s. */
+.cinematic-bonus-intro .serpent-rise{
+  animation:stage14SerpentRise 4.15s 1.25s cubic-bezier(.08,.62,.12,1) forwards!important;
+}
+.cinematic-eclipse-bonus{animation:stage14EclipseEnter 2.05s cubic-bezier(.14,.76,.18,1) both!important}
+.cinematic-eclipse-bonus .cinematic-eclipse-moon{animation:stage14MoonClose 2.45s .58s cubic-bezier(.16,.7,.2,1) both!important}
+.cinematic-bonus-intro .cinematic-bonus-copy{animation:stage14BonusCopy .92s 5.1s cubic-bezier(.12,.88,.18,1.05) forwards!important}
+.shockwave-one{animation-delay:4.25s!important}
+.shockwave-two{animation-delay:4.48s!important}
+.cinematic-bonus-lens-flare{animation-delay:4.35s!important}
+.cinematic-bonus-flash{animation-delay:4.26s!important}
+
+@keyframes stage14SerpentRise{
+  0%{opacity:0;transform:translate(-50%,112%) translateZ(-115px) scale(.46) rotate(-10deg);filter:blur(16px) brightness(.42)}
+  18%{opacity:.34;filter:blur(11px) brightness(.58)}
+  40%{opacity:.78;transform:translate(-50%,68%) translateZ(-48px) scale(.67) rotate(-6deg);filter:blur(6px) brightness(.7)}
+  62%{opacity:1;transform:translate(-50%,35%) translateZ(-8px) scale(.82) rotate(2deg);filter:blur(2.5px) brightness(.84)}
+  80%{transform:translate(-50%,10%) translateZ(20px) scale(.95) rotate(1deg);filter:blur(.6px) brightness(.96)}
+  92%{transform:translate(-50%,-3%) translateZ(38px) scale(1.04) rotate(-1deg);filter:blur(0) brightness(1.08)}
+  100%{opacity:1;transform:translate(-50%,0) translateZ(28px) scale(1) rotate(0);filter:blur(0) brightness(1)}
+}
+@keyframes stage14EclipseEnter{
+  0%{transform:translateX(-50%) scale(.14) translateZ(-130px);opacity:0;filter:blur(18px)}
+  42%{opacity:.72;filter:blur(6px)}
+  80%{transform:translateX(-50%) scale(1.04) translateZ(16px);filter:blur(0)}
+  100%{transform:translateX(-50%) scale(1);opacity:1;filter:blur(0)}
+}
+@keyframes stage14MoonClose{
+  0%{transform:translateX(112%) scale(.9);opacity:.5}
+  52%{transform:translateX(44%) scale(.96);opacity:.82}
+  88%{transform:translateX(-2%) scale(1.01);opacity:1}
+  100%{transform:translateX(0) scale(1);opacity:1}
+}
+@keyframes stage14BonusCopy{
+  0%{opacity:0;transform:translate(-50%,38px) scale(.68);filter:blur(11px)}
+  72%{filter:blur(0)}
+  100%{opacity:1;transform:translate(-50%,0) scale(1)}
+}
+
+@media(max-width:600px) and (orientation:portrait){
+  .eclipse-player-v110 .reels{--stage14-gap:5px}
+  .eclipse-player-v110 .symbol-art-stage{width:94%!important;height:94%!important;max-width:118px!important;max-height:118px!important}
+  .symbol-pay-value:not(.is-bonus)::after{display:none}
+  .cinematic-bonus-intro .serpent-rise{animation-duration:4.35s!important}
+}
