@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
       const gameId = String(body.gameId ?? '');
       if (!gameId) return json({ error: 'GAME_ID_REQUIRED' }, 400);
       const { data, error } = await supabase.rpc('create_demo_game_session', { p_game_id: gameId });
-      if (error) return json({ error: safeError(error.message) }, 400);
+      if (error) return json({ error: safeError(error.message) });
       const row = Array.isArray(data) ? data[0] : data;
       return json({ data: row });
     }
@@ -90,7 +90,7 @@ Deno.serve(async (req: Request) => {
         p_bet: bet,
         p_request_id: requestId,
       });
-      if (error) return json({ error: safeError(error.message) }, 400);
+      if (error) return json({ error: safeError(error.message) });
       const row = Array.isArray(data) ? data[0] : data;
       return json({ data: row });
     }
@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
       const sessionId = String(body.sessionId ?? '');
       if (!sessionId) return json({ error: 'SESSION_ID_REQUIRED' }, 400);
       const { data, error } = await supabase.rpc('close_demo_game_session', { p_session_id: sessionId });
-      if (error) return json({ error: safeError(error.message) }, 400);
+      if (error) return json({ error: safeError(error.message) });
       return json({ data: { closed: Boolean(data) } });
     }
 
