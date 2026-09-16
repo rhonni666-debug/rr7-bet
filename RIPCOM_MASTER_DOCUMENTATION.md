@@ -5,7 +5,7 @@
 > Repositório: `rhonni666-debug/rr7-bet`  
 > Status atual: **RIPCOM B2B v1 — SANDBOX / DEMO**
 
-O arquivo `RIPCOM_MASTER_DOCUMENTATION.txt` continua no repositório como cópia simples/backup. A partir desta versão, este arquivo `.md` é o documento principal que deve ser atualizado quando a arquitetura evoluir.
+O arquivo `RIPCOM_MASTER_DOCUMENTATION.txt` continua no repositório como cópia simples/backup. Este arquivo `.md` é o documento principal e deve ser atualizado sempre que a arquitetura evoluir.
 
 ---
 
@@ -15,31 +15,32 @@ O arquivo `RIPCOM_MASTER_DOCUMENTATION.txt` continua no repositório como cópia
 2. [Modelo de desenvolvimento sem créditos](#2-modelo-de-desenvolvimento-sem-créditos)
 3. [Arquitetura geral](#3-arquitetura-geral)
 4. [Provider RIPCOM](#4-provider-ripcom)
-5. [Primeiro jogo oficial](#5-primeiro-jogo-oficial)
-6. [API B2B v1](#6-api-b2b-v1)
-7. [Autenticação RSA](#7-autenticação-rsa)
-8. [Idempotência e telemetria](#8-idempotência-e-telemetria)
-9. [Operadores B2B](#9-operadores-b2b)
-10. [Catálogo por operador](#10-catálogo-por-operador)
-11. [Sessões B2B](#11-sessões-b2b)
-12. [Rounds B2B](#12-rounds-b2b)
-13. [Liquidação DEMO](#13-liquidação-demo)
-14. [Runtime interno RIPCOM](#14-runtime-interno-ripcom)
-15. [Player independente](#15-player-independente)
-16. [Portal público](#16-portal-público)
-17. [Painel administrativo](#17-painel-administrativo)
-18. [Painel de métricas](#18-painel-de-métricas)
+5. [Eclipse Serpent](#5-eclipse-serpent)
+6. [Versionamento e Game Manifest](#6-versionamento-e-game-manifest)
+7. [API B2B v1](#7-api-b2b-v1)
+8. [Autenticação RSA](#8-autenticação-rsa)
+9. [Idempotência e telemetria](#9-idempotência-e-telemetria)
+10. [Operadores B2B](#10-operadores-b2b)
+11. [Catálogo e release por operador](#11-catálogo-e-release-por-operador)
+12. [Sessões B2B](#12-sessões-b2b)
+13. [Rounds B2B](#13-rounds-b2b)
+14. [Liquidação DEMO](#14-liquidação-demo)
+15. [Runtime interno RIPCOM](#15-runtime-interno-ripcom)
+16. [Player independente](#16-player-independente)
+17. [Portal público](#17-portal-público)
+18. [Painéis administrativos](#18-painéis-administrativos)
 19. [SDK Node.js](#19-sdk-nodejs)
 20. [Geração de chaves](#20-geração-de-chaves)
 21. [Smoke test](#21-smoke-test)
 22. [Selftest offline](#22-selftest-offline)
 23. [OpenAPI](#23-openapi)
-24. [CI e deploy](#24-ci-e-deploy)
-25. [Segurança](#25-segurança)
-26. [Sandbox x produção](#26-sandbox-x-produção)
-27. [O que ainda não é produção comercial](#27-o-que-ainda-não-é-produção-comercial)
-28. [Próximos passos](#28-próximos-passos)
-29. [Mapa rápido dos componentes](#29-mapa-rápido-dos-componentes)
+24. [Homologação core realizada](#24-homologação-core-realizada)
+25. [CI e deploy](#25-ci-e-deploy)
+26. [Segurança](#26-segurança)
+27. [Sandbox x produção](#27-sandbox-x-produção)
+28. [O que ainda não é produção comercial](#28-o-que-ainda-não-é-produção-comercial)
+29. [Próximos passos](#29-próximos-passos)
+30. [Mapa rápido dos componentes](#30-mapa-rápido-dos-componentes)
 
 ---
 
@@ -53,7 +54,7 @@ A separação conceitual é:
 - **RR7** = primeiro operador/plataforma que consome a RIPCOM.
 - **Jogos RIPCOM** = produtos independentes que futuramente podem ser oferecidos a outras plataformas.
 
-A RIPCOM não deve ser tratada como “um conjunto de jogos internos do RR7”. Ela possui arquitetura própria de provider, API B2B, catálogo por parceiro, sessões externas, autenticação e player independente.
+A RIPCOM não deve ser tratada como “um conjunto de jogos internos do RR7”. Ela possui arquitetura própria de provider, API B2B, catálogo por parceiro, sessões externas, autenticação, versionamento e player independente.
 
 ---
 
@@ -82,7 +83,7 @@ O projeto continua sendo desenvolvido sem depender de créditos do Lovable.
 
 É **opcional**. Pode ser usado futuramente para acelerar interface/prototipação, mas não é requisito para continuar o produto.
 
-Esse modelo segue o mesmo princípio de desenvolvimento incremental usado em projetos anteriores: código versionado, backend separado, checkpoints e CI a cada bloco importante.
+O princípio é o mesmo usado no app do gêmeo digital: desenvolvimento incremental, backend separado, checkpoints e CI a cada bloco importante.
 
 ---
 
@@ -95,7 +96,7 @@ PLATAFORMA PARCEIRA
         v
 RIPCOM B2B API
         |
-        | valida operador / jogo / sessão
+        | valida operador / entitlement / release / sessão
         v
 RIPCOM GAME RUNTIME
         |
@@ -142,15 +143,11 @@ Tabela: `public.providers`
 | `provider_type` | `REAL` |
 | `status` | `ACTIVE` |
 
-O banco diferencia **tipo técnico** (`REAL`) de **marca** (`ripcom`).
-
-Jogos oficiais RIPCOM não devem utilizar `provider_type = MOCK`.
+O banco diferencia **tipo técnico** (`REAL`) de **marca** (`ripcom`). Jogos oficiais RIPCOM não devem utilizar `provider_type = MOCK`.
 
 ---
 
-## 5. Primeiro jogo oficial
-
-### Eclipse Serpent
+## 5. Eclipse Serpent
 
 | Campo | Valor |
 |---|---|
@@ -160,12 +157,108 @@ Jogos oficiais RIPCOM não devem utilizar `provider_type = MOCK`.
 | Launch Type | `PROVIDER_SESSION` |
 | Provedor | `RIPCOM` |
 | Modo atual | `DEMO` |
+| Release atual | `1.0.0` |
+| Release status | `SANDBOX` |
 
-O Eclipse Serpent é o primeiro jogo usado para validar a arquitetura completa da provedora e deve servir de referência estrutural para os próximos jogos.
+O Eclipse Serpent é o primeiro jogo usado para validar a arquitetura completa da provedora e serve como referência estrutural para os próximos jogos.
 
 ---
 
-## 6. API B2B v1
+## 6. Versionamento e Game Manifest
+
+### Tabela de releases
+
+`public.ripcom_game_releases`
+
+Função: registrar versões formais dos jogos RIPCOM.
+
+Campos principais:
+
+- `game_id`
+- `version`
+- `status`
+- `manifest`
+- `notes`
+- `released_at`
+- `created_at`
+- `updated_at`
+
+Status possíveis:
+
+- `DRAFT`
+- `SANDBOX`
+- `RELEASED`
+- `RETIRED`
+
+### Release atual do Eclipse Serpent
+
+```text
+version = 1.0.0
+status = SANDBOX
+```
+
+### Game Manifest no repositório
+
+```text
+games/eclipse-serpent/manifest.json
+```
+
+O manifest registra:
+
+- provider;
+- game code;
+- versão;
+- modo;
+- launch type;
+- runtime;
+- player route;
+- capabilities;
+- segurança;
+- canal de release.
+
+### Fixação de versão por operador
+
+`public.ripcom_operator_games.release_id`
+
+Cada operador pode ser fixado numa release específica. Isso permite que um parceiro permaneça em `1.0.0` enquanto outro homologa uma versão nova.
+
+### Fixação de versão por sessão
+
+`public.ripcom_b2b_sessions.game_release_id`
+
+Trigger:
+
+```text
+ripcom_b2b_sessions_bind_release
+```
+
+Função:
+
+```text
+public.ripcom_bind_session_release()
+```
+
+Toda nova sessão B2B recebe automaticamente a release atribuída ao operador. Isso preserva auditoria histórica mesmo depois de uma atualização do jogo.
+
+### Painel de releases
+
+Rota:
+
+```text
+/admin/ripcom-releases
+```
+
+Arquivo:
+
+```text
+src/pages/AdminRipcomReleases.tsx
+```
+
+Permite visualizar release, status, operadores fixados e Game Manifest.
+
+---
+
+## 7. API B2B v1
 
 Edge Function pública: `ripcom-b2b`
 
@@ -181,35 +274,13 @@ A função usa `verify_jwt=false` intencionalmente porque operadores externos n�
 
 | Método | Rota | Função |
 |---|---|---|
-| `GET` | `/v1/health` | Verificar saúde da API |
-| `GET` | `/v1/games` | Retornar catálogo permitido ao operador |
+| `GET` | `/v1/health` | Saúde da API |
+| `GET` | `/v1/games` | Catálogo permitido ao operador |
 | `POST` | `/v1/sessions` | Criar sessão DEMO |
 | `POST` | `/v1/games/launch` | Gerar launch URL |
 | `POST` | `/v1/sessions/close` | Encerrar sessão |
 
-### Health
-
-```http
-GET /v1/health
-```
-
-Não exige assinatura do operador.
-
-### Catálogo
-
-```http
-GET /v1/games
-```
-
-Retorna somente jogos liberados em `ripcom_operator_games`.
-
 ### Criar sessão
-
-```http
-POST /v1/sessions
-```
-
-Exemplo:
 
 ```json
 {
@@ -228,35 +299,13 @@ Resposta principal:
 - `balance`
 - `expires_at`
 
-### Launch
-
-```http
-POST /v1/games/launch
-```
-
-Recebe `session_token` e devolve `launch_url`.
-
-A URL pode ser usada em:
-
-- iframe
-- redirect
-- webview compatível
-
-### Encerrar sessão
-
-```http
-POST /v1/sessions/close
-```
-
 ### Wallet real
 
-Rotas `/v1/wallet/*` ainda **não estão habilitadas para dinheiro real**.
-
-O sandbox usa saldo DEMO interno por sessão. Chamadas para wallet real retornam `DEMO_ONLY_INTERNAL_WALLET`.
+Rotas `/v1/wallet/*` ainda **não estão habilitadas para dinheiro real**. O sandbox utiliza saldo DEMO interno por sessão.
 
 ---
 
-## 7. Autenticação RSA
+## 8. Autenticação RSA
 
 Cada operador possui seu próprio par RSA 2048.
 
@@ -268,9 +317,7 @@ Cada operador possui seu próprio par RSA 2048.
 
 `PUBLIC KEY`
 
-A private key nunca deve ser enviada à RIPCOM.
-
-### Headers obrigatórios
+Headers obrigatórios:
 
 ```text
 X-Ripcom-Operator
@@ -279,40 +326,30 @@ X-Ripcom-Request-Id
 X-Ripcom-Signature
 ```
 
-### Algoritmo
+Algoritmo:
 
 `RSA-SHA256 / RSASSA-PKCS1-v1_5`
 
-### Payload canônico
-
-```text
-METHOD
-PATH
-TIMESTAMP
-REQUEST_ID
-SHA256_HEX(BODY_EXATO)
-```
-
-Representado em uma única string:
+Payload canônico:
 
 ```text
 METHOD\nPATH\nTIMESTAMP\nREQUEST_ID\nSHA256_HEX(BODY_EXATO)
 ```
 
-O timestamp reduz risco de replay e o request ID participa do sistema de idempotência.
+O timestamp reduz replay e o request ID participa da idempotência.
 
 ---
 
-## 8. Idempotência e telemetria
+## 9. Idempotência e telemetria
 
 Tabela: `public.ripcom_api_requests`
 
-Funções principais:
+Funções:
 
 1. impedir processamento duplicado;
-2. armazenar resposta de requests B2B;
+2. armazenar resposta B2B;
 3. registrar status HTTP;
-4. medir duração da requisição.
+4. medir duração.
 
 Campos principais:
 
@@ -327,23 +364,15 @@ Campos principais:
 - `completed_at`
 - `duration_ms`
 
-Chave lógica:
-
-```text
-operator_id + request_id
-```
-
-Repetir a mesma requisição pode retornar a resposta persistida. Reutilizar o mesmo `request_id` com conteúdo diferente gera `IDEMPOTENCY_CONFLICT`.
+Reutilizar o mesmo `request_id` com conteúdo diferente gera `IDEMPOTENCY_CONFLICT`.
 
 ---
 
-## 9. Operadores B2B
+## 10. Operadores B2B
 
 Tabela: `public.ripcom_operators`
 
-Representa cada plataforma cliente da RIPCOM.
-
-Campos importantes:
+Campos principais:
 
 - `id`
 - `code`
@@ -354,53 +383,67 @@ Campos importantes:
 - `allowed_origins`
 - `metadata`
 
-### Ambientes
+Ambientes:
 
 - `SANDBOX`
 - `PRODUCTION`
 
-### Status
+Status:
 
 - `ACTIVE`
 - `SUSPENDED`
 - `PENDING`
 
-### Primeiro operador
+### RR7
 
 ```text
 code = rr7
-name = RR7
+status = ACTIVE
 environment = SANDBOX
+release Eclipse Serpent = 1.0.0
 ```
+
+### Operador de homologação
+
+```text
+code = ripcom-qa
+name = RIPCOM QA Sandbox
+environment = SANDBOX
+status atual = SUSPENDED
+release Eclipse Serpent = 1.0.0
+```
+
+`ripcom-qa` foi usado para homologação do núcleo. A chave usada era efêmera, portanto o operador foi suspenso após o teste. Deve receber nova chave antes do smoke test HTTP externo.
 
 ---
 
-## 10. Catálogo por operador
+## 11. Catálogo e release por operador
 
 Tabela: `public.ripcom_operator_games`
-
-Define quais jogos cada plataforma pode consumir.
 
 Campos:
 
 - `operator_id`
 - `game_id`
 - `enabled`
+- `release_id`
 
-Isso permite licenciamento seletivo do catálogo sem alterar o jogo.
+Essa tabela controla simultaneamente:
+
+- se o operador pode usar o jogo;
+- qual versão do jogo está liberada para ele.
 
 ---
 
-## 11. Sessões B2B
+## 12. Sessões B2B
 
 Tabela: `public.ripcom_b2b_sessions`
-
-Essas sessões são separadas das sessões normais dos usuários RR7.
 
 Campos principais:
 
 - `operator_id`
 - `game_id`
+- `game_release_id`
 - `external_player_id`
 - `session_token`
 - `status`
@@ -408,21 +451,17 @@ Campos principais:
 - `demo_balance`
 - `expires_at`
 
-Currency atual:
+Currency atual: `DEMO`.
 
-```text
-DEMO
-```
+As sessões externas são separadas das sessões normais dos usuários RR7.
 
 ---
 
-## 12. Rounds B2B
+## 13. Rounds B2B
 
 Tabela: `public.ripcom_b2b_rounds`
 
-Registra cada rodada executada numa sessão B2B.
-
-Campos principais:
+Campos:
 
 - `session_id`
 - `request_id`
@@ -437,9 +476,9 @@ Os rounds persistem para histórico, auditoria e análise técnica.
 
 ---
 
-## 13. Liquidação DEMO
+## 14. Liquidação DEMO
 
-Função PostgreSQL:
+Função:
 
 ```text
 public.ripcom_settle_demo_spin
@@ -458,11 +497,11 @@ Responsabilidades:
 - salvar round;
 - devolver novo saldo.
 
-A execução é restrita ao `service_role`.
+Execução restrita ao `service_role`.
 
 ---
 
-## 14. Runtime interno RIPCOM
+## 15. Runtime interno RIPCOM
 
 Edge Function:
 
@@ -470,15 +509,7 @@ Edge Function:
 ripcom-provider
 ```
 
-É usada pelo RR7 quando um jogo RIPCOM roda pelo fluxo interno.
-
-Valida:
-
-- se o jogo pertence à RIPCOM;
-- se o provider está ativo;
-- se a sessão é válida.
-
-### Diferença
+Usada pelo RR7 para jogos RIPCOM pelo fluxo interno.
 
 ```text
 ripcom-provider = integração interna RR7 -> RIPCOM
@@ -487,7 +518,7 @@ ripcom-b2b      = integração externa plataforma -> RIPCOM
 
 ---
 
-## 15. Player independente
+## 16. Player independente
 
 Rota:
 
@@ -501,19 +532,17 @@ Arquivo:
 src/pages/RipcomPlayer.tsx
 ```
 
-O player permite abrir uma sessão criada pela API B2B sem exigir login RR7.
-
-Operações utilizadas:
+Operações internas:
 
 - `player_state`
 - `player_spin`
 - `player_close`
 
-A credencial RSA do operador nunca é enviada ao browser.
+O browser recebe somente o token temporário da sessão, nunca a private key RSA do operador.
 
 ---
 
-## 16. Portal público
+## 17. Portal público
 
 Rota:
 
@@ -527,76 +556,38 @@ Arquivo:
 src/pages/RipcomProvider.tsx
 ```
 
-Apresenta a RIPCOM como provedora separada do visual RR7.
-
-Conteúdo:
-
-- status da API;
-- produto RIPCOM;
-- Eclipse Serpent;
-- arquitetura B2B;
-- endpoints;
-- onboarding;
-- status SANDBOX / DEMO.
+Apresenta a RIPCOM como provedora separada do visual RR7, incluindo produto, API, arquitetura B2B e onboarding.
 
 ---
 
-## 17. Painel administrativo
+## 18. Painéis administrativos
 
-Rota:
+### Operadores e distribuição
 
 ```text
 /admin/ripcom
-```
-
-Arquivo:
-
-```text
 src/pages/AdminRipcom.tsx
 ```
 
-Permite:
+Permite cadastrar operador, ambiente, status, public key RSA, allowed origins e jogos liberados.
 
-- cadastrar plataforma;
-- definir operator code;
-- selecionar SANDBOX/PRODUCTION;
-- ativar/suspender;
-- cadastrar public key RSA;
-- configurar allowed origins;
-- liberar ou bloquear jogos individualmente.
+### Releases
 
-As operações administrativas são protegidas por RLS.
+```text
+/admin/ripcom-releases
+src/pages/AdminRipcomReleases.tsx
+```
 
----
+Permite acompanhar versões, status de release, operadores fixados e manifest técnico.
 
-## 18. Painel de métricas
-
-Rota:
+### Métricas
 
 ```text
 /admin/ripcom-metricas
-```
-
-Arquivo:
-
-```text
 src/pages/AdminRipcomTelemetry.tsx
 ```
 
-Acompanha:
-
-- requests recentes;
-- operador;
-- rota;
-- status HTTP;
-- duração;
-- sessões ativas;
-- rounds;
-- apostas DEMO;
-- prêmios DEMO;
-- taxa de erro;
-- latência média;
-- P95.
+Acompanha requests, HTTP status, latência, P95, taxa de erro, sessões, rounds, apostas DEMO e prêmios DEMO.
 
 ---
 
@@ -608,11 +599,7 @@ Arquivo:
 sdk/ripcom-node.mjs
 ```
 
-Classe principal:
-
-```text
-RipcomClient
-```
+Classe principal: `RipcomClient`.
 
 Métodos:
 
@@ -622,20 +609,9 @@ Métodos:
 - `launch()`
 - `closeSession()`
 
-O SDK monta automaticamente:
+O SDK monta automaticamente timestamp, request ID, SHA-256, assinatura RSA e headers RIPCOM.
 
-- timestamp;
-- request ID;
-- hash SHA-256;
-- payload canônico;
-- assinatura RSA-SHA256;
-- headers RIPCOM.
-
-Documentação:
-
-```text
-sdk/README.md
-```
+Documentação: `sdk/README.md`.
 
 ---
 
@@ -660,7 +636,7 @@ Arquivos locais:
 .ripcom-keys/<operador>-public.pem
 ```
 
-A pasta `.ripcom-keys/` é ignorada pelo Git.
+`.ripcom-keys/` é ignorada pelo Git.
 
 ---
 
@@ -687,6 +663,8 @@ Fluxo esperado:
 5. spin DEMO;
 6. close.
 
+O smoke HTTP externo ainda precisa ser executado de um ambiente com resolução de rede para o domínio Supabase.
+
 ---
 
 ## 22. Selftest offline
@@ -703,18 +681,9 @@ Script:
 scripts/ripcom-sdk-selftest.mjs
 ```
 
-Esse teste **não depende de internet**.
+Não depende de internet. Gera RSA temporário, cria requests pelo SDK, valida headers, reconstrói payload canônico e verifica assinatura com a public key.
 
-Ele:
-
-- gera RSA temporário em memória;
-- cria requests pelo SDK;
-- valida headers;
-- reconstrói o payload canônico;
-- verifica a assinatura com a public key;
-- valida o payload da criação de sessão.
-
-Esse selftest faz parte do CI.
+Esse teste faz parte do CI.
 
 ---
 
@@ -726,27 +695,92 @@ Arquivo:
 docs/ripcom-b2b-openapi.yaml
 ```
 
-Pode ser utilizado em:
+Uso previsto:
 
 - Swagger UI;
 - Postman;
-- geração automática de clientes;
+- geração de clientes;
 - documentação técnica para parceiros.
 
-### Documentação complementar
+Documentação complementar:
 
 - `docs/RIPCOM_PROVIDER_ARCHITECTURE.md`
 - `docs/RIPCOM_B2B_V1.md`
+- `docs/RIPCOM_QA_REPORT_2026-09-16.md`
 - `docs/ripcom-b2b-openapi.yaml`
 - `sdk/README.md`
-- `RIPCOM_MASTER_DOCUMENTATION.md` ← documento mestre
-- `RIPCOM_MASTER_DOCUMENTATION.txt` ← backup simples
+- `RIPCOM_MASTER_DOCUMENTATION.md`
+- `RIPCOM_MASTER_DOCUMENTATION.txt`
 
 ---
 
-## 24. CI e deploy
+## 24. Homologação core realizada
 
-Workflow de CI:
+Data: **16/09/2026**.
+
+Operador: `ripcom-qa`.
+
+Resultado geral: **PASSOU — CORE DB FLOW**.
+
+### Release binding
+
+Sessão criada com:
+
+- saldo inicial `1000 DEMO`;
+- release automática `Eclipse Serpent 1.0.0`;
+- status inicial `ACTIVE`.
+
+Resultado: **PASSOU**.
+
+### Liquidação
+
+Rodada de QA:
+
+- aposta `5`;
+- prêmio `10`;
+- multiplicador `2x`;
+- saldo esperado `1005`;
+- saldo observado `1005`.
+
+Resultado: **PASSOU**.
+
+### Idempotência
+
+O mesmo `request_id = qa-idempotency-001` foi liquidado duas vezes.
+
+Resultado:
+
+- apenas `1` round persistido;
+- saldo permaneceu `1005`;
+- não houve débito/crédito duplicado.
+
+Resultado: **PASSOU**.
+
+### Sessão encerrada
+
+Após alterar a sessão para `CLOSED`, uma nova tentativa de rodada retornou:
+
+```text
+SESSION_NOT_ACTIVE
+```
+
+Resultado: **PASSOU**.
+
+Relatório detalhado:
+
+```text
+docs/RIPCOM_QA_REPORT_2026-09-16.md
+```
+
+### Limitação do teste HTTP
+
+O terminal disponível nesta execução não conseguiu resolver o host do Supabase. Portanto, o teste HTTP assinado de ponta a ponta não foi marcado como aprovado nem reprovado. O núcleo transacional foi validado diretamente no backend.
+
+---
+
+## 25. CI e deploy
+
+Workflow:
 
 ```text
 .github/workflows/ci.yml
@@ -768,29 +802,29 @@ Deploy web:
 .github/workflows/deploy-pages.yml
 ```
 
-Publica o frontend e o portal RIPCOM no GitHub Pages.
-
 ---
 
-## 25. Segurança
+## 26. Segurança
 
 Regras obrigatórias:
 
 1. nunca colocar private key RSA no frontend;
 2. nunca salvar private key do parceiro no banco RIPCOM;
-3. RIPCOM armazena somente public keys;
+3. armazenar somente public keys;
 4. cada operador deve ter chave própria;
 5. requests assinados devem ter timestamp;
-6. cada request deve possuir ID único;
+6. cada request deve ter ID único;
 7. idempotência deve impedir duplicação;
-8. o player recebe somente token temporário;
+8. player recebe somente token temporário;
 9. RLS protege tabelas administrativas;
-10. liquidação DEMO roda apenas com `service_role`;
-11. dinheiro real não deve ser ativado apenas alterando configuração.
+10. liquidação DEMO roda somente com `service_role`;
+11. sessões ficam vinculadas à release utilizada;
+12. chaves efêmeras de QA devem ser suspensas/rotacionadas após o teste;
+13. dinheiro real não deve ser ativado apenas alterando configuração.
 
 ---
 
-## 26. Sandbox x produção
+## 27. Sandbox x produção
 
 ### SANDBOX
 
@@ -808,7 +842,7 @@ Produção real exigirá camada específica de engenharia, compliance, seguranç
 
 ---
 
-## 27. O que ainda não é produção comercial
+## 28. O que ainda não é produção comercial
 
 Ainda não considerar pronto para dinheiro real:
 
@@ -817,53 +851,60 @@ Ainda não considerar pronto para dinheiro real:
 - certificação independente do RNG;
 - certificação matemática dos jogos;
 - compliance por jurisdição;
-- gestão formal de releases de jogos;
 - SLA comercial;
 - infraestrutura dedicada de domínio;
 - WAF/rate limiting de produção;
 - rotação automatizada de chaves;
 - staging totalmente separado do RR7.
 
----
-
-## 28. Próximos passos
-
-1. Criar segundo operador sandbox usando o painel RIPCOM.
-2. Gerar RSA próprio para esse operador.
-3. Rodar smoke test ponta a ponta.
-4. Validar Eclipse Serpent fora do fluxo normal RR7.
-5. Criar **Game Manifest** versionado por jogo.
-6. Criar versionamento formal de releases.
-7. Criar segundo jogo autoral RIPCOM.
-8. Separar ambiente staging dedicado.
-9. Definir domínio próprio quando houver domínio disponível.
-10. Preparar pacote de onboarding para primeiro parceiro externo real.
+O versionamento formal dos jogos **já foi iniciado** e não pertence mais a esta lista de pendências.
 
 ---
 
-## 29. Mapa rápido dos componentes
+## 29. Próximos passos
+
+1. Gerar/rotacionar uma nova RSA para `ripcom-qa`.
+2. Reativar `ripcom-qa` temporariamente.
+3. Executar smoke HTTP assinado de ponta a ponta em ambiente com rede.
+4. Confirmar catálogo → sessão → launch → player → spin → close.
+5. Fazer a API `/v1/games` expor explicitamente a versão/release autorizada ao operador.
+6. Fazer a resposta de sessão incluir a release vinculada.
+7. Criar segundo jogo autoral RIPCOM usando o mesmo contrato B2B.
+8. Separar ambiente staging dedicado do RR7.
+9. Definir domínio próprio RIPCOM quando disponível.
+10. Preparar pacote formal de onboarding para o primeiro parceiro externo real.
+
+---
+
+## 30. Mapa rápido dos componentes
 
 | Componente | O que é |
 |---|---|
 | `RIPCOM` | Provedora de jogos |
 | `RR7` | Primeiro operador sandbox |
 | `Eclipse Serpent` | Primeiro jogo oficial |
+| `1.0.0` | Primeira release formal do Eclipse Serpent |
+| `games/eclipse-serpent/manifest.json` | Game Manifest da release |
+| `ripcom_game_releases` | Registro de versões dos jogos |
+| `ripcom_bind_session_release()` | Liga nova sessão à release do operador |
 | `ripcom-provider` | Runtime interno RR7 → RIPCOM |
 | `ripcom-b2b` | API externa B2B |
-| `ripcom_operators` | Cadastro de plataformas parceiras |
-| `ripcom_operator_games` | Catálogo permitido por operador |
+| `ripcom_operators` | Plataformas parceiras |
+| `ripcom_operator_games` | Jogo + release autorizada por operador |
 | `ripcom_api_requests` | Idempotência + telemetria |
-| `ripcom_b2b_sessions` | Sessões externas |
+| `ripcom_b2b_sessions` | Sessões externas com release fixa |
 | `ripcom_b2b_rounds` | Rodadas externas |
 | `ripcom_settle_demo_spin` | Liquidação atômica DEMO |
 | `/ripcom/play/:sessionToken` | Player independente |
 | `/ripcom/provider` | Portal público RIPCOM |
-| `/admin/ripcom` | Gestão dos operadores |
+| `/admin/ripcom` | Gestão de operadores |
+| `/admin/ripcom-releases` | Gestão/visualização das releases |
 | `/admin/ripcom-metricas` | Métricas e auditoria técnica |
 | `sdk/ripcom-node.mjs` | SDK Node.js |
 | `npm run ripcom:keys` | Gerar RSA do parceiro |
-| `npm run ripcom:smoke` | Teste ponta a ponta |
+| `npm run ripcom:smoke` | Smoke ponta a ponta |
 | `npm run ripcom:sdk:test` | Teste RSA offline |
+| `docs/RIPCOM_QA_REPORT_2026-09-16.md` | Relatório da homologação core |
 | `RIPCOM_MASTER_DOCUMENTATION.md` | Documento mestre oficial |
 | `RIPCOM_MASTER_DOCUMENTATION.txt` | Backup simples |
 
@@ -877,6 +918,7 @@ Toda mudança estrutural importante da RIPCOM deve atualizar este documento no m
 - nova Edge Function;
 - novo endpoint;
 - novo jogo;
+- nova release;
 - mudança de autenticação;
 - novo SDK;
 - mudança de infraestrutura;
