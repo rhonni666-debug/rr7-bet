@@ -33,7 +33,12 @@ type SlotConfig = {
 };
 
 type SlotGrid = string[][];
-type GridWin = { symbolId: string; ways: number; multiplier: number };
+type GridWin = {
+  symbolId: string;
+  ways: number;
+  payPerWay: number;
+  multiplier: number;
+};
 
 function randomUnit() {
   const value = new Uint32Array(1);
@@ -59,37 +64,65 @@ function generateGrid(config: SlotConfig): SlotGrid {
   return config.layout.map((rows) => Array.from({ length: rows }, () => weightedSymbol(config.symbols)));
 }
 
+/**
+ * Three-reel ways model.
+ * One position from each reel forms one possible way. For each way, Wild may
+ * substitute a normal symbol, but the way is paid once using the highest valid
+ * symbol value. This prevents the same all-Wild way from being counted against
+ * multiple symbols.
+ */
 function evaluateGrid(grid: SlotGrid, symbols: SlotSymbol[]) {
-  const wild = symbols.find((symbol) => symbol.wild)?.id;
-  const scatter = symbols.find((symbol) => symbol.scatter)?.id;
+  const wildSymbol = symbols.find((symbol) => symbol.wild);
+  const wildId = wildSymbol?.id;
+  const scatterId = symbols.find((symbol) => symbol.scatter)?.id;
+  const normals = symbols.filter((symbol) => !symbol.scatter && !symbol.wild);
+  const winsBySymbol = new Map<string, GridWin>();
+
+  const reels = [grid[0] ?? [], grid[1] ?? [], grid[2] ?? []];
   let multiplier = 0;
-  const wins: GridWin[] = [];
 
-  for (const symbol of symbols) {
-    if (symbol.wild || symbol.scatter) continue;
-    const counts = grid.map((column) => column.filter((cell) => cell === symbol.id || Boolean(wild && cell === wild)).length);
-    if (counts.length && counts.every((count) => count > 0)) {
-      const ways = counts.reduce((value, count) => value * count, 1);
-      const contribution = Number(symbol.pay) * Math.min(ways, 6);
-      multiplier += contribution;
-      wins.push({ symbolId: symbol.id, ways, multiplier: contribution });
+  for (let left = 0; left < reels[0].length; left += 1) {
+    for (let middle = 0; middle < reels[1].length; middle += 1) {
+      for (let right = 0; right < reels[2].length; right += 1) {
+        const cells = [reels[0][left], reels[1][middle], reels[2][right]];
+        if (scatterId && cells.includes(scatterId)) continue;
+
+        const candidates = normals.filter((symbol) =>
+          cells.every((cell) => cell === symbol.id || Boolean(wildId && cell === wildId)),
+        );
+
+        if (wildSymbol && cells.every((cell) => cell === wildId)) candidates.push(wildSymbol);
+        if (!candidates.length) continue;
+
+        const winner = candidates.reduce((best, candidate) =>
+          Number(candidate.pay) > Number(best.pay) ? candidate : best,
+        );
+        const payPerWay = Math.max(0, Number(winner.pay) || 0);
+        if (payPerWay <= 0) continue;
+
+        multiplier += payPerWay;
+        const current = winsBySymbol.get(winner.id);
+        if (current) {
+          current.ways += 1;
+          current.multiplier = Math.round((current.multiplier + payPerWay) * 10000) / 10000;
+        } else {
+          winsBySymbol.set(winner.id, {
+            symbolId: winner.id,
+            ways: 1,
+            payPerWay,
+            multiplier: payPerWay,
+          });
+        }
+      }
     }
   }
 
-  if (wild) {
-    const wildSymbol = symbols.find((symbol) => symbol.id === wild);
-    const counts = grid.map((column) => column.filter((cell) => cell === wild).length);
-    if (wildSymbol && counts.length && counts.every((count) => count > 0)) {
-      const ways = counts.reduce((value, count) => value * count, 1);
-      const contribution = Number(wildSymbol.pay) * Math.min(ways, 4);
-      multiplier += contribution;
-      wins.push({ symbolId: wild, ways, multiplier: contribution });
-    }
-  }
-
-  const scatterCount = scatter ? grid.flat().filter((cell) => cell === scatter).length : 0;
-  if (scatterCount >= 3) multiplier += 0.4 * (scatterCount - 2);
-  return { multiplier, scatterCount, wins };
+  const scatterCount = scatterId ? grid.flat().filter((cell) => cell === scatterId).length : 0;
+  return {
+    multiplier: Math.round(multiplier * 10000) / 10000,
+    scatterCount,
+    wins: Array.from(winsBySymbol.values()),
+  };
 }
 
 function asNumber(value: unknown, fallback: number) {
@@ -102,7 +135,12 @@ function runSlot(config: SlotConfig) {
   let evaluation = evaluateGrid(grid, config.symbols);
   let multiplier = evaluation.multiplier;
   const featureKind = String(config.feature.kind ?? 'BASE');
-  const feature: Record<string, unknown> = { kind: featureKind, active: false };
+  const feature: Record<string, unknown> = {
+    kind: featureKind,
+    active: false,
+    payoutMode: 'THREE_REEL_WAYS',
+    aggregateWays: true,
+  };
 
   if (featureKind === 'SNAKE_WILD') {
     const wild = config.symbols.find((symbol) => symbol.wild)?.id;
