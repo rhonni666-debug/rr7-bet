@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Activity, CircleDollarSign, Gamepad2 } from 'lucide-react';
 import { AdminGate } from '../components/AdminGate';
@@ -38,7 +39,7 @@ function Transactions() {
   return <div className="space-y-5"><Header icon={<CircleDollarSign />} title="Transações DEMO" description="Ledger imutável de créditos fictícios. Nenhuma transação representa dinheiro real." /><div className="overflow-hidden rounded-3xl border border-white/8 bg-white/[.025]">{query.isLoading ? <p className="p-5 text-sm text-slate-500">Carregando...</p> : query.isError ? <p className="p-5 text-sm text-rose-300">Falha ao carregar transações.</p> : (query.data ?? []).map((row) => { const amount = Number(row.amount); return <div key={row.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-4 py-4 last:border-0"><div><div className="flex items-center gap-2"><span className="rounded-full bg-white/5 px-2 py-1 text-[10px] font-black text-slate-400">{row.type}</span><p className="text-sm font-black">{row.description}</p></div><p className="mt-1 text-[10px] text-slate-600">Usuário {String(row.user_id).slice(0, 8)} • {new Date(row.created_at).toLocaleString('pt-BR')}</p></div><p className={`text-base font-black ${amount > 0 ? 'text-emerald-300' : 'text-rose-300'}`}>{amount > 0 ? '+' : ''}{amount.toLocaleString('pt-BR')}</p></div>; })}</div></div>;
 }
 
-function Header({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function Header({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
   return <header><div className="flex items-center gap-2 text-amber-300">{icon}<p className="text-xs font-bold uppercase tracking-[.16em]">Operação</p></div><h1 className="mt-2 text-3xl font-black">{title}</h1><p className="mt-2 text-sm text-slate-400">{description}</p><div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-300/15 bg-emerald-300/5 px-3 py-1 text-[10px] font-black uppercase text-emerald-300"><Activity className="h-3 w-3" /> Atualização automática</div></header>;
 }
 
