@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ShieldCheck, Sparkles, Volume2, VolumeX, XCircle } from 'lucide-react';
-import { getPlayerState, spinPlayer, type RipcomPlayerState, type RipcomSpin } from '../api';
+import { getPlayerState, spinPlayer, type RipcomPlayerState, type RipcomSpin, type RipcomSymbol } from '../api';
 import { AnimatedAmount } from './AnimatedAmount';
 import { AnimatedBackground } from './AnimatedBackground';
 import { BonusIntroOverlay } from './BonusIntroOverlay';
@@ -17,6 +17,14 @@ function sleep(ms: number) {
 
 function Brand() {
   return <div className="brand"><div className="brand-mark">R</div><div><strong>RIPCOM</strong><span>ORIGINAL</span></div></div>;
+}
+
+function formatSymbolPay(symbol?: RipcomSymbol) {
+  if (!symbol) return '';
+  if (symbol.scatter) return 'BONUS';
+  const value = Number(symbol.pay);
+  if (!Number.isFinite(value)) return '';
+  return `${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×`;
 }
 
 function randomGrid(state: RipcomPlayerState) {
@@ -294,7 +302,7 @@ export function EclipsePlayer({ token }: { token: string }) {
                 const symbol = symbols.get(symbolId);
                 const isWinner = winning.has(symbolId);
                 const symbolClasses = ['symbol', isWinner ? 'winner' : '', symbol?.scatter ? 'scatter' : '', symbol?.wild ? 'wild' : '', phase === 'tease' && teaseColumn === columnIndex ? 'tease-hidden' : ''].filter(Boolean).join(' ');
-                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><SymbolArt symbol={symbol} /><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
+                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><SymbolArt symbol={symbol} /><span className={`symbol-pay-value ${symbol?.scatter ? 'is-bonus' : ''}`}>{formatSymbolPay(symbol)}</span><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
               })}
             </div>
           ))}
