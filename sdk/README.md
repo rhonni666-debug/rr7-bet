@@ -5,8 +5,9 @@ Este SDK é destinado ao backend da plataforma parceira. Nunca deve ser usado di
 ## Arquivos
 
 - `sdk/ripcom-node.mjs` — cliente Node.js reutilizável.
-- `scripts/ripcom-generate-keys.mjs` — gera o par RSA 2048 localmente.
-- `scripts/ripcom-smoke-test.mjs` — smoke test completo da API sandbox.
+- `scripts/ripcom-generate-operator-keys.mjs` — gera o par RSA 2048 localmente.
+- `scripts/ripcom-b2b-smoke.mjs` — smoke test completo da API sandbox.
+- `scripts/ripcom-sdk-selftest.mjs` — teste offline de assinatura, headers e payloads do SDK.
 
 ## Gerar chaves
 
@@ -39,6 +40,24 @@ const session = await ripcom.createSession({
 });
 const launch = await ripcom.launch(session.data.session_token);
 console.log(launch.data.launch_url);
+```
+
+## Validação local
+
+```bash
+npm run ripcom:sdk:test
+```
+
+Esse teste não acessa a internet. Ele gera uma chave temporária em memória, assina requests do SDK e valida as assinaturas com a chave pública correspondente.
+
+## Smoke test contra o sandbox
+
+Depois de cadastrar a chave pública do operador no painel RIPCOM:
+
+```bash
+RIPCOM_OPERATOR=minha-plataforma \
+RIPCOM_PRIVATE_KEY_PATH=./.ripcom-keys/minha-plataforma-private.pem \
+npm run ripcom:smoke
 ```
 
 ## Segurança
