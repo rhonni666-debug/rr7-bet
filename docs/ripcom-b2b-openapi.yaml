@@ -1,0 +1,255 @@
+openapi: 3.1.0
+info:
+  title: RIPCOM B2B API
+  version: 1.0.0-sandbox
+  description: |
+    API B2B da RIPCOM para integração de jogos próprios em modo DEMO/fun-money.
+    Requisições de operador usam assinatura RSA-SHA256 nos headers X-Ripcom-*.
+servers:
+  - url: https://tndnqjbkfwongolorvjm.supabase.co/functions/v1/ripcom-b2b
+    description: Sandbox
+paths:
+  /v1/health:
+    get:
+      summary: Verifica a saúde da API
+      operationId: getHealth
+      responses:
+        '200':
+          description: Serviço disponível
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      provider: { type: string, const: RIPCOM }
+                      status: { type: string, const: ok }
+                      api: { type: string, const: v1 }
+                      mode: { type: string, const: DEMO }
+                      timestamp: { type: string, format: date-time }
+  /v1/games:
+    get:
+      summary: Lista os jogos habilitados para o operador
+      operationId: listGames
+      security:
+        - RipcomSignedRequest: []
+      responses:
+        '200':
+          description: Catálogo liberado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Game'
+                  meta:
+                    type: object
+                    additionalProperties: true
+        '401': { $ref: '#/components/responses/AuthError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /v1/sessions:
+    post:
+      summary: Cria uma sessão DEMO para um jogador externo
+      operationId: createSession
+      security:
+        - RipcomSignedRequest: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [game_code, player_id]
+              properties:
+                game_code:
+                  type: string
+                  example: ripcom-slot:eclipse-serpent
+                player_id:
+                  type: string
+                  example: player-001
+                starting_balance:
+                  type: number
+                  minimum: 100
+                  maximum: 100000
+                  default: 10000
+      responses:
+        '201':
+          description: Sessão criada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Session'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/AuthError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /v1/games/launch:
+    post:
+      summary: Gera a URL do player RIPCOM para uma sessão
+      operationId: launchGame
+      security:
+        - RipcomSignedRequest: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_token]
+              properties:
+                session_token:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: URL de lançamento
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      launch_url: { type: string, format: uri }
+                      mode: { type: string, const: DEMO }
+                      session_token: { type: string, format: uuid }
+        '401': { $ref: '#/components/responses/AuthError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /v1/sessions/close:
+    post:
+      summary: Encerra uma sessão DEMO
+      operationId: closeSession
+      security:
+        - RipcomSignedRequest: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_token]
+              properties:
+                session_token:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Sessão encerrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      closed: { type: boolean }
+        '401': { $ref: '#/components/responses/AuthError' }
+  /v1/wallet/balance:
+    post:
+      summary: Reservado para integração wallet futura
+      operationId: walletBalance
+      security:
+        - RipcomSignedRequest: []
+      responses:
+        '501': { $ref: '#/components/responses/DemoOnly' }
+  /v1/wallet/bet:
+    post:
+      summary: Reservado para integração wallet futura
+      operationId: walletBet
+      security:
+        - RipcomSignedRequest: []
+      responses:
+        '501': { $ref: '#/components/responses/DemoOnly' }
+  /v1/wallet/win:
+    post:
+      summary: Reservado para integração wallet futura
+      operationId: walletWin
+      security:
+        - RipcomSignedRequest: []
+      responses:
+        '501': { $ref: '#/components/responses/DemoOnly' }
+  /v1/wallet/refund:
+    post:
+      summary: Reservado para integração wallet futura
+      operationId: walletRefund
+      security:
+        - RipcomSignedRequest: []
+      responses:
+        '501': { $ref: '#/components/responses/DemoOnly' }
+components:
+  securitySchemes:
+    RipcomSignedRequest:
+      type: apiKey
+      in: header
+      name: X-Ripcom-Signature
+      description: |
+        A autenticação completa usa quatro headers: X-Ripcom-Operator,
+        X-Ripcom-Timestamp, X-Ripcom-Request-Id e X-Ripcom-Signature.
+        O payload canônico é METHOD + "\n" + PATH + "\n" + TIMESTAMP +
+        "\n" + REQUEST_ID + "\n" + SHA256_HEX(BODY_EXATO), assinado com
+        RSASSA-PKCS1-v1_5 / SHA-256. A chave privada fica somente no backend do operador.
+  schemas:
+    Game:
+      type: object
+      properties:
+        game_code: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: [string, 'null'] }
+        art: { type: string }
+        mode: { type: string, const: DEMO }
+    Session:
+      type: object
+      properties:
+        session_id: { type: string, format: uuid }
+        session_token: { type: string, format: uuid }
+        status: { type: string, enum: [ACTIVE, CLOSED, EXPIRED] }
+        currency: { type: string, const: DEMO }
+        balance: { type: number }
+        expires_at: { type: string, format: date-time }
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    AuthError:
+      description: Assinatura, timestamp ou headers inválidos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Operador ou jogo não autorizado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflito de estado ou idempotência
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    DemoOnly:
+      description: Endpoint reservado; sandbox atual usa apenas saldo DEMO interno
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
