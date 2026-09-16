@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.6",
+  "version": "1.0.0-sandbox.7",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -31,7 +31,12 @@
     "great-win-celebration",
     "big-win-celebration",
     "mega-win-celebration",
-    "winning-symbol-pulse"
+    "winning-symbol-pulse",
+    "scatter-symbol-breathing-vfx",
+    "wild-symbol-energy-vfx",
+    "progressive-win-counter",
+    "reel-stop-audio-cues",
+    "mobile-vfx-tuning"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -45,7 +50,7 @@
       "name": "Eclipse Serpent",
       "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "cinematic-bonus-v6",
+      "presentation": "cinematic-bonus-v7",
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -54,7 +59,8 @@
       "winPresentation": {
         "greatWinAtMultiplier": 5,
         "bigWinAtMultiplier": 10,
-        "megaWinAtMultiplier": 25
+        "megaWinAtMultiplier": 25,
+        "progressiveCounter": true
       }
     }
   ]
