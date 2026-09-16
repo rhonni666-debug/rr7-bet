@@ -1,0 +1,144 @@
+/* Eclipse Serpent sandbox.8 — portrait/mobile polish */
+html,body,#root{min-height:100%;overscroll-behavior:none}
+.game-player{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.spin-button,.sound-toggle,.control select{touch-action:manipulation}
+
+/* A short snap keeps reel stops feeling mechanical without copying third-party motion. */
+.reel{will-change:transform,filter}
+.phase-reveal .reel{animation:stage8ReelSnap .24s cubic-bezier(.16,.9,.22,1)}
+.phase-reveal .reel:nth-child(2){animation-delay:.055s}
+.phase-reveal .reel:nth-child(3){animation-delay:.11s}
+.phase-reveal .reel:nth-child(4){animation-delay:.165s}
+
+/* Stronger anticipation without hiding the actual result. */
+.phase-tease .tease-target{animation:stage8TeaseReel .32s ease-in-out infinite alternate!important}
+.phase-tease .tease-target:before{content:"";position:absolute;inset:-2px;border-radius:18px;border:2px solid rgba(255,223,105,.48);box-shadow:0 0 34px rgba(255,211,75,.23);pointer-events:none;z-index:5}
+
+/* Portrait layout inspired by premium mobile slot proportions, with original RIPCOM visuals. */
+@media (max-width:600px) and (orientation:portrait){
+  html,body,#root{height:100%;min-height:100dvh;overflow:hidden}
+  .game-player{
+    min-height:100dvh;
+    height:100dvh;
+    place-items:stretch center;
+    padding:max(5px,env(safe-area-inset-top)) max(5px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left));
+  }
+  .game-frame{
+    align-self:stretch;
+    width:min(100%,480px);
+    min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 10px);
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.09);
+    background:linear-gradient(180deg,rgba(3,15,13,.88),rgba(2,8,7,.94));
+    backdrop-filter:blur(10px);
+  }
+  .game-header{padding:8px 10px;min-height:48px;background:rgba(1,9,7,.35)}
+  .game-header .brand-mark{width:30px;height:30px;border-radius:9px}
+  .game-header .brand strong{font-size:11px}
+  .game-header .brand span{font-size:7px}
+  .game-header .balance{font-size:10px}
+  .game-header .pill{padding:4px 7px;font-size:8px}
+  .sound-toggle{width:30px!important;height:30px!important}
+
+  .game-title{padding:8px 10px 7px}
+  .game-title>span{font-size:7px;letter-spacing:.18em}
+  .game-title h1{margin:3px 0 1px;font-size:23px;line-height:1}
+  .game-title p{font-size:7px;letter-spacing:.11em}
+
+  .reels{
+    flex:1;
+    min-height:0;
+    align-items:stretch;
+    gap:5px;
+    margin:0 7px;
+    padding:6px;
+    border-radius:15px;
+    background:linear-gradient(180deg,rgba(1,8,7,.96),rgba(3,15,11,.98));
+    box-shadow:inset 0 10px 32px rgba(0,0,0,.62),0 0 35px rgba(110,255,164,.06);
+  }
+  .reel{gap:5px;min-width:0}
+  .symbol{
+    flex:1 1 0;
+    min-height:0;
+    height:auto;
+    border-radius:11px;
+    background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.018));
+  }
+  .symbol span{font-size:clamp(29px,9vw,43px)}
+  .symbol small{bottom:3px;font-size:6px;letter-spacing:.04em}
+
+  .win-banner{margin:7px 7px 0;padding:7px 8px;min-height:38px;border-radius:10px}
+  .win-banner strong{font-size:16px}
+  .win-banner span,.win-banner small{font-size:7px}
+
+  .game-controls{
+    flex:0 0 auto;
+    grid-template-columns:minmax(72px,1fr) 82px minmax(72px,1fr);
+    gap:7px;
+    padding:8px 8px max(8px,env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(2,10,8,.2),rgba(1,7,5,.84));
+  }
+  .control{min-width:0;padding:7px 7px;border-radius:10px}
+  .control small{font-size:6px}
+  .control select,.control b{font-size:10px;max-width:100%}
+  .spin-button{width:78px;height:78px;border-width:3px;box-shadow:0 5px 23px color-mix(in srgb,var(--primary) 18%,transparent)}
+  .spin-button svg{width:23px;height:23px}
+  .spin-button span{font-size:7px}
+  .game-footer{padding:5px;font-size:6px}
+
+  /* Bonus keeps the reels visible and the HUD readable on a phone. */
+  .eclipse-bonus-hud{top:max(5px,env(safe-area-inset-top));width:calc(100% - 14px);border-radius:12px;padding:7px 8px}
+  .bonus-mode-active .game-frame{padding-top:62px!important}
+  .bonus-hud-label{font-size:7px!important}
+  .bonus-hud-count strong{font-size:22px!important}
+  .bonus-hud-count span{font-size:7px!important}
+  .bonus-hud-win{padding-top:3px!important}
+  .bonus-hud-win small{font-size:6px!important}
+  .bonus-hud-win b{font-size:11px!important}
+
+  .cinematic-bonus-copy{bottom:7%!important;width:94%!important}
+  .cinematic-bonus-copy strong{font-size:42px!important}
+  .cinematic-bonus-copy em{margin-top:9px!important;padding:7px 11px!important;font-size:11px!important}
+  .cinematic-bonus-copy span{margin-top:8px!important;font-size:8px!important}
+  .serpent-rise{height:64vh!important;width:min(68vw,320px)!important}
+
+  .bonus-outro-card{margin-top:18vh!important}
+  .bonus-outro-card strong{font-size:31px!important}
+  .bonus-outro-card b{font-size:40px!important}
+
+  /* Expensive effects are tuned, not disabled, on phones. */
+  .cinematic-ember:nth-child(n+13){display:none}
+  .ambient-glow{filter:blur(42px)!important;opacity:.08!important}
+  .cinematic-fog{filter:blur(23px)!important}
+  .win-celebration-particles i:nth-child(even){display:none}
+  .win-celebration-copy strong{font-size:44px!important}
+  .win-celebration-copy b{font-size:26px!important}
+}
+
+@media (max-width:390px) and (orientation:portrait){
+  .game-title h1{font-size:20px}
+  .symbol span{font-size:clamp(27px,8.7vw,36px)}
+  .game-controls{grid-template-columns:minmax(66px,1fr) 74px minmax(66px,1fr)}
+  .spin-button{width:70px;height:70px}
+  .control{padding:6px}
+}
+
+@media (max-height:700px) and (orientation:landscape){
+  .game-player{padding:5px}
+  .game-frame{width:min(760px,100%);max-height:100dvh}
+  .game-header{padding:7px 12px}
+  .game-title{padding:6px 12px 5px}
+  .game-title h1{font-size:21px}
+  .symbol{height:58px}
+  .symbol span{font-size:29px}
+  .spin-button{width:66px;height:66px}
+  .game-controls{padding:6px 10px}
+}
+
+@keyframes stage8ReelSnap{0%{transform:translateY(-8px) scaleY(1.018);filter:brightness(1.22)}65%{transform:translateY(2px) scaleY(.994)}100%{transform:translateY(0) scaleY(1);filter:brightness(1)}}
+@keyframes stage8TeaseReel{from{transform:translateY(-3px);filter:brightness(1.02)}to{transform:translateY(3px);filter:brightness(1.25)}}
+
+@media (prefers-reduced-motion:reduce){.phase-reveal .reel,.phase-tease .tease-target{animation:none!important}}
