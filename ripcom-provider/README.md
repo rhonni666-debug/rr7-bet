@@ -13,7 +13,8 @@ O app `ripcom-provider/` concentra:
 - visão de sandbox/operator;
 - player independente para sessões RIPCOM;
 - branding da RIPCOM;
-- conexão pública do player com `ripcom-b2b`.
+- conexão pública do player com `ripcom-b2b`;
+- camada visual reativa dos jogos.
 
 ## O que NÃO pertence a este frontend
 
@@ -41,6 +42,29 @@ Exemplo no host temporário do GitHub Pages:
 ```
 
 O browser recebe somente o `session_token`. A chave privada do operador nunca entra no player.
+
+## Eclipse Serpent — apresentação reativa
+
+A versão `1.0.0-sandbox.2` adiciona a camada visual viva do Eclipse Serpent sem alterar a matemática `1.0.0` do jogo.
+
+Inclui:
+
+- cenário original de templo sob eclipse;
+- névoa em camadas;
+- partículas ambientes;
+- halo e runas animados;
+- movimento contínuo do fundo em desktop e mobile;
+- reação visual durante o spin;
+- tease quando o resultado real possui pelo menos 2 scatters;
+- rolo decisivo em suspense;
+- entrada cinematográfica `ECLIPSE BONUS` quando `scatterCount >= 3`;
+- modo reduzido para `prefers-reduced-motion`.
+
+Documentação detalhada:
+
+```text
+docs/ECLIPSE_SERPENT_VFX.md
+```
 
 ## API
 
@@ -96,17 +120,17 @@ A URL pública de launch deverá apontar diretamente para o frontend RIPCOM inde
 
 ## Versionamento
 
-Versão inicial formal do frontend/provider portal:
+Versão formal atual do frontend/provider portal:
 
 ```text
-1.0.0-sandbox.1
+1.0.0-sandbox.2
 ```
 
-O versionamento do **frontend da provedora** é separado do versionamento dos **jogos**. Por exemplo:
+O versionamento do **frontend da provedora** é separado do versionamento dos **jogos**:
 
 ```text
-RIPCOM Provider Frontend 1.0.0-sandbox.1
+RIPCOM Provider Frontend 1.0.0-sandbox.2
 Eclipse Serpent 1.0.0
 ```
 
-Isso permite atualizar portal/player sem fingir que o jogo teve uma nova release matemática.
+Isso permite atualizar apresentação, portal e player sem fingir que o jogo teve uma nova release matemática.
