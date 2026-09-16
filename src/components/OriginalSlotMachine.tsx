@@ -15,7 +15,7 @@ function idleGrid(config: SlotConfig) {
   return config.layout.map((rows) => Array.from({ length: rows }, (_, index) => ids[(index + Math.floor(Math.random() * ids.length)) % ids.length] ?? ''));
 }
 
-function featureMessage(feature: Record<string, unknown>) {
+function featureMessage(feature: Record<string, unknown>, game: DemoGame) {
   if (!feature.active) return null;
   const kind = String(feature.kind ?? '');
   if (kind === 'TIGER_RESPIN') return `RESPIN DO TIGRE • multiplicador ${Number(feature.multiplier ?? 1)}x`;
@@ -26,7 +26,10 @@ function featureMessage(feature: Record<string, unknown>) {
   }
   if (kind === 'RABBIT_BONUS') return `PRÊMIO DO COELHO • ${Number(feature.bonusSpins ?? 8)} giros bônus`;
   if (kind === 'OX_RESPIN') return `RESPINS DO BOI • ${Number(feature.respins ?? 0)} tentativa(s)${feature.fullScreen ? ' • TELA CHEIA' : ''}`;
-  if (kind === 'SNAKE_WILD') return `SERPENTE WILD • ${String(feature.selectedIcon ?? '✨')} escolhido • ${Number(feature.respins ?? 0)} respin(s)`;
+  if (kind === 'SNAKE_WILD') {
+    const label = game.externalGameId?.startsWith('ripcom-slot:') ? 'ECLIPSE WILD' : 'SERPENTE WILD';
+    return `${label} • ${String(feature.selectedIcon ?? '✨')} escolhido • ${Number(feature.respins ?? 0)} respin(s)`;
+  }
   return 'RECURSO ESPECIAL ATIVADO';
 }
 
@@ -54,6 +57,7 @@ export function OriginalSlotMachine({ game, provider, session }: { game: DemoGam
   const background = config?.theme.background ?? '#190b05';
   const glow = config?.theme.glow ?? primary;
   const maxRows = Math.max(...(config?.layout ?? [3]));
+  const isRipcom = provider.slug === 'ripcom' && provider.providerType === 'REAL';
 
   function adjustBet(direction: -1 | 1) {
     const index = bets.indexOf(bet);
@@ -90,7 +94,7 @@ export function OriginalSlotMachine({ game, provider, session }: { game: DemoGam
       setOutcome(next);
       await refresh();
 
-      const special = featureMessage(next.feature);
+      const special = featureMessage(next.feature, game);
       if (next.win > 0) {
         setMessage(`${next.result} • ${next.multiplier.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}x • +${next.win.toLocaleString('pt-BR')} créditos${special ? ` • ${special}` : ''}`);
       } else {
@@ -114,9 +118,10 @@ export function OriginalSlotMachine({ game, provider, session }: { game: DemoGam
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${primary}, transparent)` }} />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2"><span className="text-2xl">{game.art}</span><div><p className="text-[10px] font-black uppercase tracking-[.18em]" style={{ color: primary }}>RR7 ORIGINALS</p><h2 className="text-xl font-black sm:text-2xl">{game.name}</h2></div></div>
+            <div className="flex items-center gap-2"><span className="text-2xl">{game.art}</span><div><p className="text-[10px] font-black uppercase tracking-[.18em]" style={{ color: primary }}>{provider.name}{isRipcom ? ' • GAME PROVIDER' : ''}</p><h2 className="text-xl font-black sm:text-2xl">{game.name}</h2></div></div>
           </div>
           <div className="flex items-center gap-2">
+            {isRipcom && <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-cyan-200">REAL PROVIDER</span>}
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-300"><ShieldCheck className="h-3 w-3" /> somente DEMO</span>
             <button onClick={() => setTurbo((value) => !value)} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${turbo ? 'border-cyan-300/40 bg-cyan-300/15 text-cyan-200' : 'border-white/10 bg-white/5 text-slate-400'}`}><Zap className="h-3 w-3" /> Turbo</button>
           </div>
@@ -152,7 +157,7 @@ export function OriginalSlotMachine({ game, provider, session }: { game: DemoGam
           <div className="hide-scrollbar mt-2 flex gap-2 overflow-x-auto pb-1">{config.symbols.map((symbol) => <div key={symbol.id} className="min-w-[78px] rounded-xl border border-white/8 bg-black/20 px-2 py-2 text-center"><div className="text-2xl">{symbol.icon}</div><p className="mt-1 truncate text-[9px] font-bold text-slate-400">{symbol.wild ? 'WILD' : symbol.scatter ? 'BÔNUS' : `${symbol.pay}x`}</p></div>)}</div>
         </div>
 
-        <div className="mx-auto mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-cyan-300/10 bg-cyan-300/5 px-3 py-2 text-[10px] leading-4 text-slate-400"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-300" /> Slot original RR7, sem dinheiro real. Arte, símbolos e matemática são próprios; a inspiração está apenas no tipo de experiência e nas mecânicas gerais.</div>
+        <div className="mx-auto mt-4 flex max-w-xl items-start gap-2 rounded-xl border border-cyan-300/10 bg-cyan-300/5 px-3 py-2 text-[10px] leading-4 text-slate-400"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-300" /> {isRipcom ? `Jogo autoral ${provider.name}. Runtime dedicado do provedor, operando exclusivamente em modo DEMO.` : 'Slot original em modo DEMO, sem dinheiro real.'}</div>
       </div>
     </section>
   );
