@@ -13,14 +13,25 @@ type GatewayResponse<T> = {
   error?: string;
 };
 
-async function invokeGateway<T>(body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke('provider-gateway', { body });
+async function invokeProvider<T>(functionName: string, body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke(functionName, { body });
   if (error) throw error;
 
   const payload = data as GatewayResponse<T> | null;
   if (payload?.error) throw new Error(payload.error);
   if (!payload?.data) throw new Error('PROVIDER_GATEWAY_EMPTY_RESPONSE');
   return payload.data;
+}
+
+function mapSession(row: Record<string, unknown>): GameSession {
+  if (!row.session_id) throw new Error('SESSION_CREATE_FAILED');
+  return {
+    id: String(row.session_id),
+    token: String(row.session_token),
+    status: String(row.status ?? 'ACTIVE'),
+    expiresAt: row.expires_at ? String(row.expires_at) : null,
+    launchUrl: row.launch_url ? String(row.launch_url) : null,
+  };
 }
 
 function mapRound(row: Record<string, unknown>, fallbackBet: number): RoundOutcome {
@@ -35,25 +46,34 @@ function mapRound(row: Record<string, unknown>, fallbackBet: number): RoundOutco
   };
 }
 
-class MockProviderAdapter implements ProviderAdapter {
+function mapSlot(row: Record<string, unknown>, fallbackBet: number): SlotSpinOutcome {
+  const round = mapRound(row, fallbackBet);
+  return {
+    ...round,
+    grid: Array.isArray(row.grid) ? row.grid as string[][] : [],
+    feature: row.feature && typeof row.feature === 'object' ? row.feature as Record<string, unknown> : {},
+    wins: Array.isArray(row.wins) ? row.wins.map((win) => {
+      const item = win as Record<string, unknown>;
+      return { symbolId: String(item.symbolId ?? ''), ways: Number(item.ways ?? 0), multiplier: Number(item.multiplier ?? 0) };
+    }) : [],
+    scatterCount: Number(row.scatterCount ?? 0),
+    layout: Array.isArray(row.layout) ? row.layout.map(Number) : [],
+  };
+}
+
+abstract class GatewayProviderAdapter implements ProviderAdapter {
+  protected abstract functionName: string;
+
   async createSession(game: DemoGame): Promise<GameSession> {
-    const row = await invokeGateway<Record<string, unknown>>({
+    const row = await invokeProvider<Record<string, unknown>>(this.functionName, {
       action: 'create_session',
       gameId: game.id,
     });
-
-    if (!row.session_id) throw new Error('SESSION_CREATE_FAILED');
-    return {
-      id: String(row.session_id),
-      token: String(row.session_token),
-      status: String(row.status ?? 'ACTIVE'),
-      expiresAt: row.expires_at ? String(row.expires_at) : null,
-      launchUrl: row.launch_url ? String(row.launch_url) : null,
-    };
+    return mapSession(row);
   }
 
   async playRound(sessionId: string, bet: number): Promise<RoundOutcome> {
-    const row = await invokeGateway<Record<string, unknown>>({
+    const row = await invokeProvider<Record<string, unknown>>(this.functionName, {
       action: 'play_round',
       sessionId,
       bet,
@@ -63,32 +83,29 @@ class MockProviderAdapter implements ProviderAdapter {
   }
 
   async spinSlot(sessionId: string, bet: number): Promise<SlotSpinOutcome> {
-    const row = await invokeGateway<Record<string, unknown>>({
+    const row = await invokeProvider<Record<string, unknown>>(this.functionName, {
       action: 'slot_spin',
       sessionId,
       bet,
       requestId: crypto.randomUUID(),
     });
-    const round = mapRound(row, bet);
-    return {
-      ...round,
-      grid: Array.isArray(row.grid) ? row.grid as string[][] : [],
-      feature: row.feature && typeof row.feature === 'object' ? row.feature as Record<string, unknown> : {},
-      wins: Array.isArray(row.wins) ? row.wins.map((win) => {
-        const item = win as Record<string, unknown>;
-        return { symbolId: String(item.symbolId ?? ''), ways: Number(item.ways ?? 0), multiplier: Number(item.multiplier ?? 0) };
-      }) : [],
-      scatterCount: Number(row.scatterCount ?? 0),
-      layout: Array.isArray(row.layout) ? row.layout.map(Number) : [],
-    };
+    return mapSlot(row, bet);
   }
 
   async closeSession(sessionId: string) {
-    await invokeGateway<{ closed: boolean }>({
+    await invokeProvider<{ closed: boolean }>(this.functionName, {
       action: 'close_session',
       sessionId,
     });
   }
+}
+
+class MockProviderAdapter extends GatewayProviderAdapter {
+  protected functionName = 'provider-gateway';
+}
+
+class RipcomProviderAdapter extends GatewayProviderAdapter {
+  protected functionName = 'ripcom-provider';
 }
 
 class UnsupportedProviderAdapter implements ProviderAdapter {
@@ -102,10 +119,13 @@ class UnsupportedProviderAdapter implements ProviderAdapter {
 }
 
 const mockAdapter = new MockProviderAdapter();
+const ripcomAdapter = new RipcomProviderAdapter();
 const unsupportedAdapter = new UnsupportedProviderAdapter();
 
 function adapterFor(provider: Provider): ProviderAdapter {
-  return provider.providerType === 'MOCK' ? mockAdapter : unsupportedAdapter;
+  if (provider.slug === 'ripcom' && provider.providerType === 'REAL') return ripcomAdapter;
+  if (provider.providerType === 'MOCK') return mockAdapter;
+  return unsupportedAdapter;
 }
 
 export const GameLauncher = {
