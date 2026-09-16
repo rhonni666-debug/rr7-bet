@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.11",
+  "version": "1.0.0-sandbox.12",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -54,7 +54,14 @@
     "label-free-symbol-presentation",
     "backend-driven-symbol-pay-values",
     "visible-symbol-multipliers",
-    "scatter-bonus-value-badge"
+    "scatter-bonus-value-badge",
+    "centered-3-4-3-layout",
+    "volumetric-bonus-rays",
+    "foreground-bonus-fog",
+    "bonus-ground-contact",
+    "bonus-shockwave-vfx",
+    "detailed-serpent-scales",
+    "cinematic-serpent-camera-push"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -68,7 +75,7 @@
       "name": "Eclipse Serpent",
       "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "premium-valued-gems-v11",
+      "presentation": "aligned-cinematic-bonus-v12",
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -87,11 +94,13 @@
         "symbolPayValuesVisible": true,
         "symbolPayValueSource": "slot_game_configs.symbols[].pay",
         "scatterValueLabel": "BONUS",
+        "layout": "3-4-3 mathematically preserved, visually centered",
         "materials": ["gold", "emerald", "sapphire", "amethyst", "ruby", "obsidian"],
         "perspectiveReels": true,
         "depthLighting": true,
         "floorPlane": true,
-        "desktopCameraTilt": true
+        "desktopCameraTilt": true,
+        "bonusRealism": ["camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "serpent scales"]
       },
       "mobileProfile": {
         "primaryOrientation": "portrait",
