@@ -445,8 +445,8 @@ Deno.serve(async (req: Request) => {
       if (error || !session) return finish({ error: 'SESSION_NOT_FOUND' }, 404);
       if (session.status !== 'ACTIVE') return finish({ error: 'SESSION_NOT_ACTIVE' }, 409);
       if (new Date(session.expires_at).getTime() <= Date.now()) return finish({ error: 'SESSION_EXPIRED' }, 410);
-      const publicBase = (Deno.env.get('RIPCOM_PUBLIC_BASE_URL') ?? 'https://rhonni666-debug.github.io/rr7-bet').replace(/\/$/, '');
-      return finish({ data: { launch_url: `${publicBase}/ripcom/play/${token}`, mode: 'DEMO', session_token: token } });
+      const publicBase = (Deno.env.get('RIPCOM_PUBLIC_BASE_URL') ?? 'https://rhonni666-debug.github.io/rr7-bet/ripcom-provider').replace(/\/$/, '');
+      return finish({ data: { launch_url: `${publicBase}/?play=${encodeURIComponent(token)}`, mode: 'DEMO', session_token: token } });
     }
 
     if (path === '/v1/sessions/close' && req.method === 'POST') {
