@@ -9,7 +9,7 @@
     "name": "Eclipse Serpent",
     "slug": "eclipse-serpent",
     "gameCode": "ripcom-slot:eclipse-serpent",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "status": "SANDBOX",
     "mode": "DEMO",
     "launchType": "PROVIDER_SESSION"
@@ -17,10 +17,29 @@
   "runtime": {
     "apiVersion": "v1",
     "b2bFunction": "ripcom-b2b",
+    "playerFunction": "ripcom-player-runtime",
     "internalFunction": "ripcom-provider",
-    "playerRoute": "/ripcom/play/:sessionToken",
+    "playerLaunch": "?play=<session_token>",
     "currency": "DEMO",
     "sessionTtlMinutes": 120
+  },
+  "bonus": {
+    "name": "Eclipse Bonus",
+    "triggerScatters": 3,
+    "freeSpins": 8,
+    "retrigger": false,
+    "betRule": "uses the paid spin bet that triggered the bonus",
+    "debitDuringFreeSpins": false,
+    "persistentSessionState": true,
+    "visualSequence": [
+      "scatter tease",
+      "sun and moon eclipse",
+      "serpent rise",
+      "ECLIPSE BONUS title",
+      "8 RODADAS GRATIS",
+      "automatic free spins",
+      "bonus total summary"
+    ]
   },
   "capabilities": [
     "session-launch",
@@ -28,17 +47,21 @@
     "idempotent-rounds",
     "demo-wallet",
     "audit-trail",
-    "operator-entitlements"
+    "operator-entitlements",
+    "persistent-bonus-state",
+    "8-free-spins",
+    "bonus-round-audit"
   ],
   "security": {
     "operatorAuth": "RSA-SHA256",
     "requestIdempotency": true,
     "privateKeyInBrowser": false,
-    "playerUsesTemporarySessionToken": true
+    "playerUsesTemporarySessionToken": true,
+    "realMoneyEnabled": false
   },
   "release": {
     "channel": "sandbox",
     "releasedAt": "2026-09-16",
-    "notes": "Primeira release formal para homologação da arquitetura RIPCOM B2B."
+    "notes": "Release 1.1.0 adiciona Eclipse Bonus persistente com 8 rodadas gratis DEMO e animacao cinematografica sol/lua/serpente."
   }
 }
