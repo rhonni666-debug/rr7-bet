@@ -1,0 +1,190 @@
+/* Eclipse Serpent sandbox.10 — premium jeweled symbol presentation */
+
+/* The reels become a continuous dark stage instead of a grid of UI cards. */
+.eclipse-player-v110 .reels{
+  border:2px solid rgba(238,190,74,.28);
+  background:
+    linear-gradient(180deg,rgba(4,7,12,.98),rgba(8,8,13,.995)),
+    radial-gradient(circle at 50% 36%,rgba(88,46,132,.12),transparent 62%);
+  box-shadow:
+    inset 0 0 0 2px rgba(54,27,9,.66),
+    inset 0 18px 30px rgba(0,0,0,.76),
+    inset 0 -18px 28px rgba(0,0,0,.7),
+    0 16px 42px rgba(0,0,0,.5),
+    0 0 24px rgba(255,198,69,.06);
+}
+.eclipse-player-v110 .reels:before{
+  background:
+    linear-gradient(112deg,rgba(255,246,198,.13),transparent 14% 49%,rgba(255,214,104,.045) 64%,transparent 82%),
+    linear-gradient(90deg,transparent,rgba(255,210,94,.05),transparent);
+}
+
+.eclipse-player-v110 .symbol{
+  border-color:transparent!important;
+  border-radius:10px;
+  background:
+    radial-gradient(circle at 50% 58%,rgba(255,255,255,.035),transparent 52%),
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(0,0,0,.055));
+  box-shadow:none;
+  overflow:visible;
+}
+.eclipse-player-v110 .symbol:before{
+  left:10%;right:10%;top:4%;height:16%;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);
+  opacity:.7;
+}
+.eclipse-player-v110 .symbol:after{
+  left:15%;right:15%;bottom:4%;height:10%;
+  background:rgba(0,0,0,.62);
+  filter:blur(8px);
+}
+
+/* Remove prototype-like micro labels. The artwork itself communicates the symbol. */
+.eclipse-player-v110 .symbol>small{display:none!important}
+
+.symbol-art-stage{
+  width:94%;
+  height:94%;
+  transform:translateZ(34px) rotateX(-4deg) scale(1.02);
+  filter:drop-shadow(0 15px 9px rgba(0,0,0,.5));
+}
+.symbol-art{
+  width:100%;
+  height:100%;
+}
+.symbol-art .art-object{
+  animation:stage10PremiumFloat 3.4s ease-in-out infinite;
+  filter:drop-shadow(0 8px 5px rgba(0,0,0,.44));
+}
+.symbol-art-stage:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:9%;right:9%;top:8%;bottom:9%;
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 48%,rgba(255,255,255,.11),transparent 57%);
+  filter:blur(8px);
+  opacity:.45;
+  pointer-events:none;
+}
+.symbol-art-stage:after{
+  left:25%;top:10%;width:27%;height:10%;
+  background:rgba(255,255,255,.36);
+  filter:blur(6px);
+  opacity:.8;
+  animation:stage10JewelShine 2.8s ease-in-out infinite;
+}
+.symbol-art-floor{
+  left:18%;right:18%;bottom:1%;height:13%;
+  background:radial-gradient(ellipse,rgba(255,213,98,.2),rgba(0,0,0,.2) 54%,transparent 73%);
+  filter:blur(4px);
+}
+
+/* Each symbol owns a distinct material/color family, closer to premium slot readability. */
+.symbol:has(.symbol-art-rune){
+  background:radial-gradient(circle at 50% 50%,rgba(44,138,255,.10),transparent 60%);
+}
+.symbol:has(.symbol-art-rune) .symbol-art-stage{
+  filter:drop-shadow(0 14px 9px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(72,187,255,.36));
+}
+.symbol:has(.symbol-art-fragment){
+  background:radial-gradient(circle at 50% 50%,rgba(177,77,240,.11),transparent 60%);
+}
+.symbol:has(.symbol-art-fragment) .symbol-art-stage{
+  filter:drop-shadow(0 14px 9px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(185,83,255,.34));
+}
+.symbol:has(.symbol-art-core){
+  background:radial-gradient(circle at 50% 50%,rgba(59,255,159,.10),transparent 60%);
+}
+.symbol:has(.symbol-art-core) .symbol-art-stage{
+  filter:drop-shadow(0 14px 9px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(83,255,166,.34));
+}
+.symbol:has(.symbol-art-gem){
+  background:radial-gradient(circle at 50% 50%,rgba(255,66,94,.10),transparent 60%);
+}
+.symbol:has(.symbol-art-gem) .symbol-art-stage{
+  filter:drop-shadow(0 14px 9px rgba(0,0,0,.5)) drop-shadow(0 0 17px rgba(255,74,102,.34));
+}
+.symbol:has(.symbol-art-serpent){
+  background:radial-gradient(circle at 50% 50%,rgba(150,72,210,.10),transparent 61%);
+}
+.symbol:has(.symbol-art-serpent) .symbol-art-stage{
+  filter:drop-shadow(0 15px 9px rgba(0,0,0,.54)) drop-shadow(0 0 18px rgba(151,75,215,.32));
+}
+.symbol.wild{
+  background:radial-gradient(circle at 50% 50%,rgba(115,255,112,.13),transparent 62%)!important;
+}
+.symbol.wild .symbol-art-stage{
+  filter:drop-shadow(0 16px 9px rgba(0,0,0,.56)) drop-shadow(0 0 22px rgba(133,255,105,.42)) drop-shadow(0 0 7px rgba(255,206,67,.35));
+}
+.symbol.scatter{
+  background:radial-gradient(circle at 50% 50%,rgba(255,190,54,.14),transparent 62%)!important;
+}
+.symbol.scatter .symbol-art-stage{
+  filter:drop-shadow(0 16px 9px rgba(0,0,0,.56)) drop-shadow(0 0 24px rgba(255,191,52,.48));
+}
+
+/* Premium winners lift out from the reel instead of just receiving a flat border. */
+.eclipse-player-v110 .symbol.winner{
+  border-color:transparent!important;
+  background:radial-gradient(circle at 50% 50%,rgba(255,224,121,.14),transparent 66%)!important;
+  transform:translateZ(24px) scale(1.055);
+  box-shadow:none;
+}
+.eclipse-player-v110 .symbol.winner .symbol-art-stage{
+  transform:translateZ(56px) rotateX(-5deg) scale(1.11);
+  filter:drop-shadow(0 18px 10px rgba(0,0,0,.54)) drop-shadow(0 0 28px rgba(255,217,95,.5));
+}
+.eclipse-player-v110 .symbol.winner:after{
+  background:rgba(255,205,72,.32);
+  filter:blur(10px);
+}
+
+/* Wild and bonus get more theatrical movement, but still remain readable. */
+.symbol.wild .premium-wild{transform-origin:50% 55%}
+.symbol.scatter .premium-bonus{transform-origin:50% 50%}
+.symbol.wild .symbol-art-stage{animation:stage10WildCrown 2.4s ease-in-out infinite}
+.symbol.scatter .symbol-art-stage{animation:stage10BonusSun 1.9s ease-in-out infinite}
+.phase-tease .symbol.scatter:not(.tease-hidden) .symbol-art-stage{
+  animation:stage10BonusTease .45s ease-in-out infinite alternate!important;
+}
+
+/* Reel separators become subtle metallic rails. */
+.eclipse-player-v110 .reel:before{
+  right:-5px;
+  width:2px;
+  background:linear-gradient(transparent 1%,rgba(255,213,103,.14) 15% 85%,transparent 99%);
+  box-shadow:1px 0 0 rgba(0,0,0,.4),-1px 0 0 rgba(255,255,255,.018);
+}
+
+@keyframes stage10PremiumFloat{
+  0%,100%{transform:translateY(1px) rotateY(-2deg) rotateX(1deg)}
+  50%{transform:translateY(-4px) rotateY(3deg) rotateX(-2deg)}
+}
+@keyframes stage10JewelShine{
+  0%,100%{transform:rotate(-28deg) translate(-3px,2px) translateZ(38px);opacity:.48}
+  50%{transform:rotate(-28deg) translate(5px,-4px) translateZ(42px);opacity:.9}
+}
+@keyframes stage10WildCrown{
+  0%,100%{transform:translateZ(36px) rotateY(-3deg) translateY(1px) scale(1.01)}
+  50%{transform:translateZ(50px) rotateY(4deg) translateY(-5px) scale(1.055)}
+}
+@keyframes stage10BonusSun{
+  0%,100%{transform:translateZ(36px) rotateZ(-1deg) scale(.99)}
+  50%{transform:translateZ(48px) rotateZ(2deg) scale(1.06)}
+}
+@keyframes stage10BonusTease{
+  from{transform:translateZ(41px) scale(1.01) rotateZ(-2deg);filter:drop-shadow(0 15px 9px rgba(0,0,0,.56)) drop-shadow(0 0 20px rgba(255,192,52,.56))}
+  to{transform:translateZ(66px) scale(1.13) rotateZ(2deg);filter:drop-shadow(0 17px 9px rgba(0,0,0,.58)) drop-shadow(0 0 42px rgba(255,202,67,.9))}
+}
+
+@media(max-width:600px) and (orientation:portrait){
+  .symbol-art-stage{width:98%;height:98%;transform:translateZ(30px) rotateX(-3deg) scale(1.03)}
+  .symbol-art-stage:after{opacity:.62}
+  .eclipse-player-v110 .symbol{border-radius:8px}
+  .eclipse-player-v110 .reels{border-width:1.5px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .symbol-art .art-object,.symbol-art-stage:after,.symbol.wild .symbol-art-stage,.symbol.scatter .symbol-art-stage,.phase-tease .symbol.scatter:not(.tease-hidden) .symbol-art-stage{animation:none!important}
+}
