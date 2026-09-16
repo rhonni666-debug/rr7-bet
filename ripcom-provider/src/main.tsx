@@ -20,6 +20,7 @@ import './reference-layout-stage15.css';
 import './win-bet-stage16.css';
 import './controls-stage17.css';
 import './fluidity-stage18.css';
+import './celestial-stage19.css';
 
 const params = new URLSearchParams(window.location.search);
 const playerToken = params.get('play');
