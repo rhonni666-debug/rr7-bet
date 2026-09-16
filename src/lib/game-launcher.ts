@@ -1,9 +1,10 @@
 import { supabase } from '../integrations/supabase/client';
-import type { DemoGame, GameSession, Provider, RoundOutcome } from '../types';
+import type { DemoGame, GameSession, Provider, RoundOutcome, SlotSpinOutcome } from '../types';
 
 export interface ProviderAdapter {
   createSession(game: DemoGame): Promise<GameSession>;
   playRound(sessionId: string, bet: number): Promise<RoundOutcome>;
+  spinSlot(sessionId: string, bet: number): Promise<SlotSpinOutcome>;
   closeSession(sessionId: string): Promise<void>;
 }
 
@@ -20,6 +21,18 @@ async function invokeGateway<T>(body: Record<string, unknown>): Promise<T> {
   if (payload?.error) throw new Error(payload.error);
   if (!payload?.data) throw new Error('PROVIDER_GATEWAY_EMPTY_RESPONSE');
   return payload.data;
+}
+
+function mapRound(row: Record<string, unknown>, fallbackBet: number): RoundOutcome {
+  if (!row.round_id) throw new Error('ROUND_FAILED');
+  return {
+    roundId: String(row.round_id),
+    bet: Number(row.bet_amount ?? fallbackBet),
+    win: Number(row.win_amount ?? 0),
+    result: String(row.result ?? 'LOSS') as RoundOutcome['result'],
+    multiplier: Number(row.multiplier ?? 0),
+    newBalance: Number(row.new_balance ?? 0),
+  };
 }
 
 class MockProviderAdapter implements ProviderAdapter {
@@ -46,15 +59,27 @@ class MockProviderAdapter implements ProviderAdapter {
       bet,
       requestId: crypto.randomUUID(),
     });
+    return mapRound(row, bet);
+  }
 
-    if (!row.round_id) throw new Error('ROUND_FAILED');
+  async spinSlot(sessionId: string, bet: number): Promise<SlotSpinOutcome> {
+    const row = await invokeGateway<Record<string, unknown>>({
+      action: 'slot_spin',
+      sessionId,
+      bet,
+      requestId: crypto.randomUUID(),
+    });
+    const round = mapRound(row, bet);
     return {
-      roundId: String(row.round_id),
-      bet: Number(row.bet_amount ?? bet),
-      win: Number(row.win_amount ?? 0),
-      result: String(row.result ?? 'LOSS') as RoundOutcome['result'],
-      multiplier: Number(row.multiplier ?? 0),
-      newBalance: Number(row.new_balance ?? 0),
+      ...round,
+      grid: Array.isArray(row.grid) ? row.grid as string[][] : [],
+      feature: row.feature && typeof row.feature === 'object' ? row.feature as Record<string, unknown> : {},
+      wins: Array.isArray(row.wins) ? row.wins.map((win) => {
+        const item = win as Record<string, unknown>;
+        return { symbolId: String(item.symbolId ?? ''), ways: Number(item.ways ?? 0), multiplier: Number(item.multiplier ?? 0) };
+      }) : [],
+      scatterCount: Number(row.scatterCount ?? 0),
+      layout: Array.isArray(row.layout) ? row.layout.map(Number) : [],
     };
   }
 
@@ -72,6 +97,7 @@ class UnsupportedProviderAdapter implements ProviderAdapter {
   }
   async createSession(): Promise<GameSession> { return this.fail(); }
   async playRound(): Promise<RoundOutcome> { return this.fail(); }
+  async spinSlot(): Promise<SlotSpinOutcome> { return this.fail(); }
   async closeSession(): Promise<void> { this.fail(); }
 }
 
@@ -88,6 +114,9 @@ export const GameLauncher = {
   },
   playRound(provider: Provider, sessionId: string, bet: number) {
     return adapterFor(provider).playRound(sessionId, bet);
+  },
+  spinSlot(provider: Provider, sessionId: string, bet: number) {
+    return adapterFor(provider).spinSlot(sessionId, bet);
   },
   closeSession(provider: Provider, sessionId: string) {
     return adapterFor(provider).closeSession(sessionId);
