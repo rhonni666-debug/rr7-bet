@@ -5,6 +5,7 @@ import { AnimatedAmount } from './AnimatedAmount';
 import { AnimatedBackground } from './AnimatedBackground';
 import { BonusIntroOverlay } from './BonusIntroOverlay';
 import { BonusTeaseOverlay } from './BonusTeaseOverlay';
+import { SymbolArt } from './SymbolArt';
 import { eclipseAudio } from './audio';
 import { classifyWin, WinCelebration } from './WinCelebration';
 
@@ -293,7 +294,7 @@ export function EclipsePlayer({ token }: { token: string }) {
                 const symbol = symbols.get(symbolId);
                 const isWinner = winning.has(symbolId);
                 const symbolClasses = ['symbol', isWinner ? 'winner' : '', symbol?.scatter ? 'scatter' : '', symbol?.wild ? 'wild' : '', phase === 'tease' && teaseColumn === columnIndex ? 'tease-hidden' : ''].filter(Boolean).join(' ');
-                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><span>{symbol?.icon ?? '✦'}</span><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
+                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><SymbolArt symbol={symbol} /><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
               })}
             </div>
           ))}
