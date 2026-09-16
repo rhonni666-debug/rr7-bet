@@ -1,0 +1,315 @@
+/* Eclipse Serpent sandbox.19 — Solar WILD + Moon + layered Eclipse Bonus */
+
+/* --------------------------------------------------------------------------
+   1. Solar WILD — approved art, alive at rest, stronger on wins
+   -------------------------------------------------------------------------- */
+.eclipse-player-v110 .symbol-art-wild{
+  overflow:visible;
+  isolation:isolate;
+}
+.eclipse-player-v110 .symbol-art-wild .solar-wild-art-v19{
+  transform-box:fill-box;
+  transform-origin:50% 50%;
+  animation:v19SolarWildBreathe 3.2s cubic-bezier(.4,0,.2,1) infinite;
+}
+.eclipse-player-v110 .symbol-art-wild::after{
+  content:"";
+  position:absolute;
+  inset:4%;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    radial-gradient(circle,rgba(255,245,176,.35) 0 16%,rgba(255,178,52,.32) 34%,rgba(255,92,0,.16) 55%,transparent 74%);
+  filter:blur(10px);
+  animation:v19SolarAura 2.6s ease-in-out infinite;
+}
+.eclipse-player-v110 .solar-wild-corona-ring{
+  stroke-dasharray:9 5;
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:v19SolarCoronaSpin 7.5s linear infinite,v19SolarCoronaPulse 1.8s ease-in-out infinite alternate;
+}
+.eclipse-player-v110 .solar-wild-hot-ring{
+  stroke-dasharray:2 4;
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:v19SolarCoronaSpin 4.5s linear infinite reverse;
+}
+.eclipse-player-v110 .symbol.wild.line-win-active .symbol-art-wild,
+.eclipse-player-v110 .symbol.wild .symbol-art-wild:hover{
+  filter:brightness(1.18) saturate(1.16);
+}
+.eclipse-player-v110 .symbol.wild.line-win-active .solar-wild-art-v19{
+  animation:v19SolarWinHit .58s cubic-bezier(.18,.82,.18,1) infinite alternate;
+}
+.eclipse-player-v110 .symbol.wild.line-win-active .symbol-art-wild::after{
+  animation:v19SolarWinAura .72s ease-in-out infinite alternate;
+}
+
+@keyframes v19SolarWildBreathe{
+  0%,100%{transform:translateZ(0) scale(.985) rotate(-.35deg);filter:brightness(.98) saturate(1.02)}
+  50%{transform:translateZ(0) scale(1.022) rotate(.35deg);filter:brightness(1.08) saturate(1.1)}
+}
+@keyframes v19SolarAura{
+  0%,100%{transform:scale(.92);opacity:.48}
+  50%{transform:scale(1.08);opacity:.92}
+}
+@keyframes v19SolarCoronaSpin{to{transform:rotate(360deg)}}
+@keyframes v19SolarCoronaPulse{from{opacity:.34}to{opacity:.9}}
+@keyframes v19SolarWinHit{
+  from{transform:scale(1.02);filter:brightness(1.1) saturate(1.08)}
+  to{transform:scale(1.105);filter:brightness(1.32) saturate(1.24)}
+}
+@keyframes v19SolarWinAura{
+  from{transform:scale(.98);opacity:.66;filter:blur(10px)}
+  to{transform:scale(1.2);opacity:1;filter:blur(14px)}
+}
+
+/* --------------------------------------------------------------------------
+   2. Moon — dedicated symbol, no WILD text
+   -------------------------------------------------------------------------- */
+.eclipse-player-v110 .symbol-art-moon{
+  overflow:visible;
+}
+.eclipse-player-v110 .lunar-symbol-v19{
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:v19MoonFloat 4.8s ease-in-out infinite;
+}
+.eclipse-player-v110 .moon-aura-v19{
+  stroke-dasharray:6 8;
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:v19MoonAura 6.2s linear infinite;
+}
+.eclipse-player-v110 .moon-shimmer-v19{
+  stroke-dasharray:12 30;
+  animation:v19MoonShimmer 3.8s ease-in-out infinite;
+}
+.eclipse-player-v110 .moon-craters-v19{
+  animation:v19MoonCraterLight 5.2s ease-in-out infinite alternate;
+}
+@keyframes v19MoonFloat{
+  0%,100%{transform:translateY(1px) rotate(-.55deg);filter:brightness(.96)}
+  50%{transform:translateY(-2px) rotate(.55deg);filter:brightness(1.08)}
+}
+@keyframes v19MoonAura{to{transform:rotate(360deg)}}
+@keyframes v19MoonShimmer{
+  0%,45%{stroke-dashoffset:42;opacity:.14}
+  62%{opacity:.78}
+  82%,100%{stroke-dashoffset:-30;opacity:.12}
+}
+@keyframes v19MoonCraterLight{from{opacity:.44}to{opacity:.7}}
+
+/* --------------------------------------------------------------------------
+   3. Scatter / Eclipse symbol — a tiny live eclipse before the cinematic
+   -------------------------------------------------------------------------- */
+.eclipse-player-v110 .eclipse-bonus-symbol-v19{
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:v19BonusSymbolBreath 3s ease-in-out infinite;
+}
+.eclipse-player-v110 .bonus-sun-disc-v19{
+  filter:drop-shadow(0 0 7px rgba(255,155,34,.8));
+  animation:v19BonusSunPulse 2.15s ease-in-out infinite;
+}
+.eclipse-player-v110 .bonus-moon-disc-v19{
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:v19BonusMoonDrift 4.5s ease-in-out infinite;
+}
+.eclipse-player-v110 .bonus-diamond-ring-v19{
+  stroke-dasharray:14 38;
+  animation:v19DiamondRing 2.4s ease-in-out infinite;
+}
+.eclipse-player-v110.phase-tease .symbol.scatter .eclipse-bonus-symbol-v19{
+  animation:v19ScatterTease .7s cubic-bezier(.35,0,.2,1) infinite alternate;
+}
+@keyframes v19BonusSymbolBreath{0%,100%{transform:scale(.985)}50%{transform:scale(1.025)}}
+@keyframes v19BonusSunPulse{0%,100%{opacity:.78}50%{opacity:1;filter:drop-shadow(0 0 15px rgba(255,167,44,1))}}
+@keyframes v19BonusMoonDrift{0%,100%{transform:translate(-1px,1px)}50%{transform:translate(2px,-1px)}}
+@keyframes v19DiamondRing{0%,38%{stroke-dashoffset:50;opacity:.28}60%{opacity:1}100%{stroke-dashoffset:-26;opacity:.18}}
+@keyframes v19ScatterTease{from{transform:scale(1);filter:brightness(1)}to{transform:scale(1.085);filter:brightness(1.25) saturate(1.15)}}
+
+/* --------------------------------------------------------------------------
+   4. Bonus intro — approved eclipse artwork as cinematic depth layer
+   -------------------------------------------------------------------------- */
+.bonus-intro-v19 .bonus-eclipse-art-v19{
+  position:absolute;
+  inset:-8%;
+  z-index:1;
+  overflow:hidden;
+  opacity:0;
+  transform:translate3d(0,18px,0) scale(1.14);
+  filter:saturate(.94) brightness(.46) contrast(1.04) blur(2px);
+  animation:v19CinematicArt 7s cubic-bezier(.16,.72,.17,1) both;
+  will-change:transform,filter,opacity;
+}
+.bonus-intro-v19 .bonus-eclipse-art-v19::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 58% 45%,transparent 0 20%,rgba(0,0,0,.04) 36%,rgba(0,0,0,.46) 78%,rgba(0,0,0,.8) 100%),
+    linear-gradient(180deg,rgba(0,8,8,.1),rgba(0,9,8,.72));
+}
+.bonus-intro-v19 .bonus-eclipse-art-v19 img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transform:translate3d(-1.5%,0,0) scale(1.06);
+  animation:v19CinematicPan 7s cubic-bezier(.17,.75,.16,1) both;
+}
+
+/* Keep procedural eclipse above the raster image so moon/sun can actually move. */
+.bonus-intro-v19 .cinematic-eclipse-bonus{
+  z-index:4!important;
+  animation:v19EclipseRigEntrance 7s cubic-bezier(.18,.76,.17,1) both;
+}
+.bonus-intro-v19 .cinematic-eclipse-bonus .cinematic-eclipse-sun{
+  animation:v19SunAlive 2.8s ease-in-out infinite!important;
+}
+.bonus-intro-v19 .cinematic-eclipse-bonus .cinematic-eclipse-moon{
+  animation:v19MoonCross 4.15s .45s cubic-bezier(.18,.72,.2,1) both!important;
+}
+.bonus-intro-v19 .cinematic-eclipse-bonus .cinematic-eclipse-corona{
+  animation:v19CoronaBurst 2.15s 1.8s ease-in-out infinite alternate!important;
+}
+.bonus-intro-v19 .cinematic-bonus-rays{z-index:3!important}
+.bonus-intro-v19 .cinematic-serpent-backlight{z-index:5!important}
+.bonus-intro-v19 .cinematic-bonus-ground{z-index:6!important}
+.bonus-intro-v19 .serpent-rise{z-index:8!important}
+.bonus-intro-v19 .cinematic-bonus-foreground-fog{z-index:9!important}
+.bonus-intro-v19 .cinematic-bonus-particles,
+.bonus-intro-v19 .cinematic-bonus-dust{z-index:10!important}
+.bonus-intro-v19 .cinematic-bonus-copy{z-index:14!important}
+.bonus-intro-v19 .cinematic-bonus-copy small,
+.bonus-intro-v19 .cinematic-bonus-copy strong,
+.bonus-intro-v19 .cinematic-bonus-copy em,
+.bonus-intro-v19 .cinematic-bonus-copy span{
+  opacity:0;
+  transform:translateY(12px) scale(.96);
+  animation:v19CopyIn .66s cubic-bezier(.16,.82,.18,1) forwards;
+}
+.bonus-intro-v19 .cinematic-bonus-copy small{animation-delay:4.78s}
+.bonus-intro-v19 .cinematic-bonus-copy strong{animation-delay:5.02s}
+.bonus-intro-v19 .cinematic-bonus-copy em{animation-delay:5.24s}
+.bonus-intro-v19 .cinematic-bonus-copy span{animation-delay:5.47s}
+
+@keyframes v19CinematicArt{
+  0%{opacity:0;transform:translate3d(0,28px,0) scale(1.2);filter:saturate(.65) brightness(.18) contrast(1.1) blur(5px)}
+  15%{opacity:.58}
+  42%{opacity:.82;filter:saturate(.9) brightness(.38) contrast(1.06) blur(2px)}
+  72%{opacity:.92;transform:translate3d(0,-4px,0) scale(1.08);filter:saturate(1.08) brightness(.54) contrast(1.08) blur(.5px)}
+  100%{opacity:.86;transform:translate3d(0,0,0) scale(1.04);filter:saturate(1.02) brightness(.5) contrast(1.08) blur(0)}
+}
+@keyframes v19CinematicPan{
+  0%{transform:translate3d(-4%,1.5%,0) scale(1.13)}
+  58%{transform:translate3d(0,-1%,0) scale(1.075)}
+  100%{transform:translate3d(1.2%,0,0) scale(1.04)}
+}
+@keyframes v19EclipseRigEntrance{
+  0%{opacity:0;transform:translate3d(22%,4%,0) scale(.8)}
+  18%{opacity:.36}
+  48%{opacity:.84;transform:translate3d(4%,0,0) scale(.96)}
+  100%{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+@keyframes v19SunAlive{
+  0%,100%{transform:scale(.985);filter:brightness(.92) saturate(1)}
+  50%{transform:scale(1.035);filter:brightness(1.18) saturate(1.18)}
+}
+@keyframes v19MoonCross{
+  0%{transform:translate3d(66%,-8%,0) scale(.84);filter:brightness(.82)}
+  22%{transform:translate3d(41%,-4%,0) scale(.9)}
+  54%{transform:translate3d(14%,-1%,0) scale(.97)}
+  78%{transform:translate3d(1.5%,0,0) scale(1.015);filter:brightness(.72)}
+  100%{transform:translate3d(0,0,0) scale(1);filter:brightness(.64)}
+}
+@keyframes v19CoronaBurst{
+  from{transform:scale(.94);filter:blur(5px);opacity:.48}
+  to{transform:scale(1.12);filter:blur(9px);opacity:1}
+}
+@keyframes v19CopyIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* --------------------------------------------------------------------------
+   5. Free spins mode — keep eclipse identity alive after intro
+   -------------------------------------------------------------------------- */
+.eclipse-player-v110.bonus-mode-active:not(.phase-bonus):not(.phase-bonus-outro) .game-frame::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 52% 14%,rgba(255,183,64,.12),transparent 25%),
+    radial-gradient(circle at 50% 16%,rgba(0,0,0,.22) 0 8%,transparent 8.8%),
+    linear-gradient(180deg,rgba(1,17,16,.04),rgba(1,9,8,.18));
+  opacity:.9;
+  animation:v19BonusAtmosphere 4.8s ease-in-out infinite;
+}
+.eclipse-player-v110.bonus-mode-active .bonus-reels{
+  box-shadow:0 0 0 1px rgba(255,205,101,.09),0 18px 52px rgba(0,0,0,.34),0 0 42px rgba(255,157,42,.035)!important;
+}
+.eclipse-player-v110.bonus-mode-active .bonus-reels .symbol-art-stage{
+  filter:saturate(1.06) brightness(1.02);
+}
+.eclipse-player-v110.bonus-mode-active .eclipse-bonus-hud{
+  animation:v19HudFloat 3.4s ease-in-out infinite;
+}
+@keyframes v19BonusAtmosphere{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes v19HudFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+
+/* --------------------------------------------------------------------------
+   6. Reel tactile motion / impact polish
+   -------------------------------------------------------------------------- */
+.eclipse-player-v110 .reels.spinning::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:18;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 18%,transparent 82%,rgba(0,0,0,.14));
+  mix-blend-mode:screen;
+  animation:v19ReelLightSweep .44s linear infinite;
+}
+.eclipse-player-v110.phase-reveal .reel:nth-child(1){animation:v19ReelLanding .34s cubic-bezier(.16,.88,.25,1) both}
+.eclipse-player-v110.phase-reveal .reel:nth-child(2){animation:v19ReelLanding .34s .055s cubic-bezier(.16,.88,.25,1) both}
+.eclipse-player-v110.phase-reveal .reel:nth-child(3){animation:v19ReelLanding .34s .11s cubic-bezier(.16,.88,.25,1) both}
+@keyframes v19ReelLightSweep{from{transform:translateY(-4%)}to{transform:translateY(4%)}}
+@keyframes v19ReelLanding{
+  0%{transform:translateY(-6px) scaleY(.985)}
+  62%{transform:translateY(2px) scaleY(1.01)}
+  100%{transform:translateY(0) scaleY(1)}
+}
+
+/* --------------------------------------------------------------------------
+   7. Mobile budget — retain identity without sacrificing smoothness
+   -------------------------------------------------------------------------- */
+@media(max-width:600px) and (orientation:portrait){
+  .eclipse-player-v110 .symbol-art-wild::after{filter:blur(7px)}
+  .eclipse-player-v110 .solar-wild-corona-ring{animation-duration:9s,2.2s}
+  .eclipse-player-v110 .lunar-symbol-v19{animation-duration:5.6s}
+  .bonus-intro-v19 .bonus-eclipse-art-v19{inset:-3%;filter:saturate(.95) brightness(.48) contrast(1.04)}
+  .bonus-intro-v19 .bonus-eclipse-art-v19 img{transform:scale(1.04)}
+  .bonus-intro-v19 .cinematic-bonus-particles i:nth-child(2n),
+  .bonus-intro-v19 .cinematic-bonus-dust i:nth-child(2n){display:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .solar-wild-art-v19,
+  .solar-wild-corona-ring,
+  .solar-wild-hot-ring,
+  .lunar-symbol-v19,
+  .moon-aura-v19,
+  .moon-shimmer-v19,
+  .eclipse-bonus-symbol-v19,
+  .bonus-intro-v19 .bonus-eclipse-art-v19,
+  .bonus-intro-v19 .bonus-eclipse-art-v19 img,
+  .bonus-intro-v19 .cinematic-eclipse-bonus,
+  .bonus-intro-v19 .cinematic-eclipse-bonus .cinematic-eclipse-moon,
+  .bonus-intro-v19 .cinematic-eclipse-bonus .cinematic-eclipse-sun{
+    animation:none!important;
+  }
+}
