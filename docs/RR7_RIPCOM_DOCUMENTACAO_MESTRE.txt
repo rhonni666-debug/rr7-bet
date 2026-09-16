@@ -1,0 +1,847 @@
+RR7 + RIPCOM — DOCUMENTAÇÃO MESTRE
+Atualização: 16/09/2026
+============================================================
+
+OBJETIVO DESTE ARQUIVO
+------------------------------------------------------------
+Este TXT é o documento principal para entender o sistema inteiro. Ele explica o que é cada parte, para que serve, o que está ativo, o que ainda está bloqueado e como as peças se relacionam.
+
+REGRA DE SEGURANÇA
+------------------------------------------------------------
+NUNCA colocar neste arquivo: senhas, chave privada RSA, service role key, token de PSP, senha bancária, certificado privado ou qualquer outro segredo.
+
+============================================================
+1. VISÃO GERAL
+============================================================
+
+RR7
+- É o operador/plataforma que mostra jogos para o usuário final.
+- Hoje é o primeiro cliente de homologação da RIPCOM.
+- Possui usuários, área administrativa, catálogo, wallet DEMO e infraestrutura de testes.
+- A futura wallet de dinheiro real pertence ao operador RR7, não à RIPCOM.
+
+RIPCOM
+- É a provedora de jogos independente.
+- Não deve ser confundida com o operador RR7.
+- Pode fornecer jogos para RR7 e, futuramente, para outras plataformas.
+- Possui API B2B própria, player próprio, autenticação de operador, catálogo por parceiro, sessões, rounds, releases e telemetria.
+
+ECLIPSE SERPENT
+- Primeiro jogo autoral oficial da RIPCOM.
+- Código: ripcom-slot:eclipse-serpent
+- Estado atual: SANDBOX / DEMO.
+- Possui runtime server-side e interface independente RIPCOM.
+- O operador não precisa receber o código-fonte do jogo para integrar.
+
+ARQUITETURA RESUMIDA
+Plataforma parceira -> RIPCOM API -> sessão -> RIPCOM Player -> motor do jogo -> wallet/callback do operador.
+
+============================================================
+2. LINKS E AMBIENTES
+============================================================
+
+Portal público atual da RIPCOM:
+https://rhonni666-debug.github.io/rr7-bet/ripcom-provider/
+
+Site RR7 no GitHub Pages:
+https://rhonni666-debug.github.io/rr7-bet/
+
+API B2B RIPCOM v1:
+https://tndnqjbkfwongolorvjm.supabase.co/functions/v1/ripcom-b2b
+
+Projeto Supabase atual:
+tndnqjbkfwongolorvjm
+
+IMPORTANTE:
+RR7 e RIPCOM ainda compartilham o mesmo projeto Supabase fisicamente, mas as camadas lógicas estão separadas. O frontend RIPCOM possui build próprio dentro de /ripcom-provider. No futuro, a RIPCOM poderá ser migrada para Supabase e domínio próprios sem reconstruir o contrato B2B.
+
+============================================================
+3. APP RIPCOM INDEPENDENTE
+============================================================
+
+Pasta:
+ripcom-provider/
+
+O QUE É:
+Aplicação Vite + React independente da interface do RR7.
+
+PRINCIPAIS ARQUIVOS:
+- ripcom-provider/package.json
+  Dependências e comandos exclusivos do app RIPCOM.
+
+- ripcom-provider/vite.config.ts
+  Configura build independente e base pública da RIPCOM.
+
+- ripcom-provider/src/api.ts
+  Cliente público para health, player state, spin e close.
+
+- ripcom-provider/src/App.tsx
+  Portal da provedora + documentação visual + sandbox + operator console + player do jogo.
+
+- ripcom-provider/src/styles.css
+  Sistema visual independente RIPCOM.
+
+BUILD:
+O GitHub Actions compila RR7 e RIPCOM separadamente.
+
+DEPLOY:
+O build RIPCOM é colocado em:
+dist/ripcom-provider/
+
+e publicado pelo mesmo GitHub Pages atual.
+
+============================================================
+4. RIPCOM B2B API v1
+============================================================
+
+FUNÇÃO:
+supabase/functions/ripcom-b2b/index.ts
+
+STATUS:
+ACTIVE
+Versão implantada no Supabase: v2 da Edge Function.
+
+AUTENTICAÇÃO:
+Cada operador usa um par RSA.
+- Chave privada: fica SOMENTE com o operador.
+- Chave pública: cadastrada na RIPCOM.
+
+HEADERS B2B:
+X-Ripcom-Operator
+X-Ripcom-Timestamp
+X-Ripcom-Request-Id
+X-Ripcom-Signature
+
+CANONICAL STRING:
+METHOD\nPATH\nTIMESTAMP\nREQUEST_ID\nSHA256_HEX(BODY)
+
+ASSINATURA:
+RSA-SHA256 / RSASSA-PKCS1-v1_5.
+
+ENDPOINTS PRINCIPAIS:
+
+GET /v1/health
+- Verifica se a API está online.
+
+GET /v1/games
+- Retorna apenas jogos autorizados para aquele operador.
+
+POST /v1/sessions
+- Cria sessão de jogador para um jogo autorizado.
+
+POST /v1/games/launch
+- Gera URL de abertura do player RIPCOM.
+- Novos launches apontam diretamente para o player independente RIPCOM.
+
+POST /v1/sessions/close
+- Encerra uma sessão.
+
+PLAYER STATE
+- Operação interna do player para carregar sessão, jogo, símbolos e saldo DEMO.
+
+PLAYER SPIN
+- Executa uma rodada no servidor.
+- O resultado não é calculado no navegador.
+
+PLAYER CLOSE
+- Fecha sessão pelo player.
+
+IDEMPOTÊNCIA:
+X-Ripcom-Request-Id identifica cada request B2B.
+Repetir o mesmo ID com request diferente gera conflito.
+
+============================================================
+5. SDK E FERRAMENTAS DE INTEGRAÇÃO
+============================================================
+
+Comandos principais do projeto:
+
+npm run ripcom:keys -- nome-do-operador
+- Gera par RSA localmente.
+- A chave privada não deve ser enviada para a RIPCOM nem commitada.
+
+npm run ripcom:smoke
+- Smoke test da API B2B principal.
+
+npm run ripcom:sdk:test
+- Autoteste do SDK/assinatura.
+
+npm run ripcom:wallet:smoke
+- Testa o callback sandbox de wallet.
+- Exige RIPCOM_PRIVATE_KEY_FILE apontando para uma chave privada local.
+
+Documentos:
+- docs/RIPCOM_B2B_V1.md
+- docs/RIPCOM_PARTNER_ONBOARDING.md
+- docs/RIPCOM_PROVIDER_ARCHITECTURE.md
+- docs/RIPCOM_WALLET_CALLBACK_SANDBOX.md
+- docs/ripcom-b2b-openapi.yaml
+
+============================================================
+6. OPERADORES B2B RIPCOM
+============================================================
+
+Tabela: ripcom_operators
+
+O QUE É:
+Cadastro das plataformas que podem consumir a RIPCOM.
+
+CAMPOS IMPORTANTES:
+- code: identificador único do operador.
+- name: nome do operador.
+- environment: SANDBOX ou PRODUCTION.
+- status: ACTIVE, SUSPENDED ou PENDING.
+- public_key_pem: chave pública RSA.
+- allowed_origins: origens permitidas.
+- api_version: versão da API.
+- wallet_mode: DEMO ou EXTERNAL_CALLBACK.
+- callback_url: endpoint do operador para wallet callbacks.
+- max_requests_per_minute: rate limit.
+- max_sessions_per_minute: limite de criação de sessões.
+- revoked_at: revogação.
+- last_key_rotation_at: controle de rotação de chave.
+
+RR7:
+É o primeiro operador sandbox da RIPCOM.
+
+============================================================
+7. CATÁLOGO POR OPERADOR
+============================================================
+
+Tabela: ripcom_operator_games
+
+O QUE É:
+Define exatamente quais jogos um operador pode consumir.
+
+Campos:
+- operator_id: operador.
+- game_id: jogo.
+- enabled: autorização de uso.
+- release_id: versão específica do jogo liberada para o operador.
+
+EFEITO:
+Mesmo que um jogo exista na RIPCOM, ele não aparece para um parceiro se não estiver autorizado nessa tabela.
+
+============================================================
+8. RELEASES / VERSIONAMENTO DE JOGOS
+============================================================
+
+Tabela: ripcom_game_releases
+
+O QUE É:
+Registro formal de versões distribuíveis de cada jogo.
+
+STATUS:
+DRAFT
+- versão em desenvolvimento.
+
+SANDBOX
+- versão liberada para homologação.
+
+RELEASED
+- versão formalmente liberada.
+
+RETIRED
+- versão retirada de circulação.
+
+ECLIPSE SERPENT:
+Primeira release formal: 1.0.0
+Estado atual: SANDBOX.
+
+VANTAGEM:
+Uma plataforma pode ficar presa em uma release estável enquanto outra testa uma versão nova.
+
+============================================================
+9. SESSÕES B2B RIPCOM
+============================================================
+
+Tabela: ripcom_b2b_sessions
+
+O QUE É:
+Sessão temporária criada quando uma plataforma abre um jogo RIPCOM.
+
+Campos importantes:
+- operator_id
+- game_id
+- game_release_id
+- external_player_id
+- session_token
+- status
+- currency
+- demo_balance
+- expires_at
+
+STATUS POSSÍVEIS:
+ACTIVE
+CLOSED
+EXPIRED
+
+MOEDA ATUAL:
+DEMO.
+
+============================================================
+10. ROUNDS RIPCOM
+============================================================
+
+Tabela: ripcom_b2b_rounds
+
+O QUE É:
+Registra cada giro executado no runtime RIPCOM.
+
+Campos:
+- session_id
+- request_id
+- bet
+- win
+- multiplier
+- grid
+- feature
+- balance_after
+
+O request_id torna a rodada idempotente.
+
+============================================================
+11. TELEMETRIA B2B
+============================================================
+
+Tabela: ripcom_api_requests
+
+O QUE É:
+Log técnico de requests feitos pelos operadores.
+
+Registra:
+- método
+- rota
+- hash do body
+- status HTTP
+- resposta
+- sucesso/falha
+- erro
+- latência
+- duração
+- horário
+
+PAINEL:
+/admin/ripcom-metricas
+
+USO:
+Diagnóstico, SLA, suporte técnico e auditoria de integração.
+
+============================================================
+12. CALLBACK SANDBOX DE WALLET
+============================================================
+
+Edge Function: ripcom-wallet-callback
+STATUS: ACTIVE
+
+O QUE É:
+A RIPCOM envia um evento de homologação para a wallet do operador.
+
+Eventos suportados no sandbox:
+PING
+BALANCE
+BET
+WIN
+REFUND
+
+Tabela: ripcom_wallet_callback_events
+
+Registra:
+- operador
+- evento
+- callback_url
+- request
+- status HTTP recebido
+- resposta
+- latência
+- sucesso
+- erro
+
+Edge Function: ripcom-wallet-receiver-demo
+STATUS: ACTIVE
+
+O QUE É:
+Receiver de homologação usado para provar que uma plataforma consegue receber callbacks RIPCOM.
+
+RR7 está configurado como primeiro cliente desse fluxo sandbox.
+
+IMPORTANTE:
+Esse callback NÃO movimenta dinheiro real.
+
+============================================================
+13. PERFIL EMPRESARIAL RIPCOM
+============================================================
+
+Tabela: ripcom_company_profile
+
+O QUE É:
+Cadastro empresarial privado da RIPCOM.
+
+Campos:
+- legal_name: razão social.
+- trade_name: nome fantasia.
+- tax_id: CNPJ.
+- country_code: país.
+- business_email.
+- business_phone.
+- website_url.
+- contract_contact_name.
+- contract_contact_email.
+- notes.
+
+PAINEL:
+/admin/ripcom-empresa
+
+STATUS ATUAL:
+- nome fantasia: RIPCOM.
+- país: BR.
+- razão social: ainda não preenchida.
+- CNPJ: ainda não preenchido no sistema.
+- site empresarial: ainda não preenchido.
+
+OBSERVAÇÃO:
+O proprietário informou que possui CNPJ, mas o número ainda não foi fornecido/cadastrado no sistema. Não inventar nem preencher automaticamente.
+
+============================================================
+14. WALLET DEMO EXISTENTE DO RR7
+============================================================
+
+Tabela: wallets
+- wallet DEMO de usuário.
+- moeda é obrigatoriamente DEMO.
+
+Tabela: wallet_transactions
+- ledger de créditos DEMO do RR7.
+- tipos atuais incluem bônus, BET, WIN, REFUND e ajuste administrativo.
+
+IMPORTANTE:
+Estas tabelas NÃO devem ser convertidas para BRL. O dinheiro real foi criado em tabelas separadas para impedir mistura contábil entre DEMO e produção.
+
+============================================================
+15. NOVA CAMADA REAL-MONEY-READY DO OPERADOR
+============================================================
+
+STATUS ATUAL GERAL:
+DISABLED
+
+Isso significa:
+A arquitetura existe, mas depósito, saque e jogo com dinheiro real continuam bloqueados.
+
+Tabela: operator_real_money_settings
+
+O QUE É:
+Feature flag e checklist central para produção do operador.
+
+Estados:
+DISABLED
+COMPLIANCE_PENDING
+PSP_SANDBOX
+READY_FOR_AUTHORIZED_PRODUCTION
+PRODUCTION_ENABLED
+
+CAMPOS PRINCIPAIS:
+- production_state
+- currency = BRL
+- deposits_enabled
+- withdrawals_enabled
+- real_money_games_enabled
+- legal_entity_verified
+- regulatory_authorization_verified
+- regulatory_reference
+- psp_provider
+- psp_merchant_reference
+- settlement_account_reference
+- same_ownership_required
+- kyc_required
+- min/max de depósito
+- min/max de saque
+
+TRAVA DE BANCO:
+O banco não aceita PRODUCTION_ENABLED se faltar qualquer uma destas condições:
+- depósitos habilitados;
+- saques habilitados;
+- jogos real-money habilitados;
+- entidade jurídica verificada;
+- autorização regulatória verificada;
+- PSP configurado;
+- merchant reference configurada;
+- conta/referência de liquidação configurada.
+
+STATUS ATUAL DA CONFIGURAÇÃO:
+production_state: DISABLED
+currency: BRL
+deposits_enabled: false
+withdrawals_enabled: false
+real_money_games_enabled: false
+legal_entity_verified: false
+regulatory_authorization_verified: false
+psp_provider: não configurado
+psp_merchant_reference: não configurado
+settlement_account_reference: não configurado
+same_ownership_required: true
+kyc_required: true
+
+Limites iniciais técnicos:
+depósito mínimo: R$ 1,00
+depósito máximo: R$ 50.000,00
+saque mínimo: R$ 1,00
+saque máximo: R$ 50.000,00
+
+Esses limites são apenas configuração técnica inicial e devem ser revisados antes de produção.
+
+============================================================
+16. REAL WALLET ACCOUNTS
+============================================================
+
+Tabela: real_wallet_accounts
+
+O QUE É:
+Wallet BRL separada para cada jogador do operador.
+
+Campos:
+- user_id
+- currency = BRL
+- status
+- available_balance
+- reserved_balance
+- lifetime_deposited
+- lifetime_withdrawn
+
+STATUS POSSÍVEIS:
+LOCKED
+PENDING_KYC
+ACTIVE
+SUSPENDED
+CLOSED
+
+A wallet nasce bloqueada; não nasce ACTIVE automaticamente.
+
+============================================================
+17. KYC REAL MONEY
+============================================================
+
+Tabela: real_money_kyc_checks
+
+O QUE É:
+Estado de verificação do jogador antes de usar wallet real.
+
+Campos:
+- status
+- provider
+- provider_reference
+- age_verified
+- account_owner_verified
+- verified_at
+- expires_at
+
+Não guardar documentos brutos nesta tabela.
+
+Status:
+UNVERIFIED
+PENDING
+VERIFIED
+REJECTED
+EXPIRED
+
+============================================================
+18. PAYMENT INTENTS
+============================================================
+
+Tabela: real_payment_intents
+
+O QUE É:
+Representa intenção de depósito ou saque que futuramente será enviada a um PSP autorizado/compatível.
+
+Tipos:
+DEPOSIT
+WITHDRAWAL
+
+Status:
+CREATED
+REQUIRES_KYC
+PENDING
+PROCESSING
+SUCCEEDED
+FAILED
+CANCELLED
+REVERSED
+
+Campos importantes:
+- amount
+- currency BRL
+- psp_provider
+- merchant_reference
+- psp_payment_reference
+- source_owner_verified
+- destination_owner_verified
+- idempotency_key
+
+Não armazena senha bancária nem segredo do PSP.
+
+============================================================
+19. LEDGER REAL MONEY
+============================================================
+
+Tabela: real_wallet_ledger_entries
+
+O QUE É:
+Livro-razão de movimentações reais do operador.
+
+Tipos preparados:
+DEPOSIT
+WITHDRAWAL
+BET
+WIN
+REFUND
+CHARGEBACK
+REVERSAL
+ADJUSTMENT
+
+Direção:
+CREDIT
+DEBIT
+
+Campos:
+- wallet_id
+- user_id
+- payment_intent_id
+- entry_type
+- direction
+- amount
+- status
+- balance_after
+- reserved_after
+- external_reference
+- idempotency_key
+- metadata
+
+OBJETIVO:
+Toda alteração de saldo real deve gerar uma entrada auditável e idempotente.
+
+============================================================
+20. PAINEL REAL MONEY
+============================================================
+
+Rota:
+/admin/real-money
+
+O QUE É:
+Painel somente de prontidão e compliance.
+
+Mostra:
+- CNPJ configurado ou pendente;
+- entidade verificada;
+- autorização regulatória;
+- PSP;
+- conta de liquidação;
+- KYC;
+- exigência de mesma titularidade;
+- status de produção;
+- tabelas criadas;
+- limites de depósito/saque.
+
+Não possui botão para burlar compliance e ativar produção diretamente.
+
+============================================================
+21. REGRA REGULATÓRIA BRASIL — IMPORTANTE
+============================================================
+
+CNPJ sozinho não autoriza uma plataforma a oferecer apostas/jogos on-line com dinheiro real no Brasil.
+
+Segundo a Secretaria de Prêmios e Apostas do Ministério da Fazenda, para operar apostas de quota fixa nacionalmente é necessária autorização prévia da SPA/MF. Desde 01/01/2025, apenas empresas autorizadas podem operar nacionalmente.
+
+Também segundo o Ministério da Fazenda, os aportes do apostador devem ocorrer por transferência eletrônica entre uma conta cadastrada do apostador e a conta do agente operador. Valores recebidos de conta não cadastrada devem ser devolvidos.
+
+Fontes oficiais para consulta:
+- Ministério da Fazenda — Apostas de Quota Fixa
+  https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/apostas-de-quota-fixa
+
+- Serviço Gov.br — Solicitar autorização para operar apostas de quota fixa
+  https://www.gov.br/pt-br/servicos/solicitar-autorizacao-para-operar-apostas-de-quota-fixa
+
+- Ministério da Fazenda — Lista de empresas autorizadas
+  https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/transparencia-ativa-processos-de-autorizacao-de-apostas-de-quota-fixa/empresas-autorizadas
+
+- Ministério da Fazenda — pagamento por conta cadastrada
+  https://www.gov.br/fazenda/pt-br/composicao/orgaos/secretaria-de-premios-e-apostas/apostas-de-quota-fixa/tire-suas-duvidas/apostadores/o-apostador-pode-fazer-o
+
+============================================================
+22. POR QUE NÃO USAR UMA CONTA BANCÁRIA COMUM DIRETAMENTE
+============================================================
+
+Uma chave PIX ou conta PJ comum digitada no site não substitui uma integração de pagamento regulada.
+
+O desenho correto é:
+Jogador -> PSP/instituição de pagamento -> validação de titularidade -> conta transacional do operador -> webhook PSP -> payment_intent -> ledger BRL.
+
+Benefícios:
+- idempotência;
+- conciliação;
+- devolução automática quando necessária;
+- prevenção de crédito duplicado;
+- trilha de auditoria;
+- KYC/titularidade;
+- separação entre saldo e settlement;
+- menor exposição de dados bancários.
+
+============================================================
+23. SEQUÊNCIA CORRETA PARA ATIVAR DINHEIRO REAL FUTURAMENTE
+============================================================
+
+1. Preencher em /admin/ripcom-empresa os dados reais da empresa/CNPJ.
+2. Validar qual entidade será juridicamente o agente operador RR7.
+3. Obter/confirmar autorização regulatória aplicável.
+4. Cadastrar a referência da autorização no sistema.
+5. Contratar PSP/instituição de pagamento compatível com operação autorizada.
+6. Criar merchant/account no PSP para o CNPJ correto.
+7. Cadastrar somente referências públicas/IDs no banco; segredos ficam em secrets do backend.
+8. Integrar webhook assinado do PSP.
+9. Implementar criação de depósito via PSP, nunca via chave PIX fixa exposta.
+10. Implementar KYC/idade/titularidade.
+11. Implementar confirmação atômica no ledger.
+12. Implementar saque com validação de titularidade.
+13. Implementar reconciliação financeira.
+14. Testar PSP_SANDBOX.
+15. Fazer revisão de segurança/compliance.
+16. Somente então marcar READY_FOR_AUTHORIZED_PRODUCTION.
+17. Ativar PRODUCTION_ENABLED apenas quando todos os guards estiverem satisfeitos.
+
+============================================================
+24. EDGE FUNCTIONS ATIVAS RELEVANTES
+============================================================
+
+provider-gateway
+- Gateway legado/demo do RR7.
+
+hub88-demo
+- POC administrativo Hub88 DEMO.
+
+hub88-public-demo
+- Launch de jogo Hub88 DEMO autorizado para usuário autenticado.
+
+b2b-sandbox
+- Sandbox genérico B2B.
+
+ripcom-provider
+- Adapter interno RIPCOM no RR7.
+
+ripcom-b2b
+- API pública B2B principal RIPCOM.
+- Atualmente implantada como Edge Function versão 2.
+
+ripcom-wallet-callback
+- Emissor de callback sandbox de wallet para operador.
+
+ripcom-wallet-receiver-demo
+- Receiver DEMO usado para homologação.
+
+============================================================
+25. PAINÉIS ADMINISTRATIVOS RIPCOM
+============================================================
+
+/admin/ripcom
+- Operadores B2B, chaves públicas e catálogo autorizado.
+
+/admin/ripcom-empresa
+- Dados empresariais privados, inclusive CNPJ.
+
+/admin/ripcom-releases
+- Gestão/consulta de releases de jogos.
+
+/admin/ripcom-metricas
+- Telemetria B2B.
+
+/admin/real-money
+- Prontidão da wallet BRL e compliance.
+
+/admin/b2b-sandbox
+- Sandbox genérico de callbacks B2B.
+
+============================================================
+26. SEGURANÇA
+============================================================
+
+- RLS habilitado nas tabelas novas.
+- Usuário normal só pode consultar dados próprios onde aplicável.
+- Escrita de KYC, ledger e pagamentos não é liberada diretamente ao navegador.
+- Chave privada RSA nunca fica na RIPCOM.
+- Service role nunca deve ir para frontend.
+- Segredo do PSP deve ficar em secrets/backend.
+- IDs de idempotência evitam duplicação.
+- Produção real possui activation guard no banco.
+- Saldo DEMO e BRL são fisicamente separados em tabelas diferentes.
+
+Avisos atuais do Supabase Security Advisor:
+- existem funções SECURITY DEFINER antigas do RR7 DEMO que o advisor recomenda revisar;
+- proteção contra senhas vazadas do Supabase Auth está desativada.
+
+Esses avisos não foram criados pela nova wallet real-money, mas devem ser tratados antes de produção real.
+
+============================================================
+27. STATUS DE CI / BUILD
+============================================================
+
+Após a inclusão do painel Real Money:
+- testes RR7: SUCCESS;
+- teste SDK RIPCOM: SUCCESS;
+- validação de assets RIPCOM: SUCCESS;
+- TypeScript RR7: SUCCESS;
+- build RR7: SUCCESS;
+- TypeScript RIPCOM Provider: SUCCESS;
+- build RIPCOM Provider: SUCCESS.
+
+============================================================
+28. O QUE AINDA NÃO ESTÁ ATIVO
+============================================================
+
+NÃO está ativo hoje:
+- depósito BRL real;
+- saque BRL real;
+- jogo com saldo BRL;
+- PSP real;
+- chave PIX de produção;
+- merchant de produção;
+- conta de liquidação real;
+- autorização regulatória marcada como verificada;
+- KYC real;
+- webhook financeiro real;
+- settlement real.
+
+Isso é intencional.
+
+============================================================
+29. PRÓXIMO PASSO OBJETIVO
+============================================================
+
+Como o proprietário informou que possui CNPJ, o próximo passo empresarial é cadastrar no painel RIPCOM Empresa:
+- razão social;
+- CNPJ;
+- e-mail comercial;
+- telefone;
+- site;
+- contato contratual.
+
+Depois disso, deve ser definido qual será o agente operador e a situação de autorização regulatória.
+
+Quando houver PSP escolhido, integrar em modo sandbox primeiro.
+
+============================================================
+30. PRINCÍPIO DE ARQUITETURA QUE NÃO DEVE SER QUEBRADO
+============================================================
+
+RIPCOM = PROVEDORA DE JOGOS.
+RR7 = OPERADOR.
+
+A conta bancária/PSP do RR7 não deve ser incorporada dentro da RIPCOM como se fizesse parte do jogo.
+
+Isso permite que futuramente:
+RR7 -> RIPCOM
+Operador B -> RIPCOM
+Operador C -> RIPCOM
+
+Cada operador mantém sua própria wallet, compliance, PSP e relacionamento financeiro com seus jogadores.
+A RIPCOM fornece jogo, sessão, resultado e protocolo B2B.
+
+============================================================
+FIM DO DOCUMENTO
+============================================================
