@@ -5,50 +5,31 @@
 > Repositório: `rhonni666-debug/rr7-bet`  
 > Status: **RIPCOM B2B v1 — SANDBOX / DEMO**
 
-O arquivo `RIPCOM_MASTER_DOCUMENTATION.txt` permanece como backup simples. Este `.md` é o documento principal e deve ser atualizado junto de qualquer mudança estrutural.
+O arquivo `RIPCOM_MASTER_DOCUMENTATION.txt` é o backup simples. Este `.md` é o documento principal e deve ser atualizado junto de qualquer mudança estrutural.
 
 ---
 
 ## 1. O que é a RIPCOM
 
-A **RIPCOM** é a provedora própria de jogos autorais do projeto.
-
-- **RIPCOM** = provedora e infraestrutura dos jogos.
+- **RIPCOM** = provedora própria e infraestrutura dos jogos autorais.
 - **RR7** = primeiro operador sandbox.
 - **Jogos RIPCOM** = produtos independentes distribuíveis para outras plataformas.
-
-A RIPCOM não depende da interface do RR7 para existir como provider.
-
----
-
-## 2. Desenvolvimento sem depender de créditos
-
-- **GitHub** = fonte de verdade.
+- **GitHub** = fonte de verdade do código.
 - **Supabase/PostgreSQL/Edge Functions** = backend.
-- **GitHub Actions** = testes, typecheck e build.
-- **Lovable** = opcional, nunca requisito.
+- **Lovable** = opcional; o projeto não depende de créditos.
 
 ---
 
-## 3. Arquitetura
+## 2. Arquitetura
 
 ```text
 PLATAFORMA PARCEIRA
-        |
-        | RSA-SHA256
-        v
-RIPCOM B2B API
-        |
-        | operador + entitlement + release + sessão
-        v
-RIPCOM GAME RUNTIME
-        |
-        | RNG / round / ledger DEMO / bonus state
-        v
-RIPCOM STANDALONE PLAYER
-        |
-        v
-JOGADOR
+ -> RIPCOM B2B API (RSA-SHA256)
+ -> entitlement + release + sessão
+ -> RIPCOM GAME RUNTIME
+ -> RNG / round / ledger DEMO / bonus state
+ -> RIPCOM STANDALONE PLAYER
+ -> JOGADOR
 ```
 
 Fluxo externo:
@@ -65,7 +46,7 @@ OPERADOR EXTERNO
 
 ---
 
-## 4. Provider RIPCOM
+## 3. Provider RIPCOM
 
 Tabela: `public.providers`
 
@@ -80,7 +61,7 @@ Jogos oficiais RIPCOM não usam `MOCK`.
 
 ---
 
-## 5. Eclipse Serpent
+## 4. Eclipse Serpent
 
 | Campo | Valor |
 |---|---|
@@ -92,7 +73,7 @@ Jogos oficiais RIPCOM não usam `MOCK`.
 | Release atual | `1.1.0` |
 | Status | `SANDBOX` |
 
-Manifest:
+Manifest da release:
 
 ```text
 games/eclipse-serpent/manifest.json
@@ -101,54 +82,87 @@ games/eclipse-serpent/manifest.json
 Frontend atual:
 
 ```text
-RIPCOM Provider Frontend = 1.0.0-sandbox.4
+RIPCOM Provider Frontend = 1.0.0-sandbox.5
 ```
 
 ---
 
-## 6. Eclipse Bonus — regra oficial
+## 5. Eclipse Bonus — regra oficial
 
-A release `1.1.0` adiciona um modo de bônus persistente real.
+A release `1.1.0` possui bônus persistente real.
 
-### Gatilho
+- **Gatilho:** 3 scatters.
+- **Prêmio:** 8 rodadas grátis.
+- **Retrigger:** desabilitado nesta release.
+- **Aposta das free spins:** mesma aposta do giro que ativou o bônus.
+- **Débito nas free spins:** nenhum.
+- **Ganhos:** creditados normalmente no saldo DEMO.
+- **Persistência:** recarregar a página não apaga as rodadas restantes.
 
-`3 scatters`
+Sequência:
 
-### Prêmio
-
-**8 rodadas grátis**.
-
-### Regras
-
-- retrigger durante free spins: `false`;
-- usa a mesma aposta do giro pago que ativou o bônus;
-- free spins não debitam nova aposta;
-- ganhos são creditados normalmente no saldo DEMO;
-- o estado do bônus é salvo no backend;
-- recarregar a página não apaga rodadas restantes.
-
-### Sequência visual
-
-1. dois scatters geram tease;
+1. dois scatters ativam o tease;
 2. rolo decisivo desacelera;
 3. cenário escurece;
-4. eclipse começa a se formar;
-5. terceiro scatter confirma;
-6. sol aparece;
-7. lua fecha o eclipse;
-8. serpente sobe;
-9. olhos brilham;
-10. aparece `ECLIPSE BONUS`;
-11. aparece `8 RODADAS GRÁTIS`;
-12. HUD mostra contador `8 → 0`;
-13. free spins executam automaticamente;
-14. tela final mostra `TOTAL GANHO`.
+4. sol aparece;
+5. lua fecha o eclipse;
+6. serpente sobe;
+7. olhos brilham;
+8. aparece `ECLIPSE BONUS`;
+9. aparece `8 RODADAS GRÁTIS`;
+10. HUD mostra `8 → 0`;
+11. as free spins executam automaticamente;
+12. Big/Mega Wins pausam a sequência para celebração;
+13. a tela final mostra `TOTAL GANHO`.
 
 Especificação completa:
 
 ```text
 docs/ECLIPSE_SERPENT_VFX.md
 ```
+
+---
+
+## 6. Áudio e “juice” visual
+
+Frontend: `1.0.0-sandbox.5`.
+
+### Motor de áudio procedural
+
+Arquivo:
+
+```text
+ripcom-provider/src/game/audio.ts
+```
+
+O áudio é sintetizado no navegador com Web Audio API. Não usa músicas, efeitos ou samples de terceiros.
+
+Eventos:
+
+- `spin()` — giro pago;
+- `freeSpin()` — rodada grátis;
+- `tease()` — suspense de quase bônus;
+- `bonusHit()` — confirmação do Eclipse Bonus;
+- `win(multiplier)` — vitória e celebrações;
+- `bonusComplete()` — encerramento do bônus.
+
+O player possui botão de som. O navegador libera áudio após a primeira interação do usuário.
+
+### Big Win / Mega Win
+
+Arquivos:
+
+```text
+ripcom-provider/src/game/WinCelebration.tsx
+ripcom-provider/src/juice.css
+```
+
+Classificação somente visual, sem alterar a matemática:
+
+- `BIG WIN`: multiplicador `>= 8x`;
+- `MEGA WIN`: multiplicador `>= 25x`.
+
+A apresentação inclui partículas, anéis de energia, pulso de símbolos vencedores, texto animado, som procedural e pausa temporária das free spins.
 
 ---
 
@@ -160,27 +174,11 @@ Tabela:
 public.ripcom_game_releases
 ```
 
-Campos:
+Campos: `game_id`, `version`, `status`, `manifest`, `notes`, `released_at`.
 
-- `game_id`
-- `version`
-- `status`
-- `manifest`
-- `notes`
-- `released_at`
+Status: `DRAFT`, `SANDBOX`, `RELEASED`, `RETIRED`.
 
-Status:
-
-- `DRAFT`
-- `SANDBOX`
-- `RELEASED`
-- `RETIRED`
-
-Release atual do Eclipse Serpent:
-
-```text
-1.1.0
-```
+Release atual do Eclipse Serpent: `1.1.0`.
 
 Pin por operador:
 
@@ -194,18 +192,14 @@ Pin por sessão:
 public.ripcom_b2b_sessions.game_release_id
 ```
 
-Trigger de binding:
+Trigger:
 
 ```text
 public.ripcom_bind_session_release()
 ripcom_b2b_sessions_bind_release
 ```
 
-Painel:
-
-```text
-/admin/ripcom-releases
-```
+Painel: `/admin/ripcom-releases`.
 
 ---
 
@@ -257,13 +251,7 @@ Ações:
 - `player_spin` — resultado server-side + liquidação + bônus;
 - `player_close` — encerra sessão.
 
-O player usa somente token temporário de sessão.
-
-Nunca recebe:
-
-- private key RSA;
-- `service_role`;
-- credenciais B2B do operador.
+O browser recebe somente token temporário de sessão, nunca private key RSA ou `service_role`.
 
 ---
 
@@ -283,11 +271,7 @@ X-Ripcom-Request-Id
 X-Ripcom-Signature
 ```
 
-Algoritmo:
-
-```text
-RSA-SHA256 / RSASSA-PKCS1-v1_5
-```
+Algoritmo: `RSA-SHA256 / RSASSA-PKCS1-v1_5`.
 
 Canonical string:
 
@@ -299,39 +283,19 @@ METHOD\nPATH\nTIMESTAMP\nREQUEST_ID\nSHA256_HEX(BODY_EXATO)
 
 ## 11. Operadores B2B
 
-Tabela:
-
-```text
-public.ripcom_operators
-```
+Tabela: `public.ripcom_operators`.
 
 Campos principais:
 
-- `code`
-- `name`
-- `environment`
-- `status`
-- `public_key_pem`
-- `allowed_origins`
-- `api_version`
-- `wallet_mode`
-- `callback_url`
-- `max_requests_per_minute`
-- `max_sessions_per_minute`
-- `revoked_at`
-- `last_key_rotation_at`
-- `metadata`
+- `code`, `name`, `environment`, `status`;
+- `public_key_pem`, `allowed_origins`;
+- `api_version`, `wallet_mode`, `callback_url`;
+- `max_requests_per_minute`, `max_sessions_per_minute`;
+- `revoked_at`, `last_key_rotation_at`, `metadata`.
 
-Ambientes:
+Ambientes: `SANDBOX`, `PRODUCTION`.
 
-- `SANDBOX`
-- `PRODUCTION`
-
-Status:
-
-- `ACTIVE`
-- `SUSPENDED`
-- `PENDING`
+Status: `ACTIVE`, `SUSPENDED`, `PENDING`.
 
 RR7 está ativo em SANDBOX e usa Eclipse Serpent `1.1.0`.
 
@@ -345,18 +309,7 @@ Tabela:
 public.ripcom_company_profile
 ```
 
-Campos:
-
-- `legal_name`
-- `trade_name`
-- `tax_id` = CNPJ
-- `country_code`
-- `business_email`
-- `business_phone`
-- `website_url`
-- `contract_contact_name`
-- `contract_contact_email`
-- `notes`
+Campos: `legal_name`, `trade_name`, `tax_id`, `country_code`, `business_email`, `business_phone`, `website_url`, `contract_contact_name`, `contract_contact_email`, `notes`.
 
 Painel:
 
@@ -364,150 +317,94 @@ Painel:
 /admin/ripcom-empresa
 ```
 
-Os dados empresariais ficam privados por padrão e não entram automaticamente no player/manifests.
+Os dados empresariais são privados por padrão e não entram automaticamente no player/manifests.
 
 ---
 
-## 13. Catálogo por operador
+## 13. Catálogo, idempotência e telemetria
 
-Tabela:
+### Jogos por operador
 
-```text
-public.ripcom_operator_games
-```
+Tabela: `public.ripcom_operator_games`.
 
-Campos:
+Campos: `operator_id`, `game_id`, `enabled`, `release_id`.
 
-- `operator_id`
-- `game_id`
-- `enabled`
-- `release_id`
+### Requests B2B
 
-Define jogo + versão por parceiro.
+Tabela: `public.ripcom_api_requests`.
 
----
-
-## 14. Idempotência e telemetria
-
-Tabela:
-
-```text
-public.ripcom_api_requests
-```
-
-Campos:
-
-- `operator_id`
-- `request_id`
-- `method`
-- `path`
-- `body_sha256`
-- `response_status`
-- `response_body`
-- `created_at`
-- `completed_at`
-- `duration_ms`
+Campos principais: `operator_id`, `request_id`, `method`, `path`, `body_sha256`, `response_status`, `response_body`, `created_at`, `completed_at`, `duration_ms`.
 
 Mesmo request ID com conteúdo diferente gera `IDEMPOTENCY_CONFLICT`.
 
 ---
 
-## 15. Sessões B2B
+## 14. Sessões B2B
 
-Tabela:
-
-```text
-public.ripcom_b2b_sessions
-```
+Tabela: `public.ripcom_b2b_sessions`.
 
 Campos base:
 
-- `operator_id`
-- `game_id`
-- `game_release_id`
-- `external_player_id`
-- `session_token`
-- `status`
-- `currency`
-- `demo_balance`
-- `expires_at`
+- `operator_id`, `game_id`, `game_release_id`;
+- `external_player_id`, `session_token`, `status`;
+- `currency`, `demo_balance`, `expires_at`.
 
-Campos do bônus:
+Campos de bônus:
 
-- `free_spins_remaining` — free spins restantes;
-- `free_spins_total` — total concedido;
-- `bonus_bet` — aposta usada no bônus;
-- `bonus_total_win` — ganho acumulado;
-- `bonus_rounds_played` — rodadas grátis executadas;
-- `bonus_triggered_at` — momento de ativação.
+- `free_spins_remaining`;
+- `free_spins_total`;
+- `bonus_bet`;
+- `bonus_total_win`;
+- `bonus_rounds_played`;
+- `bonus_triggered_at`.
 
 Currency atual: `DEMO`.
 
 ---
 
-## 16. Rounds B2B
+## 15. Rounds B2B
 
-Tabela:
+Tabela: `public.ripcom_b2b_rounds`.
 
-```text
-public.ripcom_b2b_rounds
-```
-
-Campos base:
-
-- `session_id`
-- `request_id`
-- `bet`
-- `win`
-- `multiplier`
-- `grid`
-- `feature`
-- `balance_after`
+Campos base: `session_id`, `request_id`, `bet`, `win`, `multiplier`, `grid`, `feature`, `balance_after`.
 
 Campos do bônus:
 
-- `is_free_spin`
-- `free_spins_remaining_after`
-- `bonus_awarded`
-- `bonus_bet`
-- `bonus_total_win_after`
-- `bonus_rounds_played_after`
+- `is_free_spin`;
+- `free_spins_remaining_after`;
+- `bonus_awarded`;
+- `bonus_bet`;
+- `bonus_total_win_after`;
+- `bonus_rounds_played_after`.
 
 ---
 
-## 17. Liquidação DEMO
+## 16. Liquidação DEMO
 
-Função compatível anterior:
-
-```text
-public.ripcom_settle_demo_spin
-```
-
-Função atual do bônus:
+Função atual:
 
 ```text
 public.ripcom_settle_demo_spin_v2
 ```
 
-A v2:
+Responsabilidades:
 
-- valida sessão e expiração;
-- valida aposta;
-- garante idempotência;
-- identifica se existe free spin pendente;
-- não debita saldo em free spin;
-- usa `bonus_bet` como base;
-- credita prêmio;
-- reduz contador;
-- atualiza ganho acumulado;
-- persiste round;
-- devolve estado do bônus.
+- validar sessão/expiração/aposta;
+- garantir idempotência;
+- identificar free spin pendente;
+- não debitar saldo em free spin;
+- usar `bonus_bet`;
+- creditar prêmio;
+- reduzir contador;
+- atualizar total do bônus;
+- persistir round;
+- devolver estado do bônus.
 
 Executável somente pelo `service_role`.
 
 ---
 
-## 18. Edge Functions
+## 17. Edge Functions
 
 | Função | Uso |
 |---|---|
@@ -517,35 +414,26 @@ Executável somente pelo `service_role`.
 
 ---
 
-## 19. Frontend standalone RIPCOM
+## 18. Frontend standalone RIPCOM
 
-Diretório:
+Diretório: `ripcom-provider/`.
 
-```text
-ripcom-provider/
-```
-
-Versão atual:
-
-```text
-1.0.0-sandbox.4
-```
+Versão: `1.0.0-sandbox.5`.
 
 Inclui:
 
-- portal público;
-- API Docs;
-- Sandbox;
-- Operator overview;
+- portal e API Docs;
 - player independente;
-- fundo vivo;
-- parallax;
-- névoa/partículas;
+- fundo vivo/parallax/névoa/partículas;
 - tease de scatter;
 - eclipse sol/lua;
 - serpente subindo;
-- HUD 8 → 0;
-- resumo final do bônus.
+- HUD 8→0;
+- resumo do bônus;
+- áudio procedural;
+- botão mute/unmute;
+- Big Win / Mega Win;
+- animação de símbolos vencedores.
 
 Manifest:
 
@@ -555,7 +443,7 @@ ripcom-provider/public/provider-manifest.json
 
 ---
 
-## 20. Player Eclipse Serpent
+## 19. Player Eclipse Serpent
 
 Arquivo canônico:
 
@@ -563,7 +451,7 @@ Arquivo canônico:
 ripcom-provider/src/game/EclipsePlayer.tsx
 ```
 
-Arquivos visuais:
+Arquivos principais:
 
 ```text
 ripcom-provider/src/game/AnimatedBackground.tsx
@@ -571,8 +459,11 @@ ripcom-provider/src/game/BonusIntroOverlay.tsx
 ripcom-provider/src/game/BonusTeaseOverlay.tsx
 ripcom-provider/src/game/EclipseScene.tsx
 ripcom-provider/src/game/SerpentRise.tsx
+ripcom-provider/src/game/audio.ts
+ripcom-provider/src/game/WinCelebration.tsx
 ripcom-provider/src/bonus-mode.css
 ripcom-provider/src/cinematic-vfx.css
+ripcom-provider/src/juice.css
 ```
 
 Launch:
@@ -583,7 +474,7 @@ Launch:
 
 ---
 
-## 21. Painéis administrativos
+## 20. Painéis administrativos
 
 - `/admin/ripcom` — operadores;
 - `/admin/ripcom-empresa` — identidade empresarial/CNPJ;
@@ -592,87 +483,51 @@ Launch:
 
 ---
 
-## 22. SDK Node.js
+## 21. SDK Node.js
 
-Arquivo:
+Arquivo: `sdk/ripcom-node.mjs`.
 
-```text
-sdk/ripcom-node.mjs
-```
-
-Métodos:
-
-- `health()`
-- `games()`
-- `createSession()`
-- `launch()`
-- `closeSession()`
+Métodos: `health()`, `games()`, `createSession()`, `launch()`, `closeSession()`.
 
 ---
 
-## 23. Homologação do Eclipse Bonus 1.1.0
+## 22. Homologação do Eclipse Bonus 1.1.0
 
-Teste executado diretamente no backend:
+Teste backend:
 
 | Item | Resultado |
 |---|---:|
 | Saldo inicial | `1000` |
-| Aposta do trigger | `5` |
-| Prêmio trigger | `0` |
+| Aposta trigger | `5` |
 | Saldo após trigger | `995` |
 | Free spins | `8` |
-| Prêmio de teste por free spin | `1` |
-| Free spins executadas | `8` |
+| Prêmio teste por free spin | `1` |
 | Ganho total bônus | `8` |
 | Saldo final esperado | `1003` |
 | Saldo final obtido | `1003` |
 | Rounds | `1 pago + 8 grátis` |
 | Free spins restantes | `0` |
 
-**Resultado: PASSOU.** Nenhuma das 8 free spins debitou nova aposta do saldo.
+**Resultado: PASSOU.** Nenhuma das 8 free spins debitou nova aposta.
 
 ---
 
-## 24. CI
+## 23. CI e deploy
 
-Workflow:
+Workflow CI: `.github/workflows/ci.yml`.
 
-```text
-.github/workflows/ci.yml
-```
+Valida testes RR7, SDK RIPCOM, assets, TypeScript e builds RR7/provider.
 
-Valida:
-
-- testes RR7;
-- SDK RIPCOM;
-- assets de integração;
-- TypeScript RR7;
-- build RR7;
-- TypeScript provider standalone;
-- build provider standalone.
-
-A versão com Eclipse Bonus `1.1.0` passou o CI completo.
-
----
-
-## 25. Deploy
-
-GitHub Pages publica:
+Deploy: `.github/workflows/deploy-pages.yml`.
 
 ```text
-RR7               -> raiz
+RR7               -> raiz do Pages
 RIPCOM standalone -> /ripcom-provider/
 ```
 
-Edge Function do bônus:
-
-```text
-ripcom-player-runtime = ACTIVE
-```
-
 ---
 
-## 26. Segurança obrigatória
+## 24. Segurança obrigatória
 
 1. private key nunca no frontend;
 2. private key nunca no banco RIPCOM;
@@ -684,12 +539,13 @@ ripcom-player-runtime = ACTIVE
 8. liquidação sensível fica no backend;
 9. frontend não recebe `service_role`;
 10. CNPJ/dados empresariais ficam privados;
-11. o backend decide se o giro é grátis;
-12. dinheiro real não é habilitado por simples flag.
+11. backend decide se o giro é grátis;
+12. áudio/VFX não alteram RNG ou saldo;
+13. dinheiro real não é habilitado por simples flag.
 
 ---
 
-## 27. Sandbox x produção
+## 25. Sandbox x produção
 
 ### SANDBOX atual
 
@@ -700,17 +556,17 @@ ripcom-player-runtime = ACTIVE
 
 ### PRODUCTION
 
-É uma fase futura separada e exige engenharia, segurança, compliance e requisitos aplicáveis.
+Fase futura separada. Exige engenharia, segurança, compliance e requisitos aplicáveis.
 
 ---
 
-## 28. Documentos importantes
+## 26. Documentos importantes
 
 - `RIPCOM_MASTER_DOCUMENTATION.md` — mestre;
-- `RIPCOM_MASTER_DOCUMENTATION.txt` — backup simples;
-- `docs/ECLIPSE_SERPENT_VFX.md` — bônus/animações;
+- `RIPCOM_MASTER_DOCUMENTATION.txt` — backup;
+- `docs/ECLIPSE_SERPENT_VFX.md` — bônus, áudio e animações;
 - `games/eclipse-serpent/manifest.json` — release 1.1.0;
-- `ripcom-provider/public/provider-manifest.json` — frontend provider;
+- `ripcom-provider/public/provider-manifest.json` — capacidades do frontend;
 - `docs/RIPCOM_PROVIDER_ARCHITECTURE.md`;
 - `docs/RIPCOM_B2B_V1.md`;
 - `docs/RIPCOM_PARTNER_ONBOARDING.md`;
@@ -720,13 +576,13 @@ ripcom-player-runtime = ACTIVE
 
 ---
 
-## 29. Próximos passos
+## 27. Próximos passos
 
-1. validar visualmente o Eclipse Bonus em desktop;
-2. validar visualmente em celular;
-3. adicionar áudio autoral para tease/eclipses/serpente/free spins;
-4. criar Big Win / Mega Win autoral;
-5. adicionar animações extras dos símbolos;
+1. validar visualmente o pacote audiovisual em desktop;
+2. validar em celular real;
+3. calibrar volume/timing do áudio por dispositivo;
+4. adicionar animações individuais mais ricas para scatter/wild;
+5. criar contagem animada progressiva do valor de prêmio;
 6. executar smoke HTTP externo completo;
 7. criar segundo jogo RIPCOM;
 8. separar staging da RIPCOM;
