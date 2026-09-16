@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.18",
+  "version": "1.0.0-sandbox.19",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -81,7 +81,17 @@
     "animated-serpent-scales",
     "animated-serpent-head",
     "bonus-camera-push",
-    "mobile-animation-performance-budget"
+    "mobile-animation-performance-budget",
+    "approved-solar-wild-art",
+    "animated-solar-wild-corona",
+    "dedicated-lunar-symbol",
+    "moon-symbol-without-wild-label",
+    "live-eclipse-scatter-symbol",
+    "approved-eclipse-cinematic-art",
+    "layered-eclipse-bonus-intro",
+    "animated-moon-crossing",
+    "animated-solar-corona-burst",
+    "free-spins-eclipse-atmosphere"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -95,7 +105,7 @@
       "name": "Eclipse Serpent",
       "release": "1.3.0",
       "status": "SANDBOX",
-      "presentation": "fluid-cinematic-v18",
+      "presentation": "celestial-eclipse-v19",
       "mathProfile": {
         "layout": [3,3,3],
         "payoutMode": "FIXED_5_PAYLINES",
@@ -136,7 +146,9 @@
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
-        "retrigger": false
+        "retrigger": false,
+        "introStyle": "layered solar-lunar eclipse with serpent rise",
+        "approvedCinematicAsset": "assets/eclipse-bonus-v19.svg"
       },
       "winPresentation": {
         "greatWinAtMultiplier": 5,
@@ -149,17 +161,18 @@
         "sequentialLines": true,
         "highlightOnlyWinningCoordinates": true,
         "lineValueBadge": true,
-        "accumulateWinPerLine": true
+        "accumulateWinPerLine": true,
+        "solarWildWinPulse": true
       },
       "visualProfile": {
-        "symbolStyle": "premium-original-jeweled-svg-v18",
+        "symbolStyle": "premium-original-celestial-svg-v19",
         "flatEmojiSymbols": false,
         "symbolLabelsVisible": false,
         "symbolPayValuesVisible": false,
         "symbolPayValueSource": "slot_game_configs.symbols[].pay",
         "layout": "strict equal 3x3",
         "referencePrinciple": "production mobile slot control hierarchy only; no copied assets or trade dress",
-        "materials": ["gold", "emerald", "sapphire", "amethyst", "ruby", "obsidian"],
+        "materials": ["gold", "emerald", "sapphire", "amethyst", "ruby", "obsidian", "silver-moon", "solar-plasma"],
         "perspectiveReels": true,
         "depthLighting": true,
         "gpuReelMotion": true,
@@ -168,7 +181,9 @@
         "normalReelStopGapMs": 280,
         "bonusIntroDurationMs": 7000,
         "serpentRiseDurationMs": 5050,
-        "bonusRealism": ["camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "animated serpent scales", "head sway", "eye glow", "tongue motion", "slow serpent ascent"]
+        "wildArt": "approved solar WILD",
+        "moonArt": "dedicated cratered moon, no WILD text",
+        "bonusRealism": ["approved eclipse art depth layer", "animated moon crossing", "solar corona burst", "camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "animated serpent scales", "head sway", "eye glow", "tongue motion", "slow serpent ascent"]
       },
       "mobileProfile": {
         "primaryOrientation": "portrait",
@@ -180,7 +195,8 @@
         "reelPriority": "dominant",
         "controlDeck": "minus-bet-spin-plus-auto",
         "gpuFriendlyTransforms": true,
-        "layoutContainment": true
+        "layoutContainment": true,
+        "reducedBonusParticles": true
       }
     }
   ]
