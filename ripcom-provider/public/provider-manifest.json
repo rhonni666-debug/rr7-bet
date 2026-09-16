@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.12",
+  "version": "1.0.0-sandbox.13",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -61,7 +61,13 @@
     "bonus-ground-contact",
     "bonus-shockwave-vfx",
     "detailed-serpent-scales",
-    "cinematic-serpent-camera-push"
+    "cinematic-serpent-camera-push",
+    "three-reel-aggregated-ways",
+    "single-evaluation-per-way",
+    "sequential-reel-stops",
+    "normal-speed-spin-cadence",
+    "slow-cinematic-bonus-rise",
+    "winning-ways-breakdown"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -73,9 +79,25 @@
     {
       "gameCode": "ripcom-slot:eclipse-serpent",
       "name": "Eclipse Serpent",
-      "release": "1.1.0",
+      "release": "1.2.0",
       "status": "SANDBOX",
-      "presentation": "aligned-cinematic-bonus-v12",
+      "presentation": "ways-cinematic-v13",
+      "mathProfile": {
+        "layout": [3,4,3],
+        "payoutMode": "THREE_REEL_WAYS",
+        "aggregateWays": true,
+        "wildSubstitution": "highest valid symbol per way",
+        "scatterDirectPay": false,
+        "paytableVersion": "1.2.0",
+        "basePays": {
+          "shard": 0.20,
+          "moon": 0.30,
+          "rune": 0.45,
+          "core": 0.70,
+          "serpent": 1.25,
+          "wild": 2.50
+        }
+      },
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -85,7 +107,8 @@
         "greatWinAtMultiplier": 5,
         "bigWinAtMultiplier": 10,
         "megaWinAtMultiplier": 25,
-        "progressiveCounter": true
+        "progressiveCounter": true,
+        "showWaysBreakdown": true
       },
       "visualProfile": {
         "symbolStyle": "premium-original-jeweled-svg",
@@ -100,7 +123,10 @@
         "depthLighting": true,
         "floorPlane": true,
         "desktopCameraTilt": true,
-        "bonusRealism": ["camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "serpent scales"]
+        "normalSpinDurationMs": 1200,
+        "normalReelStopGapMs": 220,
+        "bonusIntroDurationMs": 6500,
+        "bonusRealism": ["camera push", "volumetric rays", "ground contact", "foreground fog", "dust", "shockwave", "serpent scales", "slow serpent ascent"]
       },
       "mobileProfile": {
         "primaryOrientation": "portrait",
