@@ -15,6 +15,7 @@ import { AdminOperationsPage } from './pages/AdminOperations';
 import { AdminHub88PocPage } from './pages/AdminHub88Poc';
 import { AdminPocMetricsPage } from './pages/AdminPocMetrics';
 import { AdminB2BSandboxPage } from './pages/AdminB2BSandbox';
+import { RipcomPlayerPage } from './pages/RipcomPlayer';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
 const homeRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomePage });
@@ -24,6 +25,7 @@ const walletRoute = createRoute({ getParentRoute: () => rootRoute, path: '/carte
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/perfil', component: ProfilePage });
 const historyRoute = createRoute({ getParentRoute: () => rootRoute, path: '/historico', component: HistoryPage });
 const gameRoute = createRoute({ getParentRoute: () => rootRoute, path: '/jogo/$slug', component: GamePage });
+const ripcomPlayerRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ripcom/play/$token', component: RipcomPlayerPage });
 const authRoute = createRoute({ getParentRoute: () => rootRoute, path: '/auth', component: AuthPage });
 const resetPasswordRoute = createRoute({ getParentRoute: () => rootRoute, path: '/redefinir-senha', component: ResetPasswordPage });
 const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin', component: () => <AdminPage section="dashboard" /> });
@@ -49,6 +51,7 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   historyRoute,
   gameRoute,
+  ripcomPlayerRoute,
   authRoute,
   resetPasswordRoute,
   adminRoute,
