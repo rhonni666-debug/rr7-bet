@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Brand } from '../components/Brand';
 import { useAuth } from '../lib/auth';
+import { validatePassword } from '../lib/password';
 
 type Mode = 'entrar' | 'cadastro' | 'recuperar';
 
@@ -29,8 +30,12 @@ export function AuthPage() {
     if (!email.trim()) return setError(mode === 'entrar' ? 'Informe seu usuário ou e-mail.' : 'Informe o e-mail.');
     if ((mode === 'cadastro' || mode === 'recuperar') && !email.includes('@')) return setError('Informe um e-mail válido.');
     if (mode === 'cadastro' && !name.trim()) return setError('Informe seu nome.');
-    if (mode !== 'recuperar' && password.length < 6) return setError('A senha precisa ter pelo menos 6 caracteres.');
-    if (mode === 'cadastro' && password !== confirm) return setError('As senhas não conferem.');
+    if (mode === 'entrar' && password.length < 6) return setError('Senha inválida.');
+    if (mode === 'cadastro') {
+      const passwordError = validatePassword(password);
+      if (passwordError) return setError(passwordError);
+      if (password !== confirm) return setError('As senhas não conferem.');
+    }
 
     setBusy(true);
     const result = mode === 'recuperar'
@@ -60,7 +65,7 @@ export function AuthPage() {
         {mode === 'cadastro' && <Field label="Nome" value={name} onChange={setName} autoComplete="name" />}
         <Field label={identifierLabel} value={email} onChange={setEmail} type={mode === 'entrar' ? 'text' : 'email'} autoComplete={mode === 'entrar' ? 'username' : 'email'} />
         {mode !== 'recuperar' && <Field label="Senha" value={password} onChange={setPassword} type="password" autoComplete={mode === 'cadastro' ? 'new-password' : 'current-password'} />}
-        {mode === 'cadastro' && <Field label="Confirmar senha" value={confirm} onChange={setConfirm} type="password" autoComplete="new-password" />}
+        {mode === 'cadastro' && <><p className="mt-2 text-xs text-slate-500">Use pelo menos 10 caracteres, com letra e número.</p><Field label="Confirmar senha" value={confirm} onChange={setConfirm} type="password" autoComplete="new-password" /></>}
 
         {error && <p className="mt-4 rounded-xl border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">{error}</p>}
         {message && <p className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">{message}</p>}
