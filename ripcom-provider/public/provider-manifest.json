@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.2",
+  "version": "1.0.0-sandbox.3",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -18,8 +18,11 @@
     "operator-overview",
     "standalone-player",
     "living-background-vfx",
+    "parallax-background",
     "scatter-bonus-tease",
-    "bonus-intro-vfx"
+    "solar-lunar-eclipse-animation",
+    "rising-serpent-animation",
+    "cinematic-bonus-intro-v3"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -33,7 +36,7 @@
       "name": "Eclipse Serpent",
       "release": "1.0.0",
       "status": "SANDBOX",
-      "presentation": "reactive-vfx-v2"
+      "presentation": "cinematic-vfx-v3"
     }
   ]
 }
