@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ShieldCheck, Sparkles, Volume2, VolumeX, XCircle } from 'lucide-react';
 import { getPlayerState, spinPlayer, type RipcomPlayerState, type RipcomSpin } from '../api';
+import { AnimatedAmount } from './AnimatedAmount';
 import { AnimatedBackground } from './AnimatedBackground';
 import { BonusIntroOverlay } from './BonusIntroOverlay';
 import { BonusTeaseOverlay } from './BonusTeaseOverlay';
@@ -46,7 +47,7 @@ function BonusHud({ state }: { state: RipcomPlayerState }) {
     <div className="eclipse-bonus-hud">
       <div className="bonus-hud-label"><Sparkles size={15} /><span>ECLIPSE BONUS</span></div>
       <div className="bonus-hud-count"><strong>{session.freeSpinsRemaining}</strong><span>/ {total} FREE SPINS</span></div>
-      <div className="bonus-hud-win"><small>GANHO NO BÔNUS</small><b>{session.bonusTotalWin.toLocaleString('pt-BR')} CR</b></div>
+      <div className="bonus-hud-win"><small>GANHO NO BÔNUS</small><b><AnimatedAmount value={session.bonusTotalWin} duration={520} suffix=" CR" /></b></div>
     </div>
   );
 }
@@ -59,7 +60,7 @@ function BonusOutro({ totalWin }: { totalWin: number }) {
         <small>ECLIPSE BONUS CONCLUÍDO</small>
         <strong>8 RODADAS GRÁTIS</strong>
         <span>TOTAL GANHO</span>
-        <b>{totalWin.toLocaleString('pt-BR')} CR</b>
+        <b><AnimatedAmount value={totalWin} duration={1500} suffix=" CR" /></b>
       </div>
     </div>
   );
@@ -82,6 +83,7 @@ export function EclipsePlayer({ token }: { token: string }) {
   const symbols = useMemo(() => new Map((state?.config.symbols ?? []).map((symbol) => [symbol.id, symbol])), [state]);
   const winning = useMemo(() => new Set(outcome?.wins.map((win) => win.symbolId) ?? []), [outcome]);
   const scatterId = useMemo(() => state?.config.symbols.find((symbol) => symbol.scatter)?.id, [state]);
+  const wildId = useMemo(() => state?.config.symbols.find((symbol) => symbol.wild)?.id, [state]);
   const bonusActive = Boolean(state?.session.freeSpinsRemaining && state.session.freeSpinsRemaining > 0);
 
   useEffect(() => {
@@ -138,7 +140,7 @@ export function EclipsePlayer({ token }: { token: string }) {
     const tier = classifyWin(result.multiplier);
     if (tier === 'normal') return;
     setCelebration(result);
-    await sleep(tier === 'mega' ? 2700 : 2000);
+    await sleep(tier === 'mega' ? 2700 : tier === 'big' ? 2250 : 1650);
     setCelebration(null);
   }
 
@@ -168,6 +170,11 @@ export function EclipsePlayer({ token }: { token: string }) {
       await sleep(freeSpin ? 480 : 540);
       window.clearInterval(spinTimer);
 
+      for (let columnIndex = 0; columnIndex < state.config.layout.length; columnIndex += 1) {
+        eclipseAudio.reelStop(columnIndex);
+        await sleep(freeSpin ? 42 : 64);
+      }
+
       if (!freeSpin) {
         const decisiveColumn = findTeaseColumn(result, scatterId);
         if (decisiveColumn !== null) {
@@ -181,16 +188,19 @@ export function EclipsePlayer({ token }: { token: string }) {
           await sleep(result.bonusAwarded === 8 ? 1650 : 1220);
           window.clearInterval(teaseTimer);
         } else {
-          await sleep(260);
+          await sleep(180);
         }
       } else {
-        await sleep(220);
+        await sleep(150);
       }
 
       setGrid(result.grid);
       setOutcome(result);
       setTeaseColumn(null);
       applyResult(result);
+
+      if (result.scatterCount > 0) eclipseAudio.scatterLand(result.scatterCount);
+      if (wildId && result.grid.some((column) => column.includes(wildId))) eclipseAudio.wildReveal();
 
       if (result.bonusAwarded === 8) {
         eclipseAudio.bonusHit();
@@ -290,7 +300,7 @@ export function EclipsePlayer({ token }: { token: string }) {
         </div>
 
         {outcome && outcome.win > 0 && phase !== 'bonus' && phase !== 'bonus-outro' && (
-          <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong>+{outcome.win.toLocaleString('pt-BR')} CR</strong><small>{outcome.multiplier.toFixed(2)}×</small></div>
+          <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong><AnimatedAmount value={outcome.win} duration={640} prefix="+" suffix=" CR" /></strong><small>{outcome.multiplier.toFixed(2)}×</small></div>
         )}
 
         {error && <div className="game-error">{error}</div>}
