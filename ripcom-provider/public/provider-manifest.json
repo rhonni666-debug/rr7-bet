@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.8",
+  "version": "1.0.0-sandbox.9",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -41,7 +41,12 @@
     "mobile-safe-area-support",
     "mobile-touch-controls",
     "mobile-performance-budget",
-    "reel-snap-stop-vfx"
+    "reel-snap-stop-vfx",
+    "original-dimensional-svg-symbols",
+    "perspective-reel-stage",
+    "dimensional-control-deck",
+    "cinematic-floor-plane",
+    "pointer-camera-tilt"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -55,7 +60,7 @@
       "name": "Eclipse Serpent",
       "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "cinematic-mobile-v8",
+      "presentation": "dimensional-cinematic-v9",
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -67,12 +72,21 @@
         "megaWinAtMultiplier": 25,
         "progressiveCounter": true
       },
+      "visualProfile": {
+        "symbolStyle": "original-dimensional-svg",
+        "flatEmojiSymbols": false,
+        "perspectiveReels": true,
+        "depthLighting": true,
+        "floorPlane": true,
+        "desktopCameraTilt": true
+      },
       "mobileProfile": {
         "primaryOrientation": "portrait",
         "targetAspectRatio": "9:16",
         "safeAreas": true,
         "touchOptimized": true,
-        "reducedParticleBudget": true
+        "reducedParticleBudget": true,
+        "cameraTiltDisabled": true
       }
     }
   ]
