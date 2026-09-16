@@ -1,0 +1,228 @@
+/* Eclipse Serpent sandbox.16 — dark bet picker + sequential payline win presentation */
+
+/* ---------- BET PICKER ---------- */
+.eclipse-player-v110 .bet-control-stage16{
+  position:relative!important;
+  overflow:visible!important;
+  z-index:40;
+}
+.eclipse-player-v110 .bet-picker-stage16{
+  position:relative;
+  width:100%;
+  margin-top:2px;
+}
+.eclipse-player-v110 .bet-picker-trigger{
+  width:100%;
+  min-height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:2px 0 0;
+  border:0;
+  background:transparent;
+  color:#f2fff8;
+  text-align:left;
+}
+.eclipse-player-v110 .bet-picker-trigger strong{
+  font-size:15px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.02em;
+}
+.eclipse-player-v110 .bet-picker-trigger span{
+  color:#9bb8ae;
+  font-size:14px;
+  transition:transform .18s ease;
+}
+.eclipse-player-v110 .bet-picker-stage16.is-open .bet-picker-trigger span{transform:rotate(180deg)}
+.eclipse-player-v110 .bet-picker-trigger:disabled{cursor:not-allowed;opacity:.58}
+
+.eclipse-player-v110 .bet-picker-menu{
+  position:absolute;
+  z-index:200;
+  left:-12px;
+  bottom:calc(100% + 12px);
+  width:min(310px,82vw);
+  max-height:min(330px,56vh);
+  overflow:auto;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  padding:11px;
+  border:1px solid rgba(133,255,206,.2);
+  border-radius:17px;
+  background:linear-gradient(180deg,rgba(6,25,21,.985),rgba(2,13,12,.995));
+  box-shadow:0 22px 55px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.055),0 0 30px rgba(87,255,191,.045);
+  backdrop-filter:blur(18px);
+  animation:stage16BetMenuIn .18s ease-out both;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(141,255,207,.24) transparent;
+}
+.eclipse-player-v110 .bet-picker-menu button{
+  min-height:39px;
+  padding:7px 8px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+  color:#e9f8f2;
+  font-size:12px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  transition:transform .12s ease,border-color .12s ease,background .12s ease,color .12s ease;
+}
+.eclipse-player-v110 .bet-picker-menu button:hover{
+  transform:translateY(-1px);
+  border-color:rgba(105,239,200,.32);
+  background:rgba(81,214,174,.085);
+}
+.eclipse-player-v110 .bet-picker-menu button.active{
+  color:#06110d;
+  border-color:rgba(184,255,219,.72);
+  background:linear-gradient(180deg,#baffdb,#6ce5bc);
+  box-shadow:0 0 18px rgba(100,244,194,.16);
+}
+
+/* ---------- WINNING LINE SEQUENCE ---------- */
+.eclipse-player-v110 .reels.showing-line-win{
+  position:relative!important;
+}
+.eclipse-player-v110 .reels.showing-line-win .symbol{
+  transition:filter .2s ease,opacity .2s ease,transform .2s ease;
+}
+.eclipse-player-v110 .reels.showing-line-win .symbol.line-win-muted .symbol-art-stage{
+  opacity:.22!important;
+  filter:saturate(.5) brightness(.48)!important;
+  transform:translateZ(8px) scale(.91)!important;
+}
+.eclipse-player-v110 .reels.showing-line-win .symbol.line-win-active{
+  z-index:18;
+}
+.eclipse-player-v110 .reels.showing-line-win .symbol.line-win-active .symbol-art-stage{
+  opacity:1!important;
+  transform:translateZ(58px) scale(1.08)!important;
+  filter:brightness(1.23) saturate(1.15) drop-shadow(0 0 13px rgba(255,225,111,.42)) drop-shadow(0 0 27px rgba(95,255,199,.24))!important;
+  animation:stage16WinningSymbol .82s ease-in-out both;
+}
+.eclipse-player-v110 .reels.showing-line-win .symbol.line-win-active::before{
+  opacity:.8!important;
+  background:radial-gradient(circle,rgba(255,229,128,.2),rgba(78,255,194,.08) 44%,transparent 70%)!important;
+  animation:stage16WinningGlow .82s ease-in-out both;
+}
+
+.eclipse-player-v110 .payline-trace{
+  position:absolute;
+  z-index:12;
+  left:5%;
+  width:90%;
+  height:3px;
+  border-radius:999px;
+  pointer-events:none;
+  background:linear-gradient(90deg,transparent,#fff0a2 9%,#8cffcf 50%,#fff0a2 91%,transparent);
+  box-shadow:0 0 7px rgba(255,235,142,.75),0 0 18px rgba(92,255,198,.42);
+  transform-origin:50% 50%;
+  animation:stage16LineTrace .82s ease-out both;
+}
+.eclipse-player-v110 .payline-1{top:50%}
+.eclipse-player-v110 .payline-2{top:16.666%}
+.eclipse-player-v110 .payline-3{top:83.333%}
+.eclipse-player-v110 .payline-4{top:50%;left:-8%;width:116%;transform:rotate(45deg)}
+.eclipse-player-v110 .payline-5{top:50%;left:-8%;width:116%;transform:rotate(-45deg)}
+
+.eclipse-player-v110 .line-win-value{
+  position:absolute;
+  z-index:30;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  min-width:132px;
+  display:grid;
+  justify-items:center;
+  gap:1px;
+  padding:8px 16px 9px;
+  border:1px solid rgba(255,224,108,.5);
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(18,32,25,.94),rgba(5,18,15,.97));
+  box-shadow:0 14px 34px rgba(0,0,0,.56),inset 0 1px 0 rgba(255,255,255,.09),0 0 24px rgba(255,221,91,.1);
+  backdrop-filter:blur(10px);
+  pointer-events:none;
+  animation:stage16WinValue .82s cubic-bezier(.13,.86,.22,1.08) both;
+}
+.eclipse-player-v110 .line-win-value span{
+  color:#9ff0cd;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.18em;
+}
+.eclipse-player-v110 .line-win-value strong{
+  color:#fff1a7;
+  font-size:22px;
+  line-height:1;
+  font-weight:1000;
+  text-shadow:0 0 13px rgba(255,224,96,.24);
+}
+.eclipse-player-v110 .line-win-value em{
+  color:#f4fff9;
+  font-size:9px;
+  font-style:normal;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+
+@keyframes stage16BetMenuIn{
+  from{opacity:0;transform:translateY(8px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes stage16WinningSymbol{
+  0%{transform:translateZ(32px) scale(.94);filter:brightness(.9)}
+  35%{transform:translateZ(64px) scale(1.13);filter:brightness(1.35)}
+  68%{transform:translateZ(52px) scale(1.045);filter:brightness(1.17)}
+  100%{transform:translateZ(58px) scale(1.08);filter:brightness(1.23)}
+}
+@keyframes stage16WinningGlow{
+  0%{opacity:0;transform:scale(.72)}
+  44%{opacity:1;transform:scale(1.13)}
+  100%{opacity:.7;transform:scale(1)}
+}
+@keyframes stage16LineTrace{
+  0%{opacity:0;clip-path:inset(0 50% 0 50%)}
+  35%{opacity:1}
+  100%{opacity:.82;clip-path:inset(0 0 0 0)}
+}
+@keyframes stage16WinValue{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.62)}
+  42%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+@media(max-width:600px) and (orientation:portrait){
+  .eclipse-player-v110 .bet-picker-menu{
+    position:fixed;
+    z-index:500;
+    left:50%;
+    bottom:88px;
+    width:min(92vw,390px);
+    max-height:45vh;
+    transform:translateX(-50%);
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    animation:stage16BetMenuMobileIn .2s ease-out both;
+  }
+  .eclipse-player-v110 .bet-picker-menu button{min-height:38px;font-size:11px}
+  .eclipse-player-v110 .line-win-value{min-width:116px;padding:7px 13px 8px}
+  .eclipse-player-v110 .line-win-value strong{font-size:19px}
+  .eclipse-player-v110 .payline-4{transform:rotate(45deg)}
+  .eclipse-player-v110 .payline-5{transform:rotate(-45deg)}
+}
+
+@keyframes stage16BetMenuMobileIn{
+  from{opacity:0;transform:translate(-50%,10px) scale(.97)}
+  to{opacity:1;transform:translate(-50%,0) scale(1)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .eclipse-player-v110 .bet-picker-menu,
+  .eclipse-player-v110 .symbol.line-win-active .symbol-art-stage,
+  .eclipse-player-v110 .symbol.line-win-active::before,
+  .eclipse-player-v110 .payline-trace,
+  .eclipse-player-v110 .line-win-value{animation:none!important}
+}
