@@ -1,24 +1,24 @@
-.game-player{--mx:0;--my:0;isolation:isolate;background:#020706!important;transition:filter .35s ease}
-.game-player .game-frame{position:relative;z-index:20;transform:translate3d(calc(var(--mx)*-3px),calc(var(--my)*-2px),0);transition:transform .25s ease}
-.eclipse-scene{position:absolute;inset:-5%;z-index:0;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,rgba(2,7,6,.08),rgba(2,7,6,.72)),url('./assets/eclipse-temple-bg.svg') center/cover no-repeat;transform:scale(1.08) translate3d(calc(var(--mx)*7px),calc(var(--my)*5px),0);transition:transform .3s ease,filter .5s ease}
+.game-player{isolation:isolate;background:#020706!important;transition:filter .35s ease}
+.game-player .game-frame{position:relative;z-index:20;transition:transform .25s ease}
+.eclipse-scene{position:absolute;inset:-5%;z-index:0;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,rgba(2,7,6,.08),rgba(2,7,6,.72)),url('./assets/eclipse-temple-bg.svg') center/cover no-repeat;transform:scale(1.08);transition:filter .5s ease;animation:sceneDrift 16s ease-in-out infinite alternate}
 .eclipse-scene:before{content:"";position:absolute;inset:-15%;background:radial-gradient(circle at 50% 24%,rgba(198,255,105,.12),transparent 18%),radial-gradient(circle at 50% 75%,rgba(63,255,183,.08),transparent 35%);animation:ambientPulse 6s ease-in-out infinite}
 .eclipse-scene:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 0 36%,rgba(194,255,105,.035) 48%,transparent 60%);transform:translateX(-35%);animation:lightSweep 9s linear infinite}
 .eclipse-moon-halo{position:absolute;left:50%;top:9%;width:min(34vw,360px);aspect-ratio:1;border-radius:50%;transform:translateX(-50%);border:2px solid rgba(194,255,105,.12);box-shadow:0 0 70px rgba(166,255,105,.12),inset 0 0 50px rgba(166,255,105,.05);animation:haloBreath 4.8s ease-in-out infinite}
-.eclipse-moon-halo:before,.eclipse-moon-halo:after{content:"";position:absolute;inset:-14%;border:1px solid rgba(124,255,190,.08);border-radius:50%;animation:slowOrbit 18s linear infinite}.eclipse-moon-halo:after{inset:-28%;animation-duration:28s;animation-direction:reverse}
+.eclipse-moon-halo:before,.eclipse-moon-halo:after{content:"";position:absolute;inset:-14%;border:1px solid rgba(124,255,190,.08);border-radius:50%;animation:orbitLocal 18s linear infinite}.eclipse-moon-halo:after{inset:-28%;animation-duration:28s;animation-direction:reverse}
 .fog{position:absolute;left:-20%;width:140%;height:22%;border-radius:50%;filter:blur(28px);opacity:.19;background:linear-gradient(90deg,transparent,rgba(137,255,193,.35),rgba(84,219,174,.22),transparent)}
 .fog.f1{bottom:5%;animation:fogDrift 13s ease-in-out infinite alternate}.fog.f2{bottom:21%;opacity:.12;animation:fogDrift2 18s ease-in-out infinite alternate-reverse}
 .rune-ring{position:absolute;left:50%;top:22%;width:min(52vw,540px);aspect-ratio:1;border-radius:50%;border:1px dashed rgba(189,255,112,.08);transform:translate(-50%,-50%);animation:slowOrbit 42s linear infinite}
 .rune-ring:after{content:"";position:absolute;inset:10%;border-radius:50%;border:1px dotted rgba(73,245,185,.07)}
 .ember-field{position:absolute;inset:0}.ember{--x:50%;--d:8s;--s:4px;position:absolute;left:var(--x);bottom:-5%;width:var(--s);height:var(--s);border-radius:50%;background:#c9ff72;box-shadow:0 0 10px #76ffc0;opacity:0;animation:emberRise var(--d) linear infinite;animation-delay:var(--delay,0s)}
 .game-player.phase-spinning .eclipse-scene{filter:saturate(1.15) brightness(1.05)}
-.game-player.phase-spinning .ember{animation-duration:calc(var(--d)*.72)}
+.game-player.phase-spinning .ember{animation-duration:4.5s}
 .game-player.phase-tease .eclipse-scene{filter:saturate(1.35) brightness(.72) hue-rotate(-8deg)}
 .game-player.phase-tease .eclipse-moon-halo{border-color:rgba(255,218,88,.45);box-shadow:0 0 120px rgba(255,194,65,.22),inset 0 0 70px rgba(255,214,78,.1);animation:teaseHalo .72s ease-in-out infinite}
 .game-player.phase-tease .rune-ring{border-color:rgba(255,214,93,.2);animation-duration:7s}
 .game-player.phase-bonus .eclipse-scene{filter:saturate(1.65) brightness(1.18) contrast(1.05)}
 .game-player.phase-bonus .eclipse-scene:before{background:radial-gradient(circle at 50% 24%,rgba(245,255,176,.3),transparent 24%),radial-gradient(circle at 50% 67%,rgba(75,255,178,.16),transparent 44%);animation:bonusSky .9s ease-in-out infinite alternate}
 .game-player.phase-bonus .eclipse-moon-halo{border-color:rgba(220,255,145,.85);box-shadow:0 0 180px rgba(178,255,103,.38),0 0 60px rgba(93,255,193,.35),inset 0 0 80px rgba(234,255,180,.2);animation:bonusHalo .85s ease-in-out infinite}
-.game-player.phase-bonus .ember{background:#fff6ad;box-shadow:0 0 16px #efff9a;animation-duration:calc(var(--d)*.45)}
+.game-player.phase-bonus .ember{background:#fff6ad;box-shadow:0 0 16px #efff9a;animation-duration:3.2s}
 .bonus-tease-overlay,.bonus-intro-overlay{position:absolute;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none}
 .bonus-tease-overlay:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 52%,transparent 8%,rgba(3,7,6,.3) 48%,rgba(1,3,3,.72) 100%);animation:teaseVignette .55s ease-in-out infinite alternate}
 .bonus-tease-card{position:relative;padding:14px 24px;border:1px solid rgba(255,220,99,.26);border-radius:999px;background:rgba(8,11,9,.7);box-shadow:0 0 60px rgba(255,204,73,.16);backdrop-filter:blur(10px);text-align:center;animation:teaseCard .55s ease-in-out infinite alternate}
@@ -31,9 +31,11 @@
 .symbol.scatter{position:relative}.symbol.scatter:after{content:"";position:absolute;inset:5px;border-radius:12px;border:1px solid rgba(210,255,125,.18);opacity:0}.phase-tease .symbol.scatter:not(.tease-hidden):after,.phase-bonus .symbol.scatter:after{opacity:1;animation:scatterPulse .62s ease-in-out infinite}.phase-tease .symbol.scatter:not(.tease-hidden),.phase-bonus .symbol.scatter{filter:brightness(1.22) saturate(1.25);text-shadow:0 0 18px rgba(210,255,120,.38)}
 .phase-tease .reels{transform:scale(1.015);transition:transform .3s ease}.phase-bonus .reels{animation:bonusReels .6s ease-out both}
 .win-banner{z-index:25}
+@keyframes sceneDrift{0%{transform:scale(1.08) translate3d(-10px,-4px,0)}50%{transform:scale(1.1) translate3d(7px,5px,0)}100%{transform:scale(1.085) translate3d(12px,-2px,0)}}
 @keyframes ambientPulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
 @keyframes lightSweep{to{transform:translateX(45%)}}
 @keyframes haloBreath{0%,100%{transform:translateX(-50%) scale(.96);opacity:.5}50%{transform:translateX(-50%) scale(1.04);opacity:1}}
+@keyframes orbitLocal{to{transform:rotate(360deg)}}
 @keyframes slowOrbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes fogDrift{from{transform:translateX(-5%) scaleX(.9)}to{transform:translateX(9%) scaleX(1.08)}}
 @keyframes fogDrift2{from{transform:translateX(8%) scaleX(1.05)}to{transform:translateX(-7%) scaleX(.94)}}
@@ -50,5 +52,5 @@
 @keyframes teaseReel{from{transform:translateY(-2px)}to{transform:translateY(2px)}}
 @keyframes scatterPulse{0%,100%{transform:scale(.97);opacity:.25}50%{transform:scale(1.04);opacity:1;box-shadow:0 0 24px rgba(199,255,112,.15)}}
 @keyframes bonusReels{0%{transform:scale(1)}35%{transform:scale(1.025)}100%{transform:scale(1)}}
-@media (max-width:700px){.eclipse-scene{inset:-1%;transform:scale(1.16) translate3d(calc(var(--mx)*4px),calc(var(--my)*3px),0)}.eclipse-moon-halo{top:12%;width:58vw}.rune-ring{top:28%;width:86vw}.bonus-tease-card{max-width:84%;padding:12px 18px}.bonus-intro-card strong{font-size:50px}.game-player .game-frame{transform:none}}
+@media (max-width:700px){.eclipse-scene{inset:-1%;transform:scale(1.16);animation-name:sceneDriftMobile}.eclipse-moon-halo{top:12%;width:58vw}.rune-ring{top:28%;width:86vw}.bonus-tease-card{max-width:84%;padding:12px 18px}.bonus-intro-card strong{font-size:50px}.game-player .game-frame{transform:none}@keyframes sceneDriftMobile{0%{transform:scale(1.16) translate3d(-6px,-3px,0)}100%{transform:scale(1.19) translate3d(8px,4px,0)}}}
 @media (prefers-reduced-motion:reduce){.eclipse-scene,.eclipse-scene:before,.eclipse-scene:after,.eclipse-moon-halo,.eclipse-moon-halo:before,.eclipse-moon-halo:after,.fog,.rune-ring,.ember,.bonus-intro-overlay:before,.bonus-intro-overlay:after,.bonus-intro-card,.bonus-intro-icon,.bonus-particle,.reel.tease-target,.symbol.scatter:after{animation:none!important}.game-player .game-frame,.eclipse-scene{transform:none!important}}
