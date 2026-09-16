@@ -16,6 +16,7 @@ import { AdminHub88PocPage } from './pages/AdminHub88Poc';
 import { AdminPocMetricsPage } from './pages/AdminPocMetrics';
 import { AdminB2BSandboxPage } from './pages/AdminB2BSandbox';
 import { AdminRipcomPage } from './pages/AdminRipcom';
+import { AdminRipcomCompanyPage } from './pages/AdminRipcomCompany';
 import { AdminRipcomReleasesPage } from './pages/AdminRipcomReleases';
 import { AdminRipcomTelemetryPage } from './pages/AdminRipcomTelemetry';
 import { RipcomPlayerPage } from './pages/RipcomPlayer';
@@ -45,6 +46,7 @@ const adminSessionsRoute = createRoute({ getParentRoute: () => rootRoute, path: 
 const adminTransactionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/transacoes', component: () => <AdminOperationsPage section="transactions" /> });
 const adminAuditRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/auditoria', component: () => <AdminPage section="audit" /> });
 const adminRipcomRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/ripcom', component: AdminRipcomPage });
+const adminRipcomCompanyRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/ripcom-empresa', component: AdminRipcomCompanyPage });
 const adminRipcomReleasesRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/ripcom-releases', component: AdminRipcomReleasesPage });
 const adminRipcomTelemetryRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/ripcom-metricas', component: AdminRipcomTelemetryPage });
 const adminB2BSandboxRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/b2b-sandbox', component: AdminB2BSandboxPage });
@@ -75,6 +77,7 @@ const routeTree = rootRoute.addChildren([
   adminTransactionsRoute,
   adminAuditRoute,
   adminRipcomRoute,
+  adminRipcomCompanyRoute,
   adminRipcomReleasesRoute,
   adminRipcomTelemetryRoute,
   adminB2BSandboxRoute,
