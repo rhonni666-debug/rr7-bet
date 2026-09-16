@@ -1,0 +1,219 @@
+/* Eclipse Serpent sandbox.17 — compact slot control deck + DEMO auto spin */
+
+.eclipse-player-v110 .slot-control-deck-stage17{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:52px minmax(72px,1fr) 84px 52px 66px!important;
+  gap:7px!important;
+  min-height:88px!important;
+  padding:8px 10px 10px!important;
+  align-items:center!important;
+  background:linear-gradient(180deg,rgba(3,16,13,.96),rgba(1,9,8,.995))!important;
+  border-top:1px solid rgba(255,255,255,.06)!important;
+  z-index:30;
+}
+
+.bet-step-stage17,
+.auto-button-stage17{
+  height:52px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:15px;
+  background:linear-gradient(180deg,rgba(18,43,35,.96),rgba(5,20,17,.98));
+  color:#eaffdc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 18px rgba(0,0,0,.24);
+  transition:transform .14s ease,border-color .14s ease,filter .14s ease;
+}
+.bet-step-stage17:not(:disabled):active,
+.auto-button-stage17:not(:disabled):active{transform:translateY(2px) scale(.96)}
+.bet-step-stage17:not(:disabled):hover,
+.auto-button-stage17:not(:disabled):hover{border-color:rgba(196,255,112,.35);filter:brightness(1.08)}
+.bet-step-stage17:disabled,
+.auto-button-stage17:disabled{opacity:.32;cursor:not-allowed}
+
+.bet-readout-stage17{
+  height:52px;
+  min-width:0;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:15px;
+  background:rgba(255,255,255,.025);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:5px 8px;
+  text-align:center;
+}
+.bet-readout-stage17 small{
+  font-size:7px;
+  line-height:1;
+  letter-spacing:.18em;
+  color:#6f9085;
+  font-weight:900;
+}
+.bet-readout-stage17 strong{
+  margin-top:5px;
+  font-size:15px;
+  line-height:1;
+  color:#f3fff0;
+  font-variant-numeric:tabular-nums;
+}
+
+.eclipse-player-v110 .slot-control-deck-stage17 .spin-button{
+  width:82px!important;
+  height:82px!important;
+  min-width:82px!important;
+  margin:0 auto!important;
+  z-index:2;
+}
+
+.auto-button-stage17{
+  height:58px;
+  padding:5px 4px;
+  flex-direction:column;
+  gap:1px;
+  color:#bfffa2;
+}
+.auto-button-stage17 span{
+  font-size:7px;
+  line-height:1;
+  letter-spacing:.1em;
+  font-weight:950;
+}
+.auto-button-stage17 strong{
+  font-size:9px;
+  line-height:1;
+  color:#f3ffe2;
+}
+.auto-button-stage17.is-running{
+  color:#ffe99b;
+  border-color:rgba(255,205,91,.45);
+  background:linear-gradient(180deg,rgba(77,56,16,.96),rgba(33,22,7,.98));
+  box-shadow:0 0 22px rgba(255,198,60,.12),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.auto-button-stage17.is-running strong{color:#fff1a7;font-size:12px}
+
+/* AUTO panel stays above the control dock, not over the center of the reels. */
+.auto-spin-panel-stage17{
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:calc(100% + 7px);
+  z-index:120;
+  max-height:min(62vh,520px);
+  overflow:auto;
+  border:1px solid rgba(194,255,123,.2);
+  border-radius:20px;
+  padding:12px;
+  background:linear-gradient(180deg,rgba(5,29,23,.995),rgba(2,15,12,.995));
+  box-shadow:0 -18px 60px rgba(0,0,0,.58),0 0 40px rgba(115,255,138,.06),inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(18px);
+}
+.auto-spin-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.auto-spin-panel-head small,
+.auto-spin-panel-head strong{display:block}
+.auto-spin-panel-head small{font-size:7px;letter-spacing:.16em;color:#6b9386;font-weight:900}
+.auto-spin-panel-head strong{margin-top:3px;font-size:14px;letter-spacing:.05em;color:#efffe9}
+.auto-spin-panel-head>button{
+  width:34px;height:34px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:#b9d7ce;display:grid;place-items:center
+}
+
+.auto-spin-panel-stage17 section{margin-top:11px}
+.auto-spin-panel-stage17 section>span{
+  display:block;
+  margin-bottom:7px;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.15em;
+  color:#75998e;
+}
+.auto-bet-grid-stage17{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:5px;
+}
+.auto-count-grid-stage17{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+}
+.auto-bet-grid-stage17 button,
+.auto-count-grid-stage17 button{
+  min-height:34px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+  color:#9cb8af;
+  font-size:9px;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+.auto-bet-grid-stage17 button.active,
+.auto-count-grid-stage17 button.active{
+  border-color:rgba(197,255,104,.48);
+  background:linear-gradient(180deg,rgba(174,255,87,.18),rgba(72,146,44,.1));
+  color:#e7ffc1;
+  box-shadow:0 0 18px rgba(169,255,81,.08),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.auto-start-stage17{
+  width:100%;
+  min-height:48px;
+  margin-top:12px;
+  padding:8px 12px;
+  border:1px solid rgba(199,255,105,.4);
+  border-radius:14px;
+  background:linear-gradient(180deg,#c9ff72,#86d847);
+  color:#10200b;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:8px;
+  font-weight:1000;
+  box-shadow:0 10px 26px rgba(152,255,72,.12),inset 0 1px 0 rgba(255,255,255,.42);
+}
+.auto-start-stage17 span{font-size:10px;letter-spacing:.04em}
+.auto-start-stage17 strong{font-size:10px;font-variant-numeric:tabular-nums}
+
+/* During auto spin, keep the deck readable while locking manual bet changes. */
+.auto-running-stage17 .bet-readout-stage17{
+  border-color:rgba(255,210,92,.18);
+  box-shadow:inset 0 0 18px rgba(255,208,77,.03);
+}
+
+@media(max-width:600px) and (orientation:portrait){
+  .eclipse-player-v110 .slot-control-deck-stage17{
+    grid-template-columns:42px minmax(58px,1fr) 74px 42px 56px!important;
+    gap:5px!important;
+    min-height:78px!important;
+    padding:6px 7px 8px!important;
+  }
+  .bet-step-stage17{height:46px;border-radius:13px}
+  .bet-step-stage17 svg{width:20px;height:20px}
+  .bet-readout-stage17{height:46px;border-radius:13px;padding-inline:4px}
+  .bet-readout-stage17 strong{font-size:13px}
+  .eclipse-player-v110 .slot-control-deck-stage17 .spin-button{width:72px!important;height:72px!important;min-width:72px!important}
+  .auto-button-stage17{height:50px;border-radius:13px}
+  .auto-button-stage17 svg{width:17px;height:17px}
+  .auto-spin-panel-stage17{left:5px;right:5px;padding:10px;border-radius:17px;max-height:58vh}
+  .auto-bet-grid-stage17{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .auto-bet-grid-stage17 button{min-height:31px;font-size:8px}
+  .auto-count-grid-stage17 button{min-height:34px}
+}
+
+@media(max-width:370px){
+  .eclipse-player-v110 .slot-control-deck-stage17{
+    grid-template-columns:38px minmax(52px,1fr) 68px 38px 52px!important;
+    gap:4px!important;
+  }
+  .bet-readout-stage17 strong{font-size:12px}
+  .eclipse-player-v110 .slot-control-deck-stage17 .spin-button{width:66px!important;height:66px!important;min-width:66px!important}
+}
