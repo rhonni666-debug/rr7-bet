@@ -11,6 +11,23 @@ import {
 } from './api';
 
 type Page = 'home' | 'docs' | 'sandbox' | 'operator';
+type GamePhase = 'idle' | 'spinning' | 'tease' | 'bonus' | 'reveal';
+
+const ambientParticles = Array.from({ length: 22 }, (_, index) => ({
+  x: `${5 + ((index * 37) % 91)}%`,
+  delay: `${-((index * 0.67) % 8).toFixed(2)}s`,
+  duration: `${6 + (index % 7)}s`,
+  size: `${2 + (index % 4)}px`,
+}));
+
+const bonusParticles = Array.from({ length: 18 }, (_, index) => ({
+  angle: `${index * 20}deg`,
+  delay: `${(index % 6) * 0.08}s`,
+}));
+
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
 
 function readPage(): Page {
   const value = window.location.hash.replace('#/', '').replace('#', '');
@@ -82,16 +99,58 @@ function randomGrid(state: RipcomPlayerState) {
   return state.config.layout.map((rows) => Array.from({ length: rows }, () => ids[Math.floor(Math.random() * ids.length)] ?? ''));
 }
 
+function randomColumn(state: RipcomPlayerState, columnIndex: number) {
+  const ids = state.config.symbols.map((symbol) => symbol.id);
+  const rows = state.config.layout[columnIndex] ?? 3;
+  return Array.from({ length: rows }, () => ids[Math.floor(Math.random() * ids.length)] ?? '');
+}
+
+function findTeaseColumn(result: RipcomSpin, scatterId?: string) {
+  if (!scatterId || result.scatterCount < 2) return null;
+  const counts = result.grid.map((column) => column.filter((symbolId) => symbolId === scatterId).length);
+  if (result.scatterCount === 2) {
+    const emptyColumn = counts.findIndex((count) => count === 0);
+    return emptyColumn >= 0 ? emptyColumn : null;
+  }
+  const qualifying = counts.findIndex((count) => result.scatterCount - count >= 2 && count > 0);
+  return qualifying >= 0 ? qualifying : null;
+}
+
+function AmbientScene() {
+  return <div className="eclipse-scene" aria-hidden="true">
+    <div className="eclipse-moon-halo" />
+    <div className="rune-ring" />
+    <div className="fog f1" />
+    <div className="fog f2" />
+    <div className="ember-field">{ambientParticles.map((particle, index) => <i key={index} className="ember" style={{ '--x': particle.x, '--delay': particle.delay, '--d': particle.duration, '--s': particle.size } as React.CSSProperties & Record<string, string>} />)}</div>
+  </div>;
+}
+
+function BonusTease() {
+  return <div className="bonus-tease-overlay"><div className="bonus-tease-card"><strong>O ECLIPSE ESTÁ ABRINDO</strong><span>2 símbolos bônus acesos • último rolo em suspense</span></div></div>;
+}
+
+function BonusIntro({ scatterCount }: { scatterCount: number }) {
+  return <div className="bonus-intro-overlay">
+    <div className="bonus-particles">{bonusParticles.map((particle, index) => <i key={index} className="bonus-particle" style={{ '--pa': particle.angle, '--pd': particle.delay } as React.CSSProperties & Record<string, string>} />)}</div>
+    <div className="bonus-intro-card"><div className="bonus-intro-icon"><Sparkles size={34} /></div><small>RIPCOM ORIGINAL</small><strong>ECLIPSE BONUS</strong><span>{scatterCount} símbolos bônus • energia da serpente liberada</span></div>
+  </div>;
+}
+
 function Player({ token }: { token: string }) {
   const [state, setState] = useState<RipcomPlayerState | null>(null);
   const [grid, setGrid] = useState<string[][]>([]);
   const [outcome, setOutcome] = useState<RipcomSpin | null>(null);
   const [bet, setBet] = useState(10);
   const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<GamePhase>('idle');
+  const [teaseColumn, setTeaseColumn] = useState<number | null>(null);
+  const [bonusScatterCount, setBonusScatterCount] = useState(0);
   const [error, setError] = useState('');
   const [loadingText, setLoadingText] = useState('Booting provider runtime…');
   const symbols = useMemo(() => new Map((state?.config.symbols ?? []).map((symbol) => [symbol.id, symbol])), [state]);
   const winning = useMemo(() => new Set(outcome?.wins.map((win) => win.symbolId) ?? []), [outcome]);
+  const scatterId = useMemo(() => state?.config.symbols.find((symbol) => symbol.scatter)?.id, [state]);
 
   useEffect(() => {
     let alive = true;
@@ -109,30 +168,82 @@ function Player({ token }: { token: string }) {
   async function spin() {
     if (!state || busy) return;
     if (bet > state.session.balance) { setError('INSUFFICIENT_DEMO_CREDITS'); return; }
-    setBusy(true); setError(''); setOutcome(null);
-    const timer = window.setInterval(() => setGrid(randomGrid(state)), 70);
+    setBusy(true);
+    setPhase('spinning');
+    setTeaseColumn(null);
+    setBonusScatterCount(0);
+    setError('');
+    setOutcome(null);
+
+    const spinTimer = window.setInterval(() => setGrid(randomGrid(state)), 70);
+    let teaseTimer = 0;
     try {
       const result = await spinPlayer(token, bet);
-      await new Promise((resolve) => window.setTimeout(resolve, 800));
-      window.clearInterval(timer);
+      await sleep(520);
+      window.clearInterval(spinTimer);
+
+      const decisiveColumn = findTeaseColumn(result, scatterId);
+      if (decisiveColumn !== null) {
+        const stagedGrid = result.grid.map((column, columnIndex) => columnIndex === decisiveColumn ? randomColumn(state, columnIndex) : column);
+        setGrid(stagedGrid);
+        setTeaseColumn(decisiveColumn);
+        setPhase('tease');
+        teaseTimer = window.setInterval(() => {
+          setGrid((current) => current.map((column, columnIndex) => columnIndex === decisiveColumn ? randomColumn(state, columnIndex) : column));
+        }, 88);
+        await sleep(result.scatterCount >= 3 ? 1450 : 1180);
+        window.clearInterval(teaseTimer);
+      } else {
+        await sleep(280);
+      }
+
       setGrid(result.grid);
       setOutcome(result);
+      setTeaseColumn(null);
       setState((current) => current ? { ...current, session: { ...current.session, balance: result.balance } } : current);
+
+      if (result.scatterCount >= 3) {
+        setBonusScatterCount(result.scatterCount);
+        setPhase('bonus');
+        await sleep(2300);
+      }
+
+      setPhase('reveal');
+      await sleep(360);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'SPIN_FAILED');
     } finally {
-      window.clearInterval(timer);
+      window.clearInterval(spinTimer);
+      if (teaseTimer) window.clearInterval(teaseTimer);
+      setTeaseColumn(null);
+      setPhase('idle');
       setBusy(false);
     }
+  }
+
+  function moveParallax(event: React.PointerEvent<HTMLElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    event.currentTarget.style.setProperty('--mx', x.toFixed(3));
+    event.currentTarget.style.setProperty('--my', y.toFixed(3));
+  }
+
+  function resetParallax(event: React.PointerEvent<HTMLElement>) {
+    event.currentTarget.style.setProperty('--mx', '0');
+    event.currentTarget.style.setProperty('--my', '0');
   }
 
   if (error && !state) return <div className="player-loading"><Brand /><XCircle size={46} /><h2>Sessão indisponível</h2><p>{error}</p></div>;
   if (!state) return <div className="player-loading"><Brand /><div className="loader-orbit"><span></span></div><h2>Eclipse Serpent</h2><p>{loadingText}</p><small>RIPCOM • DEMO</small></div>;
 
   const theme = state.config.theme;
-  return <main className="game-player" style={{ '--primary': theme.primary || '#b9ff43', '--secondary': theme.secondary || '#16a085', '--game-bg': theme.background || '#061713' } as React.CSSProperties}>
+  return <main onPointerMove={moveParallax} onPointerLeave={resetParallax} className={`game-player phase-${phase}`} style={{ '--primary': theme.primary || '#b9ff43', '--secondary': theme.secondary || '#16a085', '--game-bg': theme.background || '#061713', '--mx': '0', '--my': '0' } as React.CSSProperties & Record<string, string>}>
+    <AmbientScene />
     <div className="game-backdrop"><div className="game-orb one"></div><div className="game-orb two"></div></div>
-    <div className="game-frame"><div className="game-header"><Brand compact /><div><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div><div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>ECLIPSE WILD • RESPINS</p></div><div className={`reels ${busy ? 'spinning' : ''}`}>{grid.map((column, columnIndex) => <div className="reel" key={columnIndex} style={{ '--delay': `${columnIndex * 90}ms` } as React.CSSProperties}>{column.map((symbolId, rowIndex) => { const symbol = symbols.get(symbolId); const isWinner = winning.has(symbolId); return <div className={`symbol ${isWinner ? 'winner' : ''}`} key={`${columnIndex}-${rowIndex}`}><span>{symbol?.icon ?? '✦'}</span><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>; })}</div>)}</div>{outcome && outcome.win > 0 && <div className="win-banner"><span>WIN</span><strong>+{outcome.win.toLocaleString('pt-BR')} CR</strong><small>{outcome.multiplier.toFixed(2)}×</small></div>}{error && <div className="game-error">{error}</div>}<div className="game-controls"><div className="control"><small>BET</small><select value={bet} onChange={(event) => setBet(Number(event.target.value))} disabled={busy}>{[1,2,5,10,20,50,100].map((value) => <option key={value}>{value}</option>)}</select></div><button className="spin-button" disabled={busy} onClick={() => void spin()}><RefreshCw className={busy ? 'rotating' : ''} /><span>{busy ? 'SPINNING' : 'SPIN'}</span></button><div className="control right"><small>SESSION</small><b>{token.slice(0, 6)}</b></div></div><div className="game-footer"><ShieldCheck size={13} /><span>RIPCOM Provider Runtime • Fun-money only</span></div></div>
+    {phase === 'tease' && <BonusTease />}
+    {phase === 'bonus' && <BonusIntro scatterCount={bonusScatterCount} />}
+    <div className="game-frame"><div className="game-header"><Brand compact /><div><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div><div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>ECLIPSE WILD • RESPINS • SCATTER BONUS</p></div><div className={`reels ${busy ? 'spinning' : ''}`}>{grid.map((column, columnIndex) => <div className={`reel ${phase === 'tease' && teaseColumn === columnIndex ? 'tease-target' : ''}`} key={columnIndex} style={{ '--delay': `${columnIndex * 90}ms` } as React.CSSProperties}>{column.map((symbolId, rowIndex) => { const symbol = symbols.get(symbolId); const isWinner = winning.has(symbolId); const symbolClasses = ['symbol', isWinner ? 'winner' : '', symbol?.scatter ? 'scatter' : '', symbol?.wild ? 'wild' : '', phase === 'tease' && teaseColumn === columnIndex ? 'tease-hidden' : ''].filter(Boolean).join(' '); return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><span>{symbol?.icon ?? '✦'}</span><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>; })}</div>)}</div>{outcome && outcome.win > 0 && phase !== 'bonus' && <div className="win-banner"><span>WIN</span><strong>+{outcome.win.toLocaleString('pt-BR')} CR</strong><small>{outcome.multiplier.toFixed(2)}×</small></div>}{error && <div className="game-error">{error}</div>}<div className="game-controls"><div className="control"><small>BET</small><select value={bet} onChange={(event) => setBet(Number(event.target.value))} disabled={busy}>{[1,2,5,10,20,50,100].map((value) => <option key={value}>{value}</option>)}</select></div><button className="spin-button" disabled={busy} onClick={() => void spin()}><RefreshCw className={busy ? 'rotating' : ''} /><span>{phase === 'tease' ? 'BONUS?' : phase === 'bonus' ? 'BONUS!' : busy ? 'SPINNING' : 'SPIN'}</span></button><div className="control right"><small>SESSION</small><b>{token.slice(0, 6)}</b></div></div><div className="game-footer"><ShieldCheck size={13} /><span>RIPCOM Provider Runtime • Fun-money only</span></div></div>
   </main>;
 }
 
