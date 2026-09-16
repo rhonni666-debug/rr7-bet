@@ -9,7 +9,7 @@
     "name": "Eclipse Serpent",
     "slug": "eclipse-serpent",
     "gameCode": "ripcom-slot:eclipse-serpent",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "status": "SANDBOX",
     "mode": "DEMO",
     "launchType": "PROVIDER_SESSION"
@@ -24,10 +24,17 @@
     "sessionTtlMinutes": 120
   },
   "paytable": {
-    "mode": "THREE_REEL_WAYS",
-    "aggregateWays": true,
-    "rule": "one position from each reel forms a way; each way pays once using the highest valid symbol after Wild substitution",
-    "basePaysPerWay": {
+    "mode": "FIXED_5_PAYLINES",
+    "layout": [3,3,3],
+    "paylines": {
+      "1": [1,1,1],
+      "2": [0,0,0],
+      "3": [2,2,2],
+      "4": [0,1,2],
+      "5": [2,1,0]
+    },
+    "rule": "each line is evaluated once from left reel to right reel; Wild substitutes normal symbols and the highest valid value is paid per line",
+    "basePaysPerLine": {
       "shard": 0.20,
       "moon": 0.30,
       "rune": 0.45,
@@ -36,7 +43,7 @@
       "wild": 2.50
     },
     "scatterDirectPay": false,
-    "betScaling": "final win = bet x aggregated way multiplier"
+    "betScaling": "final win = bet x sum of winning line multipliers"
   },
   "bonus": {
     "name": "Eclipse Bonus",
@@ -57,11 +64,11 @@
     ]
   },
   "presentation": {
-    "normalSpinDurationMs": 1200,
-    "normalReelStopGapMs": 220,
-    "bonusIntroDurationMs": 6500,
+    "normalSpinDurationMs": 1500,
+    "normalReelStopGapMs": 280,
+    "bonusIntroDurationMs": 7000,
     "sequentialReelStops": true,
-    "showWinningWaysBreakdown": true
+    "showWinningLineBreakdown": true
   },
   "capabilities": [
     "session-launch",
@@ -73,10 +80,11 @@
     "persistent-bonus-state",
     "8-free-spins",
     "bonus-round-audit",
-    "three-reel-aggregated-ways",
-    "wild-highest-valid-pay-per-way",
+    "fixed-five-paylines",
+    "wild-highest-valid-pay-per-line",
     "sequential-reel-stops",
-    "normal-speed-cadence"
+    "normal-speed-cadence",
+    "slow-bonus-cinema"
   ],
   "security": {
     "operatorAuth": "RSA-SHA256",
@@ -88,6 +96,6 @@
   "release": {
     "channel": "sandbox",
     "releasedAt": "2026-09-16",
-    "notes": "Release 1.2.0 introduz paytable agregada por ways em 3 rolos, valores base por pedra, parada sequencial mais lenta e bonus cinematografico desacelerado. Mantem modo DEMO e 8 free spins persistentes."
+    "notes": "Release 1.3.0 usa grade 3x3 e cinco linhas fixas, com valores base próprios da RIPCOM por linha vencedora. Giro, tease e subida do Eclipse Bonus foram desacelerados. Mantem modo DEMO e 8 free spins persistentes."
   }
 }
