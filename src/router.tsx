@@ -18,6 +18,7 @@ import { AdminB2BSandboxPage } from './pages/AdminB2BSandbox';
 import { AdminRipcomPage } from './pages/AdminRipcom';
 import { AdminRipcomTelemetryPage } from './pages/AdminRipcomTelemetry';
 import { RipcomPlayerPage } from './pages/RipcomPlayer';
+import { RipcomProviderPage } from './pages/RipcomProvider';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
 const homeRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomePage });
@@ -27,6 +28,7 @@ const walletRoute = createRoute({ getParentRoute: () => rootRoute, path: '/carte
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/perfil', component: ProfilePage });
 const historyRoute = createRoute({ getParentRoute: () => rootRoute, path: '/historico', component: HistoryPage });
 const gameRoute = createRoute({ getParentRoute: () => rootRoute, path: '/jogo/$slug', component: GamePage });
+const ripcomProviderRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ripcom/provider', component: RipcomProviderPage });
 const ripcomPlayerRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ripcom/play/$token', component: RipcomPlayerPage });
 const authRoute = createRoute({ getParentRoute: () => rootRoute, path: '/auth', component: AuthPage });
 const resetPasswordRoute = createRoute({ getParentRoute: () => rootRoute, path: '/redefinir-senha', component: ResetPasswordPage });
@@ -55,6 +57,7 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   historyRoute,
   gameRoute,
+  ripcomProviderRoute,
   ripcomPlayerRoute,
   authRoute,
   resetPasswordRoute,
