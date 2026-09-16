@@ -155,7 +155,15 @@ type Hub88Game = Record<string, unknown> & {
   game_code?: string;
   demo_game_support?: boolean;
   enabled?: boolean;
+  blocked_countries?: string[];
+  restricted_countries?: string[];
 };
+
+function availableForPocCountry(game: Hub88Game, country: string) {
+  const blocked = Array.isArray(game.blocked_countries) ? game.blocked_countries : [];
+  const restricted = Array.isArray(game.restricted_countries) ? game.restricted_countries : [];
+  return !blocked.includes(country) && !restricted.includes(country);
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -175,6 +183,17 @@ Deno.serve(async (req: Request) => {
 
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) return json({ error: 'AUTH_REQUIRED' }, 401);
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', authData.user.id)
+    .maybeSingle();
+  if (profileError) {
+    console.error('hub88_admin_check_failed', { userId: authData.user.id, error: profileError.message });
+    return json({ error: 'ADMIN_CHECK_FAILED' }, 500);
+  }
+  if (profile?.role !== 'ADMIN') return json({ error: 'ADMIN_REQUIRED' }, 403);
 
   let body: Record<string, unknown>;
   try {
@@ -225,10 +244,10 @@ Deno.serve(async (req: Request) => {
 
       const result = await postHub88<unknown>(config, '/operator/generic/v2/game/list', payload);
       const games = asArray<Hub88Game>(result.data).filter(
-        (game) => game.demo_game_support === true && game.enabled === true,
+        (game) => game.demo_game_support === true && game.enabled === true && availableForPocCountry(game, config.country),
       );
-      console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, count: games.length, productCode });
-      return json({ data: games, meta: { latencyMs: result.latencyMs, count: games.length, productCode } });
+      console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, count: games.length, productCode, country: config.country });
+      return json({ data: games, meta: { latencyMs: result.latencyMs, count: games.length, productCode, country: config.country } });
     }
 
     if (action === 'launch_demo') {
@@ -250,7 +269,7 @@ Deno.serve(async (req: Request) => {
       const launchUrl = typeof result.data?.url === 'string' ? result.data.url : '';
       if (!launchUrl) throw new Error('HUB88_NO_GAME_URL');
 
-      console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, gameCode, deviceType });
+      console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, gameCode, deviceType, country: config.country });
       return json({
         data: { url: launchUrl, gameCode, currency: 'XXX', mode: 'demo' },
         meta: { latencyMs: result.latencyMs },
