@@ -7,12 +7,29 @@ export interface ProviderAdapter {
   closeSession(sessionId: string): Promise<void>;
 }
 
+type GatewayResponse<T> = {
+  data?: T;
+  error?: string;
+};
+
+async function invokeGateway<T>(body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke('provider-gateway', { body });
+  if (error) throw error;
+
+  const payload = data as GatewayResponse<T> | null;
+  if (payload?.error) throw new Error(payload.error);
+  if (!payload?.data) throw new Error('PROVIDER_GATEWAY_EMPTY_RESPONSE');
+  return payload.data;
+}
+
 class MockProviderAdapter implements ProviderAdapter {
   async createSession(game: DemoGame): Promise<GameSession> {
-    const { data, error } = await supabase.rpc('create_demo_game_session', { p_game_id: game.id });
-    if (error) throw error;
-    const row = Array.isArray(data) ? data[0] : data;
-    if (!row?.session_id) throw new Error('SESSION_CREATE_FAILED');
+    const row = await invokeGateway<Record<string, unknown>>({
+      action: 'create_session',
+      gameId: game.id,
+    });
+
+    if (!row.session_id) throw new Error('SESSION_CREATE_FAILED');
     return {
       id: String(row.session_id),
       token: String(row.session_token),
@@ -23,14 +40,14 @@ class MockProviderAdapter implements ProviderAdapter {
   }
 
   async playRound(sessionId: string, bet: number): Promise<RoundOutcome> {
-    const { data, error } = await supabase.rpc('play_demo_round_v2', {
-      p_session_id: sessionId,
-      p_bet: bet,
-      p_request_id: crypto.randomUUID(),
+    const row = await invokeGateway<Record<string, unknown>>({
+      action: 'play_round',
+      sessionId,
+      bet,
+      requestId: crypto.randomUUID(),
     });
-    if (error) throw error;
-    const row = Array.isArray(data) ? data[0] : data;
-    if (!row?.round_id) throw new Error('ROUND_FAILED');
+
+    if (!row.round_id) throw new Error('ROUND_FAILED');
     return {
       roundId: String(row.round_id),
       bet: Number(row.bet_amount ?? bet),
@@ -42,8 +59,10 @@ class MockProviderAdapter implements ProviderAdapter {
   }
 
   async closeSession(sessionId: string) {
-    const { error } = await supabase.rpc('close_demo_game_session', { p_session_id: sessionId });
-    if (error) throw error;
+    await invokeGateway<{ closed: boolean }>({
+      action: 'close_session',
+      sessionId,
+    });
   }
 }
 
