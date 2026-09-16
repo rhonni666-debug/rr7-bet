@@ -1,0 +1,35 @@
+{
+  "schema": "ripcom.provider-frontend/v1",
+  "provider": "RIPCOM",
+  "application": "ripcom-game-provider",
+  "version": "1.0.0-sandbox.1",
+  "channel": "sandbox",
+  "mode": "DEMO",
+  "canonicalFrontend": true,
+  "apiVersion": "v1",
+  "playerLaunch": {
+    "parameter": "play",
+    "format": "?play=<session_token>"
+  },
+  "capabilities": [
+    "provider-portal",
+    "api-docs",
+    "sandbox-overview",
+    "operator-overview",
+    "standalone-player"
+  ],
+  "security": {
+    "operatorPrivateKeysInFrontend": false,
+    "serviceRoleInFrontend": false,
+    "playerUsesTemporarySessionToken": true,
+    "realMoneyEnabled": false
+  },
+  "currentGames": [
+    {
+      "gameCode": "ripcom-slot:eclipse-serpent",
+      "name": "Eclipse Serpent",
+      "release": "1.0.0",
+      "status": "SANDBOX"
+    }
+  ]
+}
