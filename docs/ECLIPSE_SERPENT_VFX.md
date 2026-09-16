@@ -1,7 +1,7 @@
 # Eclipse Serpent — Living Scene & Eclipse Bonus
 
 Atualizado em: 16/09/2026  
-Frontend RIPCOM: `1.0.0-sandbox.6`  
+Frontend RIPCOM: `1.0.0-sandbox.7`  
 Game release/math: `Eclipse Serpent 1.1.0`  
 Modo: `SANDBOX / DEMO`
 
@@ -22,11 +22,13 @@ Dar ao Eclipse Serpent uma experiência de slot viva e cinematográfica, mantend
 ## Arquivos principais
 
 - `ripcom-provider/src/game/EclipsePlayer.tsx` — player canônico, tease, intro, sequência automática 8→0, áudio e encerramento.
+- `ripcom-provider/src/game/AnimatedAmount.tsx` — contador progressivo dos valores de prêmio.
 - `ripcom-provider/src/game/BonusIntroOverlay.tsx` — eclipse do sol/lua + serpente subindo + anúncio das 8 rodadas.
 - `ripcom-provider/src/game/SerpentRise.tsx` — serpente vetorial autoral animada.
 - `ripcom-provider/src/game/AnimatedBackground.tsx` — cenário vivo, parallax, névoa, partículas e eclipse.
 - `ripcom-provider/src/game/audio.ts` — motor de áudio procedural Web Audio, sem assets de terceiros.
 - `ripcom-provider/src/game/WinCelebration.tsx` — overlay autoral GREAT WIN / BIG WIN / MEGA WIN.
+- `ripcom-provider/src/symbol-vfx.css` — personalidade visual de scatter/wild e otimização mobile.
 - `ripcom-provider/src/juice.css` — partículas, símbolos vencedores, celebrações e botão de som.
 - `ripcom-provider/src/bonus-mode.css` — HUD do bônus, free spins, resumo final e estados visuais.
 - `ripcom-provider/src/cinematic-vfx.css` — animação cinematográfica sol/lua/serpente.
@@ -43,6 +45,30 @@ Dar ao Eclipse Serpent uma experiência de slot viva e cinematográfica, mantend
 - `free-spinning` — rodada grátis em execução.
 - `bonus-outro` — resumo final do bônus.
 - `reveal` — revelação de resultado normal.
+
+## Scatter e Wild
+
+### Scatter
+
+O scatter possui vida própria mesmo fora do bônus:
+
+- aura dourada/esverdeada respirando;
+- ícone com microescala e rotação suave;
+- glow mais forte quando entra no tease;
+- pulso acelerado quando dois scatters já estão visíveis;
+- cue sonoro procedural ao ser revelado.
+
+### Wild
+
+O wild possui:
+
+- aura circular/energia em rotação;
+- movimento vertical sutil;
+- glow próprio;
+- explosão visual maior quando participa de combinação vencedora;
+- cue sonoro procedural separado do scatter.
+
+Esses efeitos não alteram RNG ou matemática.
 
 ## Ameaça de bônus
 
@@ -65,17 +91,18 @@ Fluxo:
 Quando o terceiro scatter confirma o bônus:
 
 1. os reels congelam;
-2. o fundo escurece;
-3. o sol aparece;
-4. a lua atravessa o sol e fecha o eclipse;
-5. a corona solar aumenta;
-6. a serpente sobe da parte inferior da tela;
-7. os olhos da serpente brilham;
-8. entra impacto sonoro procedural grave + harmônicos;
-9. entra `ECLIPSE BONUS`;
-10. entra `8 RODADAS GRÁTIS`;
-11. o HUD do bônus aparece;
-12. as oito rodadas começam automaticamente.
+2. cada rolo recebe um cue curto de parada;
+3. o fundo escurece;
+4. o sol aparece;
+5. a lua atravessa o sol e fecha o eclipse;
+6. a corona solar aumenta;
+7. a serpente sobe da parte inferior da tela;
+8. os olhos da serpente brilham;
+9. entra impacto sonoro procedural grave + harmônicos;
+10. entra `ECLIPSE BONUS`;
+11. entra `8 RODADAS GRÁTIS`;
+12. o HUD do bônus aparece;
+13. as oito rodadas começam automaticamente.
 
 ## Durante as 8 rodadas grátis
 
@@ -84,13 +111,28 @@ O player mostra:
 - contador `8 → 0`;
 - `ECLIPSE BONUS` sempre visível;
 - aposta usada no bônus;
-- ganho acumulado do bônus;
+- ganho acumulado do bônus com contagem progressiva;
 - cenário em modo eclipse ativo;
 - reels com iluminação exclusiva;
 - destaque de vitória por free spin;
 - som curto exclusivo em cada free spin.
 
 O botão de aposta fica bloqueado enquanto o bônus está ativo.
+
+## Contagem progressiva do prêmio
+
+Arquivo: `ripcom-provider/src/game/AnimatedAmount.tsx`.
+
+Os valores não aparecem de forma seca. O player anima de `0` até o valor final usando easing, aplicado em:
+
+- WIN comum;
+- GREAT WIN;
+- BIG WIN;
+- MEGA WIN;
+- ganho acumulado do bônus;
+- total final do Eclipse Bonus.
+
+A duração cresce nas celebrações maiores para aumentar impacto sem alterar o valor real liquidado no backend.
 
 ## Áudio procedural autoral
 
@@ -101,6 +143,9 @@ O áudio é sintetizado no navegador com Web Audio API; não usa samples, músic
 Eventos sonoros atuais:
 
 - `spin()` — início de giro pago;
+- `reelStop(index)` — parada individual dos rolos;
+- `scatterLand(count)` — chegada de scatter;
+- `wildReveal()` — revelação de wild;
 - `freeSpin()` — início de rodada grátis;
 - `tease()` — suspense crescente do quase bônus;
 - `bonusHit()` — confirmação do Eclipse Bonus;
@@ -124,9 +169,21 @@ Quando ocorre uma celebração:
 - partículas explodem radialmente;
 - anéis de energia se expandem;
 - texto, valor e multiplicador ganham destaque;
+- o valor sobe progressivamente até o total real;
 - símbolos vencedores pulsam;
 - cada faixa possui sequência sonora própria;
 - após a animação, o fluxo normal continua.
+
+## Mobile tuning
+
+A versão `sandbox.7` reduz custo visual em telas pequenas sem deixar o jogo estático:
+
+- reduz quantidade de partículas de celebração;
+- remove anel secundário do eclipse em telas muito estreitas;
+- reduz blur/glow pesados;
+- mantém névoa, eclipse, scatter e wild animados;
+- mantém `prefers-reduced-motion` para acessibilidade;
+- usa `touch-action: manipulation` no player.
 
 ## Encerramento
 
@@ -134,7 +191,7 @@ Depois da oitava rodada:
 
 - aparece a tela `ECLIPSE BONUS CONCLUÍDO`;
 - mostra `8 RODADAS GRÁTIS`;
-- mostra o total acumulado no bônus;
+- mostra o total acumulado no bônus com contagem progressiva;
 - toca a sequência de encerramento;
 - o jogo retorna ao estado normal.
 
@@ -176,7 +233,7 @@ Teste de homologação da release 1.1.0:
 ## Versionamento
 
 - `Eclipse Serpent = 1.1.0`
-- `RIPCOM Provider Frontend = 1.0.0-sandbox.6`
+- `RIPCOM Provider Frontend = 1.0.0-sandbox.7`
 - `ripcom-player-runtime = v1`
 
 ## Segurança
@@ -186,4 +243,4 @@ Teste de homologação da release 1.1.0:
 - service role fica apenas no Edge Runtime;
 - o browser recebe somente token temporário de sessão;
 - o frontend não decide se um giro é grátis: o backend verifica o estado da sessão;
-- áudio e VFX não alteram resultado, RNG, saldo ou liquidação.
+- áudio, contadores e VFX não alteram resultado, RNG, saldo ou liquidação.
