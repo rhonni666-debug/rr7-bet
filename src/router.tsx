@@ -13,6 +13,7 @@ import { AdminPage } from './pages/Admin';
 import { AdminCreditsPage } from './pages/AdminCredits';
 import { AdminOperationsPage } from './pages/AdminOperations';
 import { AdminHub88PocPage } from './pages/AdminHub88Poc';
+import { AdminPocMetricsPage } from './pages/AdminPocMetrics';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
 const homeRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomePage });
@@ -36,6 +37,7 @@ const adminSessionsRoute = createRoute({ getParentRoute: () => rootRoute, path: 
 const adminTransactionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/transacoes', component: () => <AdminOperationsPage section="transactions" /> });
 const adminAuditRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/auditoria', component: () => <AdminPage section="audit" /> });
 const adminHub88PocRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/hub88-poc', component: AdminHub88PocPage });
+const adminPocMetricsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/poc-metrics', component: AdminPocMetricsPage });
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
@@ -59,6 +61,7 @@ const routeTree = rootRoute.addChildren([
   adminTransactionsRoute,
   adminAuditRoute,
   adminHub88PocRoute,
+  adminPocMetricsRoute,
 ]);
 
 const rawBase = import.meta.env.BASE_URL;
