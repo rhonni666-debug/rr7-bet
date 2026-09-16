@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../integrations/supabase/client';
 import type { UserProfile } from '../types';
+import { validatePassword } from './password';
 
 type ActionResult = { ok: boolean; message: string };
 
@@ -26,6 +27,11 @@ function normalizeLoginIdentifier(identifier: string) {
   const value = identifier.trim().toLowerCase();
   if (value === 'rhonni') return 'rhonni@rr7.bet';
   return value;
+}
+
+function recoveryRedirectUrl() {
+  if (import.meta.env.BASE_URL === './') return 'https://rhonni666-debug.github.io/rr7-bet/redefinir-senha';
+  return `${window.location.origin}${import.meta.env.BASE_URL}redefinir-senha`;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -108,6 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         : { ok: true, message: 'Login realizado.' };
     },
     signUp: async (displayName, email, password) => {
+      const passwordError = validatePassword(password);
+      if (passwordError) return { ok: false, message: passwordError };
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -124,13 +132,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     resetPassword: async (email) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}redefinir-senha`,
+        redirectTo: recoveryRedirectUrl(),
       });
       return error
         ? { ok: false, message: error.message }
         : { ok: true, message: 'Se o e-mail existir, enviaremos as instruções de recuperação.' };
     },
     updatePassword: async (password) => {
+      const passwordError = validatePassword(password);
+      if (passwordError) return { ok: false, message: passwordError };
       const { error } = await supabase.auth.updateUser({ password });
       return error ? { ok: false, message: error.message } : { ok: true, message: 'Senha atualizada.' };
     },

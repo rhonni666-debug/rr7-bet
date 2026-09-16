@@ -55,7 +55,8 @@ const routeTree = rootRoute.addChildren([
   adminAuditRoute,
 ]);
 
-const basepath = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+const rawBase = import.meta.env.BASE_URL;
+const basepath = rawBase === './' ? '/' : rawBase.replace(/\/$/, '') || '/';
 
 export const router = createRouter({ routeTree, basepath });
 
