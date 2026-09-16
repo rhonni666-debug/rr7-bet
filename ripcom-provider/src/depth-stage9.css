@@ -1,0 +1,70 @@
+/* Eclipse Serpent sandbox.9 — dimensional presentation layer */
+.game-player{perspective:1200px;isolation:isolate}
+.game-player:before{content:"";position:absolute;z-index:0;left:50%;top:7%;width:min(900px,92vw);height:62vh;transform:translateX(-50%);pointer-events:none;background:radial-gradient(ellipse at 50% 18%,rgba(199,255,111,.18),rgba(55,213,160,.07) 28%,transparent 68%);filter:blur(8px);opacity:.72}
+.game-player:after{content:"";position:absolute;z-index:0;left:-12%;right:-12%;bottom:-34%;height:62%;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(133,255,202,.08) 0 1px,transparent 1px 52px),repeating-linear-gradient(0deg,rgba(133,255,202,.07) 0 1px,transparent 1px 48px),radial-gradient(ellipse at 50% 0%,rgba(151,255,193,.12),transparent 56%);transform-origin:50% 0;transform:perspective(700px) rotateX(66deg);mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),transparent 78%);opacity:.48}
+
+.eclipse-player-v110 .game-frame{transform-style:preserve-3d;transform:rotateY(calc(var(--mx,0) * 1.3deg)) rotateX(calc(var(--my,0) * -1deg)) translateZ(0);transition:transform .2s ease-out;border-color:rgba(176,255,211,.15);background:linear-gradient(155deg,rgba(9,31,25,.94),rgba(2,11,10,.96) 62%,rgba(8,26,20,.94));box-shadow:0 42px 130px rgba(0,0,0,.58),0 0 0 1px rgba(138,255,199,.04),0 0 90px rgba(83,255,168,.065),inset 0 1px 0 rgba(255,255,255,.08)}
+.eclipse-player-v110 .game-frame:before{content:"";position:absolute;z-index:4;left:5%;right:5%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(230,255,236,.58),rgba(169,255,209,.35),transparent);box-shadow:0 7px 32px rgba(185,255,205,.15);pointer-events:none}
+.eclipse-player-v110 .game-frame:after{content:"";position:absolute;z-index:-1;left:5%;right:5%;bottom:-18px;height:28px;border-radius:50%;background:rgba(0,0,0,.72);filter:blur(15px);transform:translateZ(-45px);pointer-events:none}
+
+.eclipse-player-v110 .reels{position:relative;overflow:visible;perspective:950px;transform-style:preserve-3d;border:1px solid rgba(164,255,214,.18);background:linear-gradient(180deg,rgba(6,20,17,.98),rgba(1,7,6,.99));box-shadow:inset 0 12px 30px rgba(0,0,0,.72),inset 0 -12px 24px rgba(13,74,57,.12),0 14px 38px rgba(0,0,0,.4),0 0 0 5px rgba(3,13,11,.78),0 0 0 6px rgba(151,255,205,.055)}
+.eclipse-player-v110 .reels:before{content:"";position:absolute;z-index:8;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.08),transparent 16% 54%,rgba(127,255,203,.035) 68%,transparent 84%);mix-blend-mode:screen}
+.eclipse-player-v110 .reels:after{content:"";position:absolute;z-index:9;left:0;right:0;top:0;bottom:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 12px 14px rgba(0,0,0,.35),inset 0 -16px 20px rgba(0,0,0,.45)}
+
+.eclipse-player-v110 .reel{position:relative;transform-style:preserve-3d;perspective:700px}
+.eclipse-player-v110 .reel:before{content:"";position:absolute;z-index:4;top:2%;bottom:2%;right:-5px;width:1px;background:linear-gradient(transparent,rgba(160,255,213,.11) 12% 88%,transparent);pointer-events:none}
+.eclipse-player-v110 .reel:last-child:before{display:none}
+
+.eclipse-player-v110 .symbol{overflow:visible;transform-style:preserve-3d;backface-visibility:hidden;border:1px solid rgba(176,255,218,.11);background:linear-gradient(145deg,rgba(32,64,55,.34),rgba(4,14,12,.95) 52%,rgba(15,38,31,.66));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -7px 12px rgba(0,0,0,.42),0 8px 13px rgba(0,0,0,.32);transition:transform .22s cubic-bezier(.16,.85,.2,1),filter .2s ease,box-shadow .2s ease,border-color .2s ease}
+.eclipse-player-v110 .symbol:before{content:"";position:absolute;z-index:4;left:7%;right:7%;top:4%;height:26%;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.075),transparent);pointer-events:none;transform:translateZ(30px)}
+.eclipse-player-v110 .symbol:after{content:"";position:absolute;z-index:-1;left:8%;right:8%;bottom:-7px;height:12px;border-radius:50%;background:rgba(0,0,0,.5);filter:blur(5px);pointer-events:none;transform:translateZ(-24px)}
+
+.symbol-art-stage{position:relative;width:78%;height:78%;display:grid;place-items:center;transform-style:preserve-3d;transform:translateZ(28px) rotateX(-3deg);transition:transform .25s cubic-bezier(.16,.85,.2,1),filter .25s ease;filter:drop-shadow(0 12px 9px rgba(0,0,0,.42))}
+.symbol-art{width:100%;height:100%;overflow:visible;transform-style:preserve-3d}
+.symbol-art .art-object{transform-origin:50% 52%;animation:stage9ArtifactFloat 3.2s ease-in-out infinite;filter:drop-shadow(0 7px 4px rgba(0,0,0,.32))}
+.symbol-art-floor{position:absolute;z-index:-1;left:18%;right:18%;bottom:5%;height:14%;border-radius:50%;background:radial-gradient(ellipse,rgba(128,255,202,.22),rgba(4,15,12,.08) 55%,transparent 72%);filter:blur(3px);transform:translateZ(-10px) rotateX(68deg)}
+.symbol-art-stage:after{content:"";position:absolute;z-index:3;left:23%;top:13%;width:30%;height:12%;border-radius:50%;background:rgba(255,255,255,.18);filter:blur(7px);transform:rotate(-28deg) translateZ(36px);pointer-events:none}
+
+.symbol-art-rune{filter:drop-shadow(0 11px 8px rgba(0,0,0,.4)) drop-shadow(0 0 10px rgba(157,255,222,.15))}
+.symbol-art-fragment{transform:translateZ(31px) rotateX(-4deg) rotateZ(2deg)}
+.symbol-art-core{filter:drop-shadow(0 12px 8px rgba(0,0,0,.45)) drop-shadow(0 0 12px rgba(89,255,194,.16))}
+.symbol-art-bonus{filter:drop-shadow(0 12px 8px rgba(0,0,0,.48)) drop-shadow(0 0 15px rgba(255,218,103,.25))}
+.symbol-art-wild,.symbol-art-serpent{filter:drop-shadow(0 13px 8px rgba(0,0,0,.5)) drop-shadow(0 0 15px rgba(123,255,187,.2))}
+
+.symbol.scatter .symbol-art-stage{animation:stage9ScatterBreath 1.75s ease-in-out infinite}
+.symbol.wild .symbol-art-stage{animation:stage9WildHover 2.25s ease-in-out infinite}
+.phase-tease .symbol.scatter:not(.tease-hidden) .symbol-art-stage{animation:stage9ScatterTease .46s ease-in-out infinite alternate;filter:drop-shadow(0 13px 7px rgba(0,0,0,.5)) drop-shadow(0 0 24px rgba(255,222,102,.75))}
+.symbol.wild.winner .symbol-art-stage{animation:stage9WildWin .5s ease-in-out infinite alternate}
+
+.eclipse-player-v110 .symbol.winner{transform:translateZ(18px) scale(1.035);border-color:rgba(207,255,143,.48);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -7px 13px rgba(0,0,0,.35),0 13px 20px rgba(0,0,0,.38),0 0 24px rgba(175,255,126,.13)}
+.eclipse-player-v110 .symbol.winner .symbol-art-stage{transform:translateZ(43px) rotateX(-4deg) scale(1.06)}
+.eclipse-player-v110 .spinning .symbol{transform:translateZ(-8px) rotateX(5deg) scale(.965);filter:brightness(.78) blur(.5px)}
+.eclipse-player-v110 .spinning .symbol-art-stage{transform:translateZ(8px) rotateX(11deg) scaleY(1.07);filter:drop-shadow(0 7px 4px rgba(0,0,0,.32)) blur(.35px)}
+
+/* Stronger machine rails and control deck. */
+.eclipse-player-v110 .game-controls{position:relative;border-top:1px solid rgba(142,255,202,.065);background:linear-gradient(180deg,rgba(5,20,16,.25),rgba(1,8,7,.82));box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.eclipse-player-v110 .control{background:linear-gradient(145deg,rgba(17,45,36,.42),rgba(2,12,10,.78));box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 5px 12px rgba(0,0,0,.2)}
+.eclipse-player-v110 .spin-button{transform:translateZ(25px);box-shadow:0 13px 0 color-mix(in srgb,var(--primary) 20%,#0b3126),0 18px 30px rgba(0,0,0,.36),0 0 30px color-mix(in srgb,var(--primary) 20%,transparent),inset 0 2px 2px rgba(255,255,255,.52),inset 0 -8px 15px rgba(0,0,0,.2);transition:transform .12s ease,box-shadow .12s ease,filter .15s ease}
+.eclipse-player-v110 .spin-button:not(:disabled):active{transform:translateY(7px) translateZ(12px);box-shadow:0 5px 0 color-mix(in srgb,var(--primary) 20%,#0b3126),0 10px 17px rgba(0,0,0,.3),0 0 24px color-mix(in srgb,var(--primary) 16%,transparent),inset 0 2px 2px rgba(255,255,255,.4)}
+
+@keyframes stage9ArtifactFloat{0%,100%{transform:translateY(1px) rotateY(-2deg) rotateX(1deg)}50%{transform:translateY(-3px) rotateY(3deg) rotateX(-2deg)}}
+@keyframes stage9ScatterBreath{0%,100%{transform:translateZ(28px) rotateX(-3deg) scale(.98)}50%{transform:translateZ(39px) rotateX(-5deg) scale(1.055)}}
+@keyframes stage9WildHover{0%,100%{transform:translateZ(29px) rotateY(-3deg) translateY(1px)}50%{transform:translateZ(42px) rotateY(4deg) translateY(-4px)}}
+@keyframes stage9ScatterTease{from{transform:translateZ(33px) scale(.98) rotateZ(-1deg)}to{transform:translateZ(51px) scale(1.09) rotateZ(1deg)}}
+@keyframes stage9WildWin{from{transform:translateZ(36px) rotateY(-5deg) scale(1.02)}to{transform:translateZ(53px) rotateY(5deg) scale(1.11)}}
+
+@media(max-width:600px) and (orientation:portrait){
+  .game-player:before{top:3%;height:48vh;opacity:.6}
+  .game-player:after{bottom:-27%;height:48%;opacity:.3}
+  .eclipse-player-v110 .game-frame{transform:none!important;box-shadow:0 22px 60px rgba(0,0,0,.48),0 0 45px rgba(83,255,168,.045)}
+  .eclipse-player-v110 .reels{perspective:700px;box-shadow:inset 0 9px 22px rgba(0,0,0,.68),inset 0 -10px 18px rgba(10,70,53,.1),0 8px 23px rgba(0,0,0,.34),0 0 0 3px rgba(3,13,11,.78),0 0 0 4px rgba(151,255,205,.045)}
+  .symbol-art-stage{width:83%;height:83%;filter:drop-shadow(0 8px 6px rgba(0,0,0,.4))}
+  .symbol-art-stage:after{filter:blur(5px);opacity:.7}
+  .eclipse-player-v110 .symbol{box-shadow:inset 0 1px 0 rgba(255,255,255,.055),inset 0 -5px 9px rgba(0,0,0,.4),0 5px 8px rgba(0,0,0,.28)}
+  .eclipse-player-v110 .spin-button{box-shadow:0 9px 0 color-mix(in srgb,var(--primary) 18%,#0b3126),0 13px 20px rgba(0,0,0,.33),0 0 22px color-mix(in srgb,var(--primary) 17%,transparent),inset 0 2px 2px rgba(255,255,255,.45),inset 0 -6px 12px rgba(0,0,0,.2)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .symbol-art .art-object,.symbol.scatter .symbol-art-stage,.symbol.wild .symbol-art-stage,.phase-tease .symbol.scatter:not(.tease-hidden) .symbol-art-stage,.symbol.wild.winner .symbol-art-stage{animation:none!important}
+  .eclipse-player-v110 .game-frame{transform:none!important}
+}
