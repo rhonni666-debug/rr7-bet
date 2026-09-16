@@ -14,6 +14,7 @@ import { AdminCreditsPage } from './pages/AdminCredits';
 import { AdminOperationsPage } from './pages/AdminOperations';
 import { AdminHub88PocPage } from './pages/AdminHub88Poc';
 import { AdminPocMetricsPage } from './pages/AdminPocMetrics';
+import { AdminB2BSandboxPage } from './pages/AdminB2BSandbox';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
 const homeRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomePage });
@@ -36,6 +37,7 @@ const adminCreditsRoute = createRoute({ getParentRoute: () => rootRoute, path: '
 const adminSessionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/sessoes', component: () => <AdminOperationsPage section="sessions" /> });
 const adminTransactionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/transacoes', component: () => <AdminOperationsPage section="transactions" /> });
 const adminAuditRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/auditoria', component: () => <AdminPage section="audit" /> });
+const adminB2BSandboxRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/b2b-sandbox', component: AdminB2BSandboxPage });
 const adminHub88PocRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/hub88-poc', component: AdminHub88PocPage });
 const adminPocMetricsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/poc-metrics', component: AdminPocMetricsPage });
 
@@ -60,6 +62,7 @@ const routeTree = rootRoute.addChildren([
   adminSessionsRoute,
   adminTransactionsRoute,
   adminAuditRoute,
+  adminB2BSandboxRoute,
   adminHub88PocRoute,
   adminPocMetricsRoute,
 ]);
