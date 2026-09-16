@@ -19,6 +19,7 @@ import './paylines-stage14.css';
 import './reference-layout-stage15.css';
 import './win-bet-stage16.css';
 import './controls-stage17.css';
+import './fluidity-stage18.css';
 
 const params = new URLSearchParams(window.location.search);
 const playerToken = params.get('play');
