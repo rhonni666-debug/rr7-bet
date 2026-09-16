@@ -49,8 +49,9 @@ export type RipcomSpin = {
   feature: Record<string, unknown>;
   wins: Array<{
     symbolId: string;
-    ways: number;
-    payPerWay: number;
+    lines: number[];
+    lineCount: number;
+    payPerLine: number;
     multiplier: number;
   }>;
   scatterCount: number;
