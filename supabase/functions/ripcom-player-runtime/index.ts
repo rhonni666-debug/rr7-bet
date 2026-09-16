@@ -35,10 +35,20 @@ type SlotConfig = {
 type SlotGrid = string[][];
 type GridWin = {
   symbolId: string;
-  ways: number;
-  payPerWay: number;
+  lines: number[];
+  lineCount: number;
+  payPerLine: number;
   multiplier: number;
 };
+
+// Classic 3x3 five-line geometry: middle, top, bottom, down diagonal, up diagonal.
+const PAYLINES = [
+  [1, 1, 1],
+  [0, 0, 0],
+  [2, 2, 2],
+  [0, 1, 2],
+  [2, 1, 0],
+] as const;
 
 function randomUnit() {
   const value = new Uint32Array(1);
@@ -65,11 +75,10 @@ function generateGrid(config: SlotConfig): SlotGrid {
 }
 
 /**
- * Three-reel ways model.
- * One position from each reel forms one possible way. For each way, Wild may
- * substitute a normal symbol, but the way is paid once using the highest valid
- * symbol value. This prevents the same all-Wild way from being counted against
- * multiple symbols.
+ * Five fixed paylines on a 3x3 grid.
+ * Each payline is evaluated once. Wild substitutes normal symbols; if more than
+ * one symbol is valid, the line pays the highest valid base value. Scatter does
+ * not pay directly in this release and is handled separately as the bonus trigger.
  */
 function evaluateGrid(grid: SlotGrid, symbols: SlotSymbol[]) {
   const wildSymbol = symbols.find((symbol) => symbol.wild);
@@ -77,45 +86,42 @@ function evaluateGrid(grid: SlotGrid, symbols: SlotSymbol[]) {
   const scatterId = symbols.find((symbol) => symbol.scatter)?.id;
   const normals = symbols.filter((symbol) => !symbol.scatter && !symbol.wild);
   const winsBySymbol = new Map<string, GridWin>();
-
-  const reels = [grid[0] ?? [], grid[1] ?? [], grid[2] ?? []];
   let multiplier = 0;
 
-  for (let left = 0; left < reels[0].length; left += 1) {
-    for (let middle = 0; middle < reels[1].length; middle += 1) {
-      for (let right = 0; right < reels[2].length; right += 1) {
-        const cells = [reels[0][left], reels[1][middle], reels[2][right]];
-        if (scatterId && cells.includes(scatterId)) continue;
+  PAYLINES.forEach((rows, lineIndex) => {
+    const cells = rows.map((row, reel) => grid[reel]?.[row]);
+    if (cells.some((cell) => !cell)) return;
+    if (scatterId && cells.includes(scatterId)) return;
 
-        const candidates = normals.filter((symbol) =>
-          cells.every((cell) => cell === symbol.id || Boolean(wildId && cell === wildId)),
-        );
+    const candidates = normals.filter((symbol) =>
+      cells.every((cell) => cell === symbol.id || Boolean(wildId && cell === wildId)),
+    );
+    if (wildSymbol && cells.every((cell) => cell === wildId)) candidates.push(wildSymbol);
+    if (!candidates.length) return;
 
-        if (wildSymbol && cells.every((cell) => cell === wildId)) candidates.push(wildSymbol);
-        if (!candidates.length) continue;
+    const winner = candidates.reduce((best, candidate) =>
+      Number(candidate.pay) > Number(best.pay) ? candidate : best,
+    );
+    const payPerLine = Math.max(0, Number(winner.pay) || 0);
+    if (payPerLine <= 0) return;
 
-        const winner = candidates.reduce((best, candidate) =>
-          Number(candidate.pay) > Number(best.pay) ? candidate : best,
-        );
-        const payPerWay = Math.max(0, Number(winner.pay) || 0);
-        if (payPerWay <= 0) continue;
-
-        multiplier += payPerWay;
-        const current = winsBySymbol.get(winner.id);
-        if (current) {
-          current.ways += 1;
-          current.multiplier = Math.round((current.multiplier + payPerWay) * 10000) / 10000;
-        } else {
-          winsBySymbol.set(winner.id, {
-            symbolId: winner.id,
-            ways: 1,
-            payPerWay,
-            multiplier: payPerWay,
-          });
-        }
-      }
+    multiplier += payPerLine;
+    const lineNumber = lineIndex + 1;
+    const current = winsBySymbol.get(winner.id);
+    if (current) {
+      current.lines.push(lineNumber);
+      current.lineCount = current.lines.length;
+      current.multiplier = Math.round((current.multiplier + payPerLine) * 10000) / 10000;
+    } else {
+      winsBySymbol.set(winner.id, {
+        symbolId: winner.id,
+        lines: [lineNumber],
+        lineCount: 1,
+        payPerLine,
+        multiplier: payPerLine,
+      });
     }
-  }
+  });
 
   const scatterCount = scatterId ? grid.flat().filter((cell) => cell === scatterId).length : 0;
   return {
@@ -138,8 +144,8 @@ function runSlot(config: SlotConfig) {
   const feature: Record<string, unknown> = {
     kind: featureKind,
     active: false,
-    payoutMode: 'THREE_REEL_WAYS',
-    aggregateWays: true,
+    payoutMode: 'FIXED_5_PAYLINES',
+    paylineCount: 5,
   };
 
   if (featureKind === 'SNAKE_WILD') {
