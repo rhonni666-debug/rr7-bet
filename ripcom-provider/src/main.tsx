@@ -7,6 +7,7 @@ import './styles.css';
 import './game-vfx.css';
 import './cinematic-vfx.css';
 import './bonus-mode.css';
+import './juice.css';
 
 const params = new URLSearchParams(window.location.search);
 const playerToken = params.get('play');
