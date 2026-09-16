@@ -1,7 +1,7 @@
 {
   "name": "ripcom-game-provider",
   "private": true,
-  "version": "1.0.0-sandbox.15",
+  "version": "1.0.0-sandbox.16",
   "type": "module",
   "scripts": {
     "dev": "vite",
