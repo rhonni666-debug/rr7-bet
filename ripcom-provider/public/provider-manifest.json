@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.7",
+  "version": "1.0.0-sandbox.8",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -36,7 +36,12 @@
     "wild-symbol-energy-vfx",
     "progressive-win-counter",
     "reel-stop-audio-cues",
-    "mobile-vfx-tuning"
+    "mobile-vfx-tuning",
+    "portrait-9x16-layout",
+    "mobile-safe-area-support",
+    "mobile-touch-controls",
+    "mobile-performance-budget",
+    "reel-snap-stop-vfx"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -50,7 +55,7 @@
       "name": "Eclipse Serpent",
       "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "cinematic-bonus-v7",
+      "presentation": "cinematic-mobile-v8",
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -61,6 +66,13 @@
         "bigWinAtMultiplier": 10,
         "megaWinAtMultiplier": 25,
         "progressiveCounter": true
+      },
+      "mobileProfile": {
+        "primaryOrientation": "portrait",
+        "targetAspectRatio": "9:16",
+        "safeAreas": true,
+        "touchOptimized": true,
+        "reducedParticleBudget": true
       }
     }
   ]
