@@ -18,8 +18,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-      - run: npm run test
-      - run: npm run ripcom:sdk:test
-      - run: npm run typecheck
-      - run: npm run build
+      - name: Install RR7 dependencies
+        run: npm install --no-audit --no-fund
+      - name: Test RR7
+        run: npm run test
+      - name: Test RIPCOM SDK
+        run: npm run ripcom:sdk:test
+      - name: Typecheck RR7
+        run: npm run typecheck
+      - name: Build RR7
+        run: npm run build
+      - name: Install RIPCOM provider dependencies
+        run: npm --prefix ripcom-provider install --no-audit --no-fund
+      - name: Typecheck RIPCOM provider
+        run: npm --prefix ripcom-provider run typecheck
+      - name: Build RIPCOM provider
+        run: npm --prefix ripcom-provider run build
