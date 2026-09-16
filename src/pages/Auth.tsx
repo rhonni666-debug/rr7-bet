@@ -26,7 +26,8 @@ export function AuthPage() {
     setMessage('');
     setError('');
 
-    if (!email.trim()) return setError('Informe o e-mail.');
+    if (!email.trim()) return setError(mode === 'entrar' ? 'Informe seu usuário ou e-mail.' : 'Informe o e-mail.');
+    if ((mode === 'cadastro' || mode === 'recuperar') && !email.includes('@')) return setError('Informe um e-mail válido.');
     if (mode === 'cadastro' && !name.trim()) return setError('Informe seu nome.');
     if (mode !== 'recuperar' && password.length < 6) return setError('A senha precisa ter pelo menos 6 caracteres.');
     if (mode === 'cadastro' && password !== confirm) return setError('As senhas não conferem.');
@@ -46,6 +47,7 @@ export function AuthPage() {
   }
 
   const title = mode === 'cadastro' ? 'Criar conta' : mode === 'recuperar' ? 'Recuperar senha' : 'Entrar';
+  const identifierLabel = mode === 'entrar' ? 'Usuário ou e-mail' : 'E-mail';
 
   return (
     <div className="mx-auto grid min-h-[70vh] max-w-md place-items-center">
@@ -56,7 +58,7 @@ export function AuthPage() {
         <p className="mt-2 text-sm leading-6 text-slate-400">A conta libera favoritos, histórico e a carteira de créditos sem valor monetário.</p>
 
         {mode === 'cadastro' && <Field label="Nome" value={name} onChange={setName} autoComplete="name" />}
-        <Field label="E-mail" value={email} onChange={setEmail} type="email" autoComplete="email" />
+        <Field label={identifierLabel} value={email} onChange={setEmail} type={mode === 'entrar' ? 'text' : 'email'} autoComplete={mode === 'entrar' ? 'username' : 'email'} />
         {mode !== 'recuperar' && <Field label="Senha" value={password} onChange={setPassword} type="password" autoComplete={mode === 'cadastro' ? 'new-password' : 'current-password'} />}
         {mode === 'cadastro' && <Field label="Confirmar senha" value={confirm} onChange={setConfirm} type="password" autoComplete="new-password" />}
 
