@@ -47,7 +47,7 @@ Modo: DEMO
 Release atual: 1.1.0
 Status: SANDBOX
 Manifest: games/eclipse-serpent/manifest.json
-Frontend RIPCOM: 1.0.0-sandbox.5
+Frontend RIPCOM: 1.0.0-sandbox.6
 
 ============================================================
 5. ECLIPSE BONUS
@@ -79,28 +79,29 @@ spin() = giro pago
 freeSpin() = rodada grátis
 tease() = suspense de quase bônus
 bonusHit() = confirmação do Eclipse Bonus
-win(multiplier) = vitória / Big Win / Mega Win
+win(multiplier) = vitória / Great Win / Big Win / Mega Win
 bonusComplete() = encerramento do bônus
 
 O player possui botão para ativar/desativar som.
 O navegador libera áudio após a primeira interação do usuário.
 
 ============================================================
-7. BIG WIN / MEGA WIN
+7. GREAT WIN / BIG WIN / MEGA WIN
 ============================================================
 Arquivos:
 ripcom-provider/src/game/WinCelebration.tsx
 ripcom-provider/src/juice.css
 
 A classificação é somente audiovisual e não muda a matemática.
-BIG WIN = multiplicador >= 8x.
+GREAT WIN = multiplicador >= 5x e < 10x.
+BIG WIN = multiplicador >= 10x e < 25x.
 MEGA WIN = multiplicador >= 25x.
 
 Inclui:
 partículas
 anéis de energia
 texto animado
-som procedural
+som procedural por faixa
 pulso dos símbolos vencedores
 pausa temporária das free spins para mostrar a celebração
 
@@ -297,7 +298,7 @@ ripcom-player-runtime = player standalone + Eclipse Bonus
 19. FRONTEND STANDALONE
 ============================================================
 Diretório: ripcom-provider/
-Versão: 1.0.0-sandbox.5
+Versão: 1.0.0-sandbox.6
 
 Inclui:
 portal
@@ -313,6 +314,7 @@ HUD 8->0
 resumo do bônus
 áudio procedural
 mute/unmute
+Great Win
 Big Win
 Mega Win
 animação de símbolos vencedores
