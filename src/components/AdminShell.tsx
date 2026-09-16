@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Activity, Blocks, CircleDollarSign, Coins, Gamepad2, Gauge, Gift, GitBranch, Image, LayoutDashboard, ListTree, RadioTower, ScrollText, TimerReset, Users, Webhook } from 'lucide-react';
+import { Activity, Blocks, Building2, CircleDollarSign, Coins, Gamepad2, Gauge, Gift, GitBranch, Image, LayoutDashboard, ListTree, RadioTower, ScrollText, TimerReset, Users, Webhook } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
 const items = [
@@ -15,6 +15,7 @@ const items = [
   { to: '/admin/transacoes', label: 'Transações', icon: CircleDollarSign },
   { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
   { to: '/admin/ripcom', label: 'RIPCOM B2B', icon: RadioTower },
+  { to: '/admin/ripcom-empresa', label: 'RIPCOM Empresa', icon: Building2 },
   { to: '/admin/ripcom-releases', label: 'RIPCOM Releases', icon: GitBranch },
   { to: '/admin/ripcom-metricas', label: 'RIPCOM Métricas', icon: Activity },
   { to: '/admin/b2b-sandbox', label: 'B2B Sandbox', icon: Webhook },
