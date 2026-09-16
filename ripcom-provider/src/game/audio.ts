@@ -97,11 +97,32 @@ class EclipseAudioEngine {
   }
 
   win(multiplier: number) {
-    const scale = multiplier >= 25 ? [392, 523, 659, 784, 1047] : multiplier >= 8 ? [330, 440, 554, 659] : [440, 554, 659];
-    scale.forEach((freq, index) => {
-      this.tone(freq, multiplier >= 8 ? 0.48 : 0.3, { type: 'sine', gain: multiplier >= 25 ? 0.1 : 0.065, when: index * 0.085, endFreq: freq * 1.03 });
+    if (multiplier >= 25) {
+      [392, 523, 659, 784, 1047, 1319].forEach((freq, index) => {
+        this.tone(freq, 0.56, { type: 'sine', gain: 0.1, when: index * 0.085, endFreq: freq * 1.04 });
+      });
+      this.noise(0.4, 0.1, 0.08);
+      return;
+    }
+
+    if (multiplier >= 10) {
+      [330, 440, 554, 659, 880].forEach((freq, index) => {
+        this.tone(freq, 0.48, { type: 'triangle', gain: 0.075, when: index * 0.09, endFreq: freq * 1.03 });
+      });
+      this.noise(0.28, 0.055, 0.08);
+      return;
+    }
+
+    if (multiplier >= 5) {
+      [392, 494, 587, 784].forEach((freq, index) => {
+        this.tone(freq, 0.34, { type: 'sine', gain: 0.058, when: index * 0.09, endFreq: freq * 1.02 });
+      });
+      return;
+    }
+
+    [440, 554, 659].forEach((freq, index) => {
+      this.tone(freq, 0.28, { type: 'sine', gain: 0.05, when: index * 0.085, endFreq: freq * 1.02 });
     });
-    if (multiplier >= 8) this.noise(0.32, multiplier >= 25 ? 0.1 : 0.06, 0.08);
   }
 
   bonusComplete() {
