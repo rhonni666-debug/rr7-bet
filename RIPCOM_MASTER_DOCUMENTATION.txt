@@ -4,20 +4,17 @@ Repositório: rhonni666-debug/rr7-bet
 Status: RIPCOM B2B v1 — SANDBOX / DEMO
 
 IMPORTANTE
-O documento principal é RIPCOM_MASTER_DOCUMENTATION.md.
-Este TXT é o backup simples com as informações essenciais.
+Documento principal: RIPCOM_MASTER_DOCUMENTATION.md
+Este TXT é o backup simples das informações essenciais.
 
 ============================================================
-1. RIPCOM
+1. IDENTIDADE
 ============================================================
 RIPCOM = provedora própria e infraestrutura dos jogos autorais.
 RR7 = primeiro operador sandbox.
 GitHub = fonte de verdade do código.
 Supabase/PostgreSQL/Edge Functions = backend.
 Modo atual = 100% DEMO / fun-money.
-
-Arquitetura:
-Operador -> RIPCOM B2B API -> sessão/release -> game runtime -> player standalone -> jogador.
 
 ============================================================
 2. ECLIPSE SERPENT
@@ -27,31 +24,57 @@ Slug: eclipse-serpent
 Game Code: ripcom-slot:eclipse-serpent
 Launch Type: PROVIDER_SESSION
 Release matemática: 1.1.0
-Frontend RIPCOM: 1.0.0-sandbox.10
+Frontend RIPCOM: 1.0.0-sandbox.12
 Status: SANDBOX
 Modo: DEMO
 
 Player canônico:
 ripcom-provider/src/game/EclipsePlayer.tsx
 
-Launch:
-<provider-base>/?play=<session_token>
+============================================================
+3. SANDBOX.12 — VALORES, ALINHAMENTO E BÔNUS
+============================================================
+A sandbox.12 preserva a matemática e corrige a apresentação.
+
+Layout matemático:
+[3,4,3]
+
+O 3-4-3 continua igual no backend.
+As colunas laterais de 3 símbolos agora ficam centralizadas verticalmente em relação à coluna central de 4 símbolos.
+O tamanho aparente das pedras é padronizado.
+
+Arquivo:
+ripcom-provider/src/stage12-polish.css
 
 ============================================================
-3. SANDBOX.10 — SÍMBOLOS PREMIUM
+4. VALORES VISÍVEIS DAS PEDRAS
 ============================================================
-A sandbox.10 mantém a profundidade da sandbox.9 e redesenha os símbolos para uma leitura mais premium e atrativa.
+Fonte oficial dos valores:
+public.slot_game_configs.symbols[].pay
 
-Símbolos:
+Valores atuais:
+Fragmento = 0,14x
+Lua Eclipse = 0,22x
+Runa = 0,34x
+Núcleo = 0,60x
+Serpente Eclipse = 1,25x
+Wild = 2,30x
+Portal / Scatter = BONUS
+
+O valor mostrado é o pay base.
+O prêmio final continua sendo calculado no backend conforme ways/combinação/regras.
+
+Arquivos:
+ripcom-provider/src/game/EclipsePlayer.tsx
+ripcom-provider/src/symbol-pay-stage11.css
+
+============================================================
+5. SÍMBOLOS PREMIUM
+============================================================
+Arquivo:
 ripcom-provider/src/game/SymbolArt.tsx
 
-Apresentação visual:
-ripcom-provider/src/premium-symbols-stage10.css
-
-Camada de profundidade:
-ripcom-provider/src/depth-stage9.css
-
-Materiais e cores:
+Materiais:
 ouro
 esmeralda
 safira
@@ -59,79 +82,58 @@ ametista
 rubi
 obsidiana
 
-Símbolos atuais:
-Runa = medalhão de safira com ouro
-Fragmento = cristal de ametista
+Símbolos:
+Runa = medalhão de safira e ouro
+Fragmento = ametista facetada
 Núcleo = esfera esmeralda
-Eclipse Bonus = medalhão solar dourado com eclipse
-Wild = máscara/cabeça de serpente em esmeralda e ouro com olhos rubi
-Serpente Eclipse = serpente esmeralda sobre medalhão ametista/dourado
-Gema fallback = rubi facetado
+Eclipse Bonus = medalhão solar dourado
+Wild = máscara de serpente ouro/esmeralda
+Serpente Eclipse = serpente sobre medalhão ametista
+Fallback = rubi facetado
 
-Mudanças visuais:
-símbolos maiores
-sem emoji como arte principal
-sem pequenos rótulos abaixo dos símbolos
-rolo contínuo em vez de grade de cards
-brilho e sombra por material
-rails metálicos entre rolos
-Wild e Bonus com animação própria
-símbolos vencedores avançam em profundidade
-brilho de joia em movimento
-
-SVG/CSS são somente apresentação. Não alteram RNG, saldo ou prêmio.
+Não usa emoji como arte principal.
 
 ============================================================
-4. MOBILE / 9:16
-============================================================
-Arquivo:
-ripcom-provider/src/mobile-stage8.css
-
-Perfil:
-portrait 9:16
-safe areas/notch
-reels maiores
-controles compactos
-touch optimized
-HUD do bônus compacto
-redução seletiva de partículas e blur
-prefers-reduced-motion
-
-Checklist:
-docs/ECLIPSE_SERPENT_MOBILE_QA.md
-
-============================================================
-5. ECLIPSE BONUS
+6. ECLIPSE BONUS — REGRA
 ============================================================
 Gatilho: 3 scatters.
 Prêmio: 8 rodadas grátis.
 Retrigger: desabilitado.
 Aposta das free spins: mesma aposta do giro trigger.
 Débito nas free spins: nenhum.
-Ganhos: creditados no saldo DEMO.
+Ganhos: saldo DEMO.
 Estado do bônus: persistido no backend.
 
-Fluxo:
-2 scatters -> tease -> rolo decisivo -> 3º scatter -> eclipse -> serpente sobe -> ECLIPSE BONUS -> 8 FREE SPINS -> 8 a 0 -> total ganho.
+============================================================
+7. ECLIPSE BONUS — NOVA ENTRADA CINEMATOGRÁFICA
+============================================================
+Arquivos:
+ripcom-provider/src/game/BonusIntroOverlay.tsx
+ripcom-provider/src/game/EclipseScene.tsx
+ripcom-provider/src/game/SerpentRise.tsx
+ripcom-provider/src/stage12-polish.css
 
-Campos de sessão:
-free_spins_remaining
-free_spins_total
-bonus_bet
-bonus_total_win
-bonus_rounds_played
-bonus_triggered_at
+Sequência:
+1. câmera avança para o eclipse
+2. ambiente escurece
+3. raios volumétricos aparecem
+4. lua fecha o sol
+5. plano de chão aparece sob a serpente
+6. backlight acende atrás da serpente
+7. serpente sobe com profundidade e desaceleração
+8. corpo mostra escamas, ventre e highlights
+9. cabeça tem mais detalhes, olhos, narinas e língua
+10. névoa passa na frente da serpente
+11. poeira sobe do chão
+12. duas ondas de choque surgem no impacto
+13. lens flare acompanha o fechamento do eclipse
+14. título ECLIPSE BONUS entra após o evento físico
+15. aparece 8 RODADAS GRÁTIS
 
-Campos de round:
-is_free_spin
-free_spins_remaining_after
-bonus_awarded
-bonus_bet
-bonus_total_win_after
-bonus_rounds_played_after
+Tudo é apresentação visual. RNG/pay/saldo continuam no backend.
 
 ============================================================
-6. ÁUDIO / VFX
+8. ÁUDIO / VFX
 ============================================================
 Áudio procedural:
 ripcom-provider/src/game/audio.ts
@@ -147,33 +149,8 @@ bonusHit()
 win(multiplier)
 bonusComplete()
 
-Arquivos principais:
-ripcom-provider/src/game/AnimatedBackground.tsx
-ripcom-provider/src/game/BonusIntroOverlay.tsx
-ripcom-provider/src/game/BonusTeaseOverlay.tsx
-ripcom-provider/src/game/SerpentRise.tsx
-ripcom-provider/src/game/WinCelebration.tsx
-ripcom-provider/src/game/AnimatedAmount.tsx
-ripcom-provider/src/game/SymbolArt.tsx
-ripcom-provider/src/symbol-vfx.css
-ripcom-provider/src/depth-stage9.css
-ripcom-provider/src/premium-symbols-stage10.css
-ripcom-provider/src/juice.css
-ripcom-provider/src/cinematic-vfx.css
-ripcom-provider/src/bonus-mode.css
-
 ============================================================
-7. GREAT / BIG / MEGA WIN
-============================================================
-GREAT WIN = >= 5x e < 10x.
-BIG WIN = >= 10x e < 25x.
-MEGA WIN = >= 25x.
-
-Classificação é apenas audiovisual.
-Valor do prêmio usa contador progressivo, mas o valor real é liquidado no backend.
-
-============================================================
-8. API B2B
+9. API B2B
 ============================================================
 Edge Function: ripcom-b2b
 Base:
@@ -189,7 +166,7 @@ POST /v1/sessions/close
 Wallet real permanece desabilitada.
 
 ============================================================
-9. RUNTIME DO PLAYER
+10. RUNTIME PLAYER
 ============================================================
 Edge Function: ripcom-player-runtime
 Base:
@@ -200,14 +177,14 @@ player_state
 player_spin
 player_close
 
-Browser recebe somente token temporário.
-Nunca recebe private key RSA ou service_role.
+Browser usa token temporário.
+Private key e service_role não vão para o frontend.
 
 Liquidação:
 public.ripcom_settle_demo_spin_v2
 
 ============================================================
-10. AUTENTICAÇÃO B2B
+11. AUTENTICAÇÃO B2B
 ============================================================
 Parceiro mantém PRIVATE KEY.
 RIPCOM armazena PUBLIC KEY.
@@ -218,65 +195,17 @@ X-Ripcom-Timestamp
 X-Ripcom-Request-Id
 X-Ripcom-Signature
 
-Algoritmo: RSA-SHA256 / RSASSA-PKCS1-v1_5.
-
-Canonical:
-METHOD\nPATH\nTIMESTAMP\nREQUEST_ID\nSHA256_HEX(BODY_EXATO)
-
-Idempotência:
-public.ripcom_api_requests
+Algoritmo:
+RSA-SHA256 / RSASSA-PKCS1-v1_5
 
 ============================================================
-11. TABELAS PRINCIPAIS
-============================================================
-public.providers
-public.ripcom_operators
-public.ripcom_operator_games
-public.ripcom_game_releases
-public.ripcom_b2b_sessions
-public.ripcom_b2b_rounds
-public.ripcom_api_requests
-public.ripcom_company_profile
-
-RR7 permanece como operador sandbox ativo.
-Release Eclipse Serpent = 1.1.0.
-
-============================================================
-12. PERFIL EMPRESARIAL PRIVADO
-============================================================
-Tabela:
-public.ripcom_company_profile
-
-Painel:
-/admin/ripcom-empresa
-
-Dados empresariais/CNPJ ficam privados por padrão.
-
-============================================================
-13. SDK / OPENAPI
-============================================================
-SDK:
-sdk/ripcom-node.mjs
-
-Métodos:
-health()
-games()
-createSession()
-launch()
-closeSession()
-
-OpenAPI:
-docs/ripcom-b2b-openapi.yaml
-
-============================================================
-14. HOMOLOGAÇÃO DO BÔNUS
+12. HOMOLOGAÇÃO DO BÔNUS
 ============================================================
 Saldo inicial: 1000
 Aposta trigger: 5
 Saldo após trigger: 995
 Free spins: 8
-Prêmio teste por free spin: 1
-Ganho total: 8
+Ganho total teste: 8
 Saldo final: 1003
 Rounds: 1 pago + 8 grátis
 Free spins restantes: 0
@@ -285,7 +214,7 @@ RESULTADO: PASSOU.
 Nenhuma free spin debitou nova aposta.
 
 ============================================================
-15. CI / DEPLOY
+13. CI / DEPLOY
 ============================================================
 CI:
 .github/workflows/ci.yml
@@ -297,7 +226,7 @@ RR7 -> raiz do Pages
 RIPCOM standalone -> /ripcom-provider/
 
 ============================================================
-16. SEGURANÇA
+14. SEGURANÇA
 ============================================================
 Private key nunca no frontend.
 Private key nunca no banco RIPCOM.
@@ -308,13 +237,11 @@ Player usa token temporário.
 RLS protege tabelas administrativas.
 Liquidação sensível no backend.
 Frontend não recebe service_role.
-Dados empresariais ficam privados.
-Backend decide se giro é grátis.
-Áudio/VFX/SVG/contadores não alteram RNG ou saldo.
+Áudio/VFX/SVG/valores visuais não alteram RNG ou saldo.
 Dinheiro real não é habilitado por flag.
 
 ============================================================
-17. DOCUMENTOS IMPORTANTES
+15. DOCUMENTOS IMPORTANTES
 ============================================================
 RIPCOM_MASTER_DOCUMENTATION.md
 RIPCOM_MASTER_DOCUMENTATION.txt
@@ -328,18 +255,5 @@ docs/RIPCOM_PARTNER_ONBOARDING.md
 docs/RIPCOM_QA_REPORT_2026-09-16.md
 docs/ripcom-b2b-openapi.yaml
 sdk/README.md
-
-============================================================
-18. PRÓXIMOS PASSOS
-============================================================
-1. Validar sandbox.10 visualmente em desktop e celular.
-2. Comparar força visual com a referência enviada sem copiar assets.
-3. Decidir se 2.5D atende ou se próximo salto deve usar WebGL/canvas.
-4. Calibrar volume/timing em aparelho real.
-5. Medir FPS no celular.
-6. Smoke HTTP externo completo.
-7. Criar segundo jogo RIPCOM.
-8. Separar staging.
-9. Migrar para domínio próprio.
 
 FIM DO DOCUMENTO
