@@ -56,7 +56,7 @@ Jogos oficiais RIPCOM não usam `MOCK`.
 | Game Code | `ripcom-slot:eclipse-serpent` |
 | Launch Type | `PROVIDER_SESSION` |
 | Release matemática | `1.1.0` |
-| Frontend RIPCOM | `1.0.0-sandbox.9` |
+| Frontend RIPCOM | `1.0.0-sandbox.10` |
 | Status | `SANDBOX` |
 | Modo | `DEMO` |
 
@@ -86,11 +86,11 @@ Launch:
 
 ---
 
-## 4. Sandbox.9 — apresentação dimensional
+## 4. Sandbox.10 — símbolos premium + profundidade
 
-A `sandbox.9` remove a aparência de ícones/emoji chapados e adiciona uma camada visual própria, sem alterar matemática, RNG ou liquidação.
+A `sandbox.10` mantém a camada dimensional introduzida na sandbox.9 e redesenha os símbolos para uma leitura mais próxima de slots premium: peças maiores, materiais distintos, ouro, gemas coloridas e menos aparência de interface/cartão.
 
-### Símbolos autorais dimensionais
+### Símbolos premium autorais
 
 Arquivo:
 
@@ -98,17 +98,38 @@ Arquivo:
 ripcom-provider/src/game/SymbolArt.tsx
 ```
 
-Os símbolos são desenhados em SVG original com gradientes, facetas, reflexos, sombra e profundidade:
+Os símbolos continuam sendo SVGs originais da RIPCOM, mas agora usam materiais e cores distintas:
 
-- Runa;
-- Fragmento;
-- Núcleo;
-- Eclipse Bonus;
-- Wild;
-- Serpente Eclipse;
-- fallback de gema autoral.
+- **Runa** — medalhão de safira com moldura dourada;
+- **Fragmento** — cristal de ametista facetado em ouro;
+- **Núcleo** — esfera esmeralda com aro metálico;
+- **Eclipse Bonus** — medalhão solar dourado com eclipse central;
+- **Wild** — máscara/cabeça de serpente em esmeralda e ouro com olhos rubi;
+- **Serpente Eclipse** — serpente esmeralda sobre medalhão ametista/dourado;
+- **Gema fallback** — rubi facetado com moldura dourada.
 
-O frontend não usa mais emoji como arte principal dos símbolos.
+O frontend não usa emoji como arte principal.
+
+### Apresentação premium dos símbolos
+
+Arquivo:
+
+```text
+ripcom-provider/src/premium-symbols-stage10.css
+```
+
+Inclui:
+
+- símbolos maiores ocupando mais do rolo;
+- remoção dos pequenos rótulos abaixo de cada símbolo;
+- rolo contínuo em vez de grade de cards;
+- brilho e sombra distintos por material;
+- moldura metálica/dourada;
+- gemas com safira, ametista, rubi e esmeralda;
+- Wild e Bonus com movimento mais teatral;
+- símbolos vencedores avançando em profundidade;
+- brilho de joia em movimento;
+- rails metálicos sutis entre os rolos.
 
 ### Profundidade do tabuleiro
 
@@ -131,7 +152,7 @@ Inclui:
 - inclinação suave de câmera pelo ponteiro no desktop;
 - camera tilt desativado no mobile para estabilidade.
 
-Essa camada é apresentação visual. O backend continua sendo a autoridade do resultado.
+Essas camadas são exclusivamente de apresentação. O backend continua sendo a autoridade do resultado.
 
 ---
 
@@ -152,7 +173,7 @@ O perfil mobile mantém:
 - botão SPIN de fácil toque;
 - HUD das free spins compacto;
 - redução seletiva de partículas/blur;
-- símbolos, scatter, wild e bônus ainda animados;
+- símbolos premium, scatter, wild e bônus ainda animados;
 - `prefers-reduced-motion` respeitado.
 
 Checklist:
@@ -245,7 +266,10 @@ ripcom-provider/src/game/BonusTeaseOverlay.tsx
 ripcom-provider/src/game/SerpentRise.tsx
 ripcom-provider/src/game/WinCelebration.tsx
 ripcom-provider/src/game/AnimatedAmount.tsx
+ripcom-provider/src/game/SymbolArt.tsx
 ripcom-provider/src/symbol-vfx.css
+ripcom-provider/src/depth-stage9.css
+ripcom-provider/src/premium-symbols-stage10.css
 ripcom-provider/src/juice.css
 ripcom-provider/src/cinematic-vfx.css
 ripcom-provider/src/bonus-mode.css
@@ -528,14 +552,15 @@ RIPCOM standalone -> /ripcom-provider/
 
 ## 19. Próximos passos
 
-1. validar visualmente a `sandbox.9` em desktop e celular;
-2. decidir se a profundidade 2.5D atende ou se o próximo salto deve usar WebGL/canvas;
-3. calibrar volume/timing em aparelho real;
-4. medir FPS em celular real;
-5. smoke HTTP externo completo;
-6. criar segundo jogo RIPCOM;
-7. separar staging;
-8. migrar para domínio próprio quando disponível.
+1. validar visualmente a `sandbox.10` em desktop e celular;
+2. comparar a força visual dos símbolos premium com a referência enviada, sem copiar seus assets;
+3. decidir se a profundidade 2.5D atende ou se o próximo salto deve usar WebGL/canvas;
+4. calibrar volume/timing em aparelho real;
+5. medir FPS em celular real;
+6. smoke HTTP externo completo;
+7. criar segundo jogo RIPCOM;
+8. separar staging;
+9. migrar para domínio próprio quando disponível.
 
 ---
 
