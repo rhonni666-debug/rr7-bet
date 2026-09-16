@@ -4,19 +4,11 @@ import { useEffect, useState } from 'react';
 import { useDemo } from '../lib/demo-store';
 import { useAuth } from '../lib/auth';
 import { useCatalog } from '../lib/catalog';
+import { roundErrorMessage } from '../lib/game-errors';
 import { GameLauncher } from '../lib/game-launcher';
 import type { GameSession } from '../types';
 
 const bets = [1, 2, 5, 10, 20, 50, 100];
-
-function roundErrorMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : '';
-  if (message.includes('INSUFFICIENT_DEMO_CREDITS')) return 'Créditos DEMO insuficientes.';
-  if (message.includes('RATE_LIMIT')) return 'Muitas rodadas em pouco tempo. Aguarde alguns segundos.';
-  if (message.includes('SESSION_EXPIRED') || message.includes('SESSION_NOT_ACTIVE')) return 'A sessão DEMO expirou. Volte ao lobby e abra o jogo novamente.';
-  if (message.includes('AUTH_REQUIRED')) return 'Sua sessão de login expirou. Entre novamente.';
-  return 'Não foi possível concluir a rodada DEMO.';
-}
 
 export function GamePage() {
   const { slug } = useParams({ from: '/jogo/$slug' });
