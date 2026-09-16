@@ -56,7 +56,7 @@ Jogos oficiais RIPCOM não usam `MOCK`.
 | Game Code | `ripcom-slot:eclipse-serpent` |
 | Launch Type | `PROVIDER_SESSION` |
 | Release matemática | `1.1.0` |
-| Frontend RIPCOM | `1.0.0-sandbox.10` |
+| Frontend RIPCOM | `1.0.0-sandbox.12` |
 | Status | `SANDBOX` |
 | Modo | `DEMO` |
 
@@ -86,9 +86,60 @@ Launch:
 
 ---
 
-## 4. Sandbox.10 — símbolos premium + profundidade
+## 4. Sandbox.12 — símbolos valorizados, 3-4-3 alinhado e bônus cinematográfico
 
-A `sandbox.10` mantém a camada dimensional introduzida na sandbox.9 e redesenha os símbolos para uma leitura mais próxima de slots premium: peças maiores, materiais distintos, ouro, gemas coloridas e menos aparência de interface/cartão.
+A `sandbox.12` consolida as sandboxes 9–11 e corrige os dois problemas visuais principais apontados em QA: desalinhamento do layout `3-4-3` e falta de peso/realismo na entrada do Eclipse Bonus.
+
+### Valores visíveis nas pedras
+
+Os valores exibidos nos símbolos **não são inventados no frontend**. Eles vêm de:
+
+```text
+public.slot_game_configs.symbols[].pay
+```
+
+Tabela atual da matemática ativa:
+
+| Símbolo | pay base exibido |
+|---|---:|
+| Fragmento | `0,14×` |
+| Lua Eclipse | `0,22×` |
+| Runa | `0,34×` |
+| Núcleo | `0,60×` |
+| Serpente Eclipse | `1,25×` |
+| Wild | `2,30×` |
+| Portal / Scatter | `BONUS` |
+
+Observação importante: `pay` é a contribuição base do símbolo. O prêmio final continua sendo calculado no backend conforme combinação/ways e regras do jogo. A plaquinha é uma referência visual do valor base, não um cálculo de prêmio independente.
+
+Arquivos:
+
+```text
+ripcom-provider/src/game/EclipsePlayer.tsx
+ripcom-provider/src/symbol-pay-stage11.css
+```
+
+### Layout 3-4-3 alinhado
+
+A matemática continua usando:
+
+```text
+[3,4,3]
+```
+
+Não houve mudança na quantidade de posições nem na avaliação do resultado. A apresentação foi alterada para:
+
+- manter o mesmo tamanho de célula nas três colunas;
+- centralizar verticalmente as colunas laterais de 3 símbolos;
+- manter a coluna central com 4 símbolos;
+- impedir o quarto símbolo central de parecer “pendurado” abaixo do tabuleiro;
+- padronizar a escala aparente de Bonus, Wild, Núcleo, Fragmento, Runa e demais peças.
+
+Arquivo:
+
+```text
+ripcom-provider/src/stage12-polish.css
+```
 
 ### Símbolos premium autorais
 
@@ -98,67 +149,63 @@ Arquivo:
 ripcom-provider/src/game/SymbolArt.tsx
 ```
 
-Os símbolos continuam sendo SVGs originais da RIPCOM, mas agora usam materiais e cores distintas:
+Os símbolos são SVGs originais da RIPCOM com materiais distintos:
 
-- **Runa** — medalhão de safira com moldura dourada;
-- **Fragmento** — cristal de ametista facetado em ouro;
-- **Núcleo** — esfera esmeralda com aro metálico;
-- **Eclipse Bonus** — medalhão solar dourado com eclipse central;
-- **Wild** — máscara/cabeça de serpente em esmeralda e ouro com olhos rubi;
-- **Serpente Eclipse** — serpente esmeralda sobre medalhão ametista/dourado;
-- **Gema fallback** — rubi facetado com moldura dourada.
+- **Runa** — medalhão de safira e ouro;
+- **Fragmento** — ametista facetada;
+- **Núcleo** — esfera esmeralda;
+- **Eclipse Bonus** — medalhão solar dourado;
+- **Wild** — máscara de serpente em ouro/esmeralda;
+- **Serpente Eclipse** — serpente sobre medalhão ametista;
+- **Gema fallback** — rubi facetado.
 
 O frontend não usa emoji como arte principal.
 
-### Apresentação premium dos símbolos
+### Entrada do bônus com mais realismo
 
-Arquivo:
+Arquivos:
 
 ```text
-ripcom-provider/src/premium-symbols-stage10.css
+ripcom-provider/src/game/BonusIntroOverlay.tsx
+ripcom-provider/src/game/EclipseScene.tsx
+ripcom-provider/src/game/SerpentRise.tsx
+ripcom-provider/src/stage12-polish.css
 ```
 
-Inclui:
+A sequência agora contém:
 
-- símbolos maiores ocupando mais do rolo;
-- remoção dos pequenos rótulos abaixo de cada símbolo;
-- rolo contínuo em vez de grade de cards;
-- brilho e sombra distintos por material;
-- moldura metálica/dourada;
-- gemas com safira, ametista, rubi e esmeralda;
-- Wild e Bonus com movimento mais teatral;
-- símbolos vencedores avançando em profundidade;
-- brilho de joia em movimento;
-- rails metálicos sutis entre os rolos.
+1. câmera avançando para o eclipse;
+2. escurecimento e profundidade de ambiente;
+3. raios volumétricos atrás do eclipse;
+4. lua fechando o sol;
+5. plano de chão/contato abaixo da serpente;
+6. backlight da serpente;
+7. serpente subindo com aceleração/desaceleração e profundidade;
+8. corpo com camadas, escamas, ventre e highlights;
+9. cabeça mais detalhada, olhos, narinas e língua;
+10. névoa passando **na frente** da serpente para criar profundidade;
+11. poeira/partículas subindo do chão;
+12. duas ondas de choque no impacto;
+13. lens flare no ponto de fechamento do eclipse;
+14. título `ECLIPSE BONUS` entrando somente depois do evento físico;
+15. destaque `8 RODADAS GRÁTIS`.
 
-### Profundidade do tabuleiro
+Esses efeitos são apenas apresentação. RNG, saldo, pay e free spins continuam sob autoridade do backend.
 
-Arquivo:
+### Camadas visuais anteriores mantidas
 
 ```text
 ripcom-provider/src/depth-stage9.css
+ripcom-provider/src/premium-symbols-stage10.css
+ripcom-provider/src/symbol-pay-stage11.css
+ripcom-provider/src/stage12-polish.css
 ```
-
-Inclui:
-
-- reels em perspectiva;
-- superfícies com luz superior e sombra inferior;
-- objetos com `translateZ` e movimento sutil;
-- reflexo de vidro/metal;
-- sombra projetada abaixo dos símbolos;
-- plano de chão em perspectiva;
-- moldura com profundidade;
-- botão SPIN com relevo e deslocamento ao pressionar;
-- inclinação suave de câmera pelo ponteiro no desktop;
-- camera tilt desativado no mobile para estabilidade.
-
-Essas camadas são exclusivamente de apresentação. O backend continua sendo a autoridade do resultado.
 
 ---
 
 ## 5. Mobile / portrait 9:16
 
-Arquivo:
+Arquivo base:
 
 ```text
 ripcom-provider/src/mobile-stage8.css
@@ -173,7 +220,9 @@ O perfil mobile mantém:
 - botão SPIN de fácil toque;
 - HUD das free spins compacto;
 - redução seletiva de partículas/blur;
-- símbolos premium, scatter, wild e bônus ainda animados;
+- valores dos símbolos legíveis;
+- 3-4-3 visualmente centralizado;
+- bônus cinematográfico ajustado para portrait;
 - `prefers-reduced-motion` respeitado.
 
 Checklist:
@@ -263,6 +312,7 @@ Arquivos visuais principais:
 ripcom-provider/src/game/AnimatedBackground.tsx
 ripcom-provider/src/game/BonusIntroOverlay.tsx
 ripcom-provider/src/game/BonusTeaseOverlay.tsx
+ripcom-provider/src/game/EclipseScene.tsx
 ripcom-provider/src/game/SerpentRise.tsx
 ripcom-provider/src/game/WinCelebration.tsx
 ripcom-provider/src/game/AnimatedAmount.tsx
@@ -270,6 +320,8 @@ ripcom-provider/src/game/SymbolArt.tsx
 ripcom-provider/src/symbol-vfx.css
 ripcom-provider/src/depth-stage9.css
 ripcom-provider/src/premium-symbols-stage10.css
+ripcom-provider/src/symbol-pay-stage11.css
+ripcom-provider/src/stage12-polish.css
 ripcom-provider/src/juice.css
 ripcom-provider/src/cinematic-vfx.css
 ripcom-provider/src/bonus-mode.css
@@ -482,7 +534,7 @@ Teste já executado:
 | Aposta trigger | `5` |
 | Saldo após trigger | `995` |
 | Free spins | `8` |
-| Prêmio de teste por free spin | `1` |
+| Prêmio teste por free spin | `1` |
 | Ganho total do bônus | `8` |
 | Saldo final | `1003` |
 | Rounds | `1 pago + 8 grátis` |
@@ -527,7 +579,7 @@ RIPCOM standalone -> /ripcom-provider/
 8. liquidação sensível fica no backend;
 9. frontend não recebe `service_role`;
 10. dados empresariais ficam privados;
-11. backend decide se o giro é grátis;
+11. backend decide se giro é grátis;
 12. áudio/VFX/SVG/contadores não alteram RNG ou saldo;
 13. dinheiro real não é habilitado por simples flag.
 
@@ -552,12 +604,12 @@ RIPCOM standalone -> /ripcom-provider/
 
 ## 19. Próximos passos
 
-1. validar visualmente a `sandbox.10` em desktop e celular;
-2. comparar a força visual dos símbolos premium com a referência enviada, sem copiar seus assets;
-3. decidir se a profundidade 2.5D atende ou se o próximo salto deve usar WebGL/canvas;
+1. validar visualmente a `sandbox.12` em desktop e celular;
+2. gravar a entrada do Eclipse Bonus em aparelho real e calibrar peso/velocidade;
+3. medir FPS durante eclipse + serpente + fog em celular;
 4. calibrar volume/timing em aparelho real;
-5. medir FPS em celular real;
-6. smoke HTTP externo completo;
+5. smoke HTTP externo completo;
+6. decidir eventual evolução WebGL/canvas após QA da sandbox.12;
 7. criar segundo jogo RIPCOM;
 8. separar staging;
 9. migrar para domínio próprio quando disponível.
