@@ -24,6 +24,10 @@ jobs:
         run: npm run test
       - name: Test RIPCOM SDK
         run: npm run ripcom:sdk:test
+      - name: Validate RIPCOM integration assets
+        run: |
+          node --check examples/ripcom-node-operator/server.mjs
+          node -e "JSON.parse(require('fs').readFileSync('ripcom-provider/public/provider-manifest.json','utf8')); console.log('RIPCOM provider manifest: OK')"
       - name: Typecheck RR7
         run: npm run typecheck
       - name: Build RR7
