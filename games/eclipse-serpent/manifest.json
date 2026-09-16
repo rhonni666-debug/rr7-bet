@@ -1,0 +1,44 @@
+{
+  "$schema": "ripcom.game-manifest/v1",
+  "provider": {
+    "name": "RIPCOM",
+    "slug": "ripcom",
+    "type": "REAL"
+  },
+  "game": {
+    "name": "Eclipse Serpent",
+    "slug": "eclipse-serpent",
+    "gameCode": "ripcom-slot:eclipse-serpent",
+    "version": "1.0.0",
+    "status": "SANDBOX",
+    "mode": "DEMO",
+    "launchType": "PROVIDER_SESSION"
+  },
+  "runtime": {
+    "apiVersion": "v1",
+    "b2bFunction": "ripcom-b2b",
+    "internalFunction": "ripcom-provider",
+    "playerRoute": "/ripcom/play/:sessionToken",
+    "currency": "DEMO",
+    "sessionTtlMinutes": 120
+  },
+  "capabilities": [
+    "session-launch",
+    "server-side-rng",
+    "idempotent-rounds",
+    "demo-wallet",
+    "audit-trail",
+    "operator-entitlements"
+  ],
+  "security": {
+    "operatorAuth": "RSA-SHA256",
+    "requestIdempotency": true,
+    "privateKeyInBrowser": false,
+    "playerUsesTemporarySessionToken": true
+  },
+  "release": {
+    "channel": "sandbox",
+    "releasedAt": "2026-09-16",
+    "notes": "Primeira release formal para homologação da arquitetura RIPCOM B2B."
+  }
+}
