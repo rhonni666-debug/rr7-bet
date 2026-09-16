@@ -9,7 +9,7 @@
     "name": "Eclipse Serpent",
     "slug": "eclipse-serpent",
     "gameCode": "ripcom-slot:eclipse-serpent",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "status": "SANDBOX",
     "mode": "DEMO",
     "launchType": "PROVIDER_SESSION"
@@ -23,6 +23,21 @@
     "currency": "DEMO",
     "sessionTtlMinutes": 120
   },
+  "paytable": {
+    "mode": "THREE_REEL_WAYS",
+    "aggregateWays": true,
+    "rule": "one position from each reel forms a way; each way pays once using the highest valid symbol after Wild substitution",
+    "basePaysPerWay": {
+      "shard": 0.20,
+      "moon": 0.30,
+      "rune": 0.45,
+      "core": 0.70,
+      "serpent": 1.25,
+      "wild": 2.50
+    },
+    "scatterDirectPay": false,
+    "betScaling": "final win = bet x aggregated way multiplier"
+  },
   "bonus": {
     "name": "Eclipse Bonus",
     "triggerScatters": 3,
@@ -34,12 +49,19 @@
     "visualSequence": [
       "scatter tease",
       "sun and moon eclipse",
-      "serpent rise",
+      "slow serpent rise",
       "ECLIPSE BONUS title",
       "8 RODADAS GRATIS",
       "automatic free spins",
       "bonus total summary"
     ]
+  },
+  "presentation": {
+    "normalSpinDurationMs": 1200,
+    "normalReelStopGapMs": 220,
+    "bonusIntroDurationMs": 6500,
+    "sequentialReelStops": true,
+    "showWinningWaysBreakdown": true
   },
   "capabilities": [
     "session-launch",
@@ -50,7 +72,11 @@
     "operator-entitlements",
     "persistent-bonus-state",
     "8-free-spins",
-    "bonus-round-audit"
+    "bonus-round-audit",
+    "three-reel-aggregated-ways",
+    "wild-highest-valid-pay-per-way",
+    "sequential-reel-stops",
+    "normal-speed-cadence"
   ],
   "security": {
     "operatorAuth": "RSA-SHA256",
@@ -62,6 +88,6 @@
   "release": {
     "channel": "sandbox",
     "releasedAt": "2026-09-16",
-    "notes": "Release 1.1.0 adiciona Eclipse Bonus persistente com 8 rodadas gratis DEMO e animacao cinematografica sol/lua/serpente."
+    "notes": "Release 1.2.0 introduz paytable agregada por ways em 3 rolos, valores base por pedra, parada sequencial mais lenta e bonus cinematografico desacelerado. Mantem modo DEMO e 8 free spins persistentes."
   }
 }
