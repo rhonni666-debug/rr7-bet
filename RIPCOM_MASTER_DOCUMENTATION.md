@@ -289,7 +289,45 @@ O operador QA foi suspenso após uso de uma chave efêmera. Deve receber chave n
 
 ---
 
-## 10. Catálogo por operador
+## 10. Perfil empresarial privado da RIPCOM
+
+A RIPCOM agora possui estrutura separada para identidade empresarial/contratual.
+
+Tabela:
+
+```text
+public.ripcom_company_profile
+```
+
+Finalidade:
+
+- razão social;
+- nome fantasia;
+- CNPJ;
+- país;
+- e-mail comercial;
+- telefone comercial;
+- site;
+- contato contratual;
+- e-mail contratual;
+- notas internas.
+
+O CNPJ **não é colocado no código-fonte, manifests públicos ou player**. Ele fica no backend privado e somente administradores podem ler/alterar por RLS.
+
+Painel:
+
+```text
+/admin/ripcom-empresa
+src/pages/AdminRipcomCompany.tsx
+```
+
+O perfil foi criado inicialmente com `trade_name = RIPCOM` e `country_code = BR`, sem inventar razão social, CNPJ ou contatos.
+
+Ter um CNPJ permite preencher a identidade empresarial real quando desejado, mas os requisitos de eventual operação regulada/produção continuam sendo uma etapa separada.
+
+---
+
+## 11. Catálogo por operador
 
 Tabela:
 
@@ -308,7 +346,7 @@ A tabela define **qual jogo** e **qual release** o parceiro pode consumir.
 
 ---
 
-## 11. Idempotência e telemetria
+## 12. Idempotência e telemetria
 
 Tabela:
 
@@ -333,7 +371,7 @@ O mesmo `request_id` com conteúdo diferente gera `IDEMPOTENCY_CONFLICT`.
 
 ---
 
-## 12. Sessões e rounds
+## 13. Sessões e rounds
 
 ### Sessões
 
@@ -378,7 +416,7 @@ Registra:
 
 ---
 
-## 13. Liquidação DEMO
+## 14. Liquidação DEMO
 
 Função:
 
@@ -402,7 +440,7 @@ Execução sensível restrita ao `service_role`.
 
 ---
 
-## 14. Edge Functions
+## 15. Edge Functions
 
 ### `ripcom-provider`
 
@@ -421,7 +459,7 @@ ripcom-b2b      = parceiro -> RIPCOM
 
 ---
 
-## 15. Frontend oficial standalone RIPCOM
+## 16. Frontend oficial standalone RIPCOM
 
 Diretório:
 
@@ -458,9 +496,13 @@ Documentação:
 ripcom-provider/README.md
 ```
 
-O versionamento desse frontend é independente do versionamento dos jogos.
+Configuração pública de exemplo:
 
-Exemplo:
+```text
+ripcom-provider/.env.example
+```
+
+O versionamento desse frontend é independente do versionamento dos jogos.
 
 ```text
 RIPCOM Provider Frontend = 1.0.0-sandbox.1
@@ -469,9 +511,9 @@ Eclipse Serpent          = 1.0.0
 
 ---
 
-## 16. Launch URL oficial
+## 17. Launch URL oficial
 
-O `ripcom-b2b` já possui como base padrão de launch o frontend standalone:
+O `ripcom-b2b` usa como base padrão de launch o frontend standalone:
 
 ```text
 https://rhonni666-debug.github.io/rr7-bet/ripcom-provider
@@ -489,7 +531,7 @@ A rota `/ripcom/play/:sessionToken` dentro do RR7 fica como compatibilidade/tran
 
 ---
 
-## 17. Player standalone
+## 18. Player standalone
 
 Arquivo principal:
 
@@ -503,7 +545,7 @@ O app detecta:
 ?play=<session_token>
 ```
 
-O player então usa:
+O player usa:
 
 - `player_state`
 - `player_spin`
@@ -513,7 +555,7 @@ A chave RSA do operador nunca é enviada ao browser.
 
 ---
 
-## 18. Painéis administrativos
+## 19. Painéis administrativos
 
 ### Operadores
 
@@ -522,6 +564,14 @@ A chave RSA do operador nunca é enviada ao browser.
 ```
 
 Gerencia operadores, public keys, ambiente, status, limites e jogos.
+
+### Empresa
+
+```text
+/admin/ripcom-empresa
+```
+
+Gerencia dados empresariais privados da RIPCOM, incluindo CNPJ quando preenchido.
 
 ### Releases
 
@@ -541,7 +591,7 @@ Acompanha requests, latência, status HTTP, sessões e rounds.
 
 ---
 
-## 19. SDK Node.js
+## 20. SDK Node.js
 
 Arquivo:
 
@@ -565,7 +615,7 @@ sdk/README.md
 
 ---
 
-## 20. Backend exemplo de operador
+## 21. Backend exemplo de operador
 
 Arquivos:
 
@@ -576,7 +626,7 @@ examples/ripcom-node-operator/README.md
 
 Objetivo: mostrar como um parceiro mantém a private key somente no servidor e utiliza o SDK RIPCOM.
 
-Rotas locais do exemplo:
+Rotas locais:
 
 - `GET /health`
 - `GET /games`
@@ -584,11 +634,11 @@ Rotas locais do exemplo:
 - `POST /launch`
 - `POST /close`
 
-Esse exemplo é para homologação DEMO, não para ser publicado sem os controles adicionais do próprio operador.
+Esse exemplo é para homologação DEMO, não para ser publicado sem controles adicionais do próprio operador.
 
 ---
 
-## 21. Ferramentas de integração
+## 22. Ferramentas de integração
 
 ### Gerar chaves
 
@@ -630,7 +680,7 @@ O selftest gera RSA em memória e valida assinatura sem internet.
 
 ---
 
-## 22. OpenAPI
+## 23. OpenAPI
 
 Arquivo:
 
@@ -647,7 +697,7 @@ Uso:
 
 ---
 
-## 23. Homologação core concluída
+## 24. Homologação core concluída
 
 Relatório:
 
@@ -671,7 +721,7 @@ O smoke HTTP externo ainda deve ser executado de um ambiente com conectividade a
 
 ---
 
-## 24. CI
+## 25. CI
 
 Workflow:
 
@@ -692,7 +742,7 @@ Valida:
 
 ---
 
-## 25. Deploy
+## 26. Deploy
 
 Workflow:
 
@@ -711,7 +761,7 @@ O frontend standalone é compilado separadamente antes de ser copiado para o art
 
 ---
 
-## 26. Documentação complementar
+## 27. Documentação complementar
 
 - `docs/RIPCOM_PROVIDER_ARCHITECTURE.md`
 - `docs/RIPCOM_B2B_V1.md`
@@ -720,12 +770,13 @@ O frontend standalone é compilado separadamente antes de ser copiado para o art
 - `docs/ripcom-b2b-openapi.yaml`
 - `sdk/README.md`
 - `ripcom-provider/README.md`
+- `examples/ripcom-node-operator/README.md`
 - `RIPCOM_MASTER_DOCUMENTATION.md` ← mestre
 - `RIPCOM_MASTER_DOCUMENTATION.txt` ← backup
 
 ---
 
-## 27. Segurança obrigatória
+## 28. Segurança obrigatória
 
 1. private key nunca no frontend;
 2. private key nunca no banco RIPCOM;
@@ -738,11 +789,12 @@ O frontend standalone é compilado separadamente antes de ser copiado para o art
 9. sessão vinculada à release;
 10. chave efêmera de QA deve ser suspensa/rotacionada;
 11. provider frontend nunca recebe `service_role`;
-12. dinheiro real não é habilitado por simples flag.
+12. dados empresariais/CNPJ ficam privados por padrão;
+13. dinheiro real não é habilitado por simples flag.
 
 ---
 
-## 28. Sandbox x produção
+## 29. Sandbox x produção
 
 ### SANDBOX
 
@@ -759,21 +811,22 @@ Estado atual:
 
 ---
 
-## 29. Próximos passos
+## 30. Próximos passos
 
-1. Fazer `/v1/games` retornar explicitamente a release autorizada.
-2. Fazer `/v1/sessions` retornar a release fixada na sessão.
-3. Rotacionar a chave do `ripcom-qa` antes do smoke HTTP.
-4. Executar smoke HTTP externo completo.
-5. Validar player standalone desktop e mobile via launch real.
-6. Criar segundo jogo autoral RIPCOM.
-7. Criar staging RIPCOM totalmente separado do RR7.
-8. Migrar `RIPCOM_PUBLIC_BASE_URL` para domínio próprio quando disponível.
-9. Preparar pacote de onboarding do primeiro parceiro externo real.
+1. Preencher o perfil empresarial privado com os dados reais quando desejado.
+2. Fazer `/v1/games` retornar explicitamente a release autorizada.
+3. Fazer `/v1/sessions` retornar a release fixada na sessão.
+4. Rotacionar a chave do `ripcom-qa` antes do smoke HTTP.
+5. Executar smoke HTTP externo completo.
+6. Validar player standalone desktop e mobile via launch real.
+7. Criar segundo jogo autoral RIPCOM.
+8. Criar staging RIPCOM totalmente separado do RR7.
+9. Migrar `RIPCOM_PUBLIC_BASE_URL` para domínio próprio quando disponível.
+10. Preparar pacote comercial/técnico para o primeiro parceiro externo real.
 
 ---
 
-## 30. Mapa rápido
+## 31. Mapa rápido
 
 | Componente | Função |
 |---|---|
@@ -783,6 +836,7 @@ Estado atual:
 | `ripcom_game_releases` | Releases dos jogos |
 | `manifest.json` do jogo | Snapshot técnico da release |
 | `ripcom_operators` | Parceiros B2B |
+| `ripcom_company_profile` | Identidade empresarial privada/CNPJ |
 | `ripcom_operator_games` | Jogo + release por operador |
 | `ripcom_api_requests` | Idempotência + telemetria |
 | `ripcom_b2b_sessions` | Sessões externas versionadas |
@@ -793,6 +847,7 @@ Estado atual:
 | `ripcom-provider/` | Frontend canônico independente |
 | `provider-manifest.json` | Manifest do frontend provider |
 | `/admin/ripcom` | Operadores |
+| `/admin/ripcom-empresa` | Perfil empresarial privado |
 | `/admin/ripcom-releases` | Releases |
 | `/admin/ripcom-metricas` | Observabilidade |
 | `sdk/ripcom-node.mjs` | SDK Node |
@@ -811,6 +866,7 @@ Toda mudança importante deve atualizar este documento no mesmo ciclo, principal
 - jogo;
 - release;
 - frontend provider;
+- identidade empresarial;
 - autenticação;
 - SDK;
 - infraestrutura;
