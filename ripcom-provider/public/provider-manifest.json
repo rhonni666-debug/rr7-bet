@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.10",
+  "version": "1.0.0-sandbox.11",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -51,7 +51,10 @@
     "gold-metal-symbol-frames",
     "multi-material-symbol-palette",
     "continuous-reel-stage",
-    "label-free-symbol-presentation"
+    "label-free-symbol-presentation",
+    "backend-driven-symbol-pay-values",
+    "visible-symbol-multipliers",
+    "scatter-bonus-value-badge"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -65,7 +68,7 @@
       "name": "Eclipse Serpent",
       "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "premium-jeweled-v10",
+      "presentation": "premium-valued-gems-v11",
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -81,6 +84,9 @@
         "symbolStyle": "premium-original-jeweled-svg",
         "flatEmojiSymbols": false,
         "symbolLabelsVisible": false,
+        "symbolPayValuesVisible": true,
+        "symbolPayValueSource": "slot_game_configs.symbols[].pay",
+        "scatterValueLabel": "BONUS",
         "materials": ["gold", "emerald", "sapphire", "amethyst", "ruby", "obsidian"],
         "perspectiveReels": true,
         "depthLighting": true,
