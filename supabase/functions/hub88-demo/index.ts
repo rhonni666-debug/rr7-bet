@@ -135,7 +135,9 @@ async function postHub88<T>(config: Hub88Config, path: string, payload: Record<s
       latencyMs,
       response: typeof parsed === 'string' ? parsed.slice(0, 300) : parsed,
     });
-    throw new Error(`HUB88_HTTP_${response.status}`);
+    const error = new Error(`HUB88_HTTP_${response.status}`) as Error & { latencyMs?: number };
+    error.latencyMs = latencyMs;
+    throw error;
   }
 
   return { data: parsed as T, latencyMs };
@@ -211,6 +213,30 @@ Deno.serve(async (req: Request) => {
     return json({ error: error instanceof Error ? error.message : 'HUB88_CONFIG_INVALID' }, 503);
   }
 
+  async function recordMetric(input: {
+    operation: string;
+    providerCode?: string;
+    gameCode?: string;
+    deviceType?: 'mobile' | 'desktop';
+    success: boolean;
+    latencyMs?: number | null;
+    errorCode?: string;
+  }) {
+    const { error } = await supabase.from('aggregator_poc_metrics').insert({
+      aggregator: 'hub88',
+      operation: input.operation,
+      provider_code: input.providerCode || null,
+      game_code: input.gameCode || null,
+      device_type: input.deviceType || null,
+      success: input.success,
+      latency_ms: input.latencyMs ?? null,
+      error_code: input.errorCode || null,
+      environment: 'staging',
+      country: config.country,
+    });
+    if (error) console.error('hub88_metric_persist_failed', { operation: input.operation, error: error.message });
+  }
+
   if (action === 'status') {
     return json({
       data: {
@@ -227,12 +253,17 @@ Deno.serve(async (req: Request) => {
 
   if (!config.enabled) return json({ error: 'HUB88_DISABLED' }, 503);
 
+  let metricProviderCode = '';
+  let metricGameCode = '';
+  let metricDeviceType: 'mobile' | 'desktop' | undefined;
+
   try {
     if (action === 'list_products') {
       const result = await postHub88<unknown>(config, '/operator/generic/v2/products/list', {
         operator_id: config.operatorId,
       });
       const products = asArray<Record<string, unknown>>(result.data);
+      await recordMetric({ operation: action, success: true, latencyMs: result.latencyMs });
       console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, count: products.length });
       return json({ data: products, meta: { latencyMs: result.latencyMs, count: products.length } });
     }
@@ -240,12 +271,14 @@ Deno.serve(async (req: Request) => {
     if (action === 'list_games') {
       const payload: Record<string, unknown> = { operator_id: config.operatorId };
       const productCode = String(body.productCode ?? '').trim();
+      metricProviderCode = productCode;
       if (productCode) payload.product_code = productCode;
 
       const result = await postHub88<unknown>(config, '/operator/generic/v2/game/list', payload);
       const games = asArray<Hub88Game>(result.data).filter(
         (game) => game.demo_game_support === true && game.enabled === true && availableForPocCountry(game, config.country),
       );
+      await recordMetric({ operation: action, providerCode: productCode, success: true, latencyMs: result.latencyMs });
       console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, count: games.length, productCode, country: config.country });
       return json({ data: games, meta: { latencyMs: result.latencyMs, count: games.length, productCode, country: config.country } });
     }
@@ -253,8 +286,11 @@ Deno.serve(async (req: Request) => {
     if (action === 'launch_demo') {
       const gameCode = String(body.gameCode ?? '').trim();
       if (!gameCode) return json({ error: 'GAME_CODE_REQUIRED' }, 400);
+      metricGameCode = gameCode;
+      metricProviderCode = String(body.providerCode ?? '').trim();
 
       const deviceType = body.deviceType === 'mobile' ? 'mobile' : 'desktop';
+      metricDeviceType = deviceType;
       const result = await postHub88<Record<string, unknown>>(config, '/operator/generic/v2/game/url', {
         game_code: gameCode,
         platform: deviceType === 'mobile' ? 'GPL_MOBILE' : 'GPL_DESKTOP',
@@ -269,6 +305,7 @@ Deno.serve(async (req: Request) => {
       const launchUrl = typeof result.data?.url === 'string' ? result.data.url : '';
       if (!launchUrl) throw new Error('HUB88_NO_GAME_URL');
 
+      await recordMetric({ operation: action, providerCode: metricProviderCode, gameCode, deviceType, success: true, latencyMs: result.latencyMs });
       console.log('hub88_poc_metric', { action, success: true, latencyMs: result.latencyMs, gameCode, deviceType, country: config.country });
       return json({
         data: { url: launchUrl, gameCode, currency: 'XXX', mode: 'demo' },
@@ -278,7 +315,17 @@ Deno.serve(async (req: Request) => {
 
     return json({ error: 'UNKNOWN_ACTION' }, 400);
   } catch (error) {
-    const code = error instanceof Error ? error.message : 'HUB88_GATEWAY_ERROR';
+    const typedError = error as Error & { latencyMs?: number };
+    const code = typedError instanceof Error ? typedError.message : 'HUB88_GATEWAY_ERROR';
+    await recordMetric({
+      operation: action || 'unknown',
+      providerCode: metricProviderCode,
+      gameCode: metricGameCode,
+      deviceType: metricDeviceType,
+      success: false,
+      latencyMs: typedError?.latencyMs ?? null,
+      errorCode: code,
+    });
     console.error('hub88_poc_metric', { action, success: false, error: code });
     return json({ error: code }, code.startsWith('HUB88_HTTP_') ? 502 : 500);
   }
