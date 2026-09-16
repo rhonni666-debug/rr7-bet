@@ -1,7 +1,7 @@
 # Eclipse Serpent — Living Scene & Eclipse Bonus
 
 Atualizado em: 16/09/2026  
-Frontend RIPCOM: `1.0.0-sandbox.5`  
+Frontend RIPCOM: `1.0.0-sandbox.6`  
 Game release/math: `Eclipse Serpent 1.1.0`  
 Modo: `SANDBOX / DEMO`
 
@@ -26,8 +26,8 @@ Dar ao Eclipse Serpent uma experiência de slot viva e cinematográfica, mantend
 - `ripcom-provider/src/game/SerpentRise.tsx` — serpente vetorial autoral animada.
 - `ripcom-provider/src/game/AnimatedBackground.tsx` — cenário vivo, parallax, névoa, partículas e eclipse.
 - `ripcom-provider/src/game/audio.ts` — motor de áudio procedural Web Audio, sem assets de terceiros.
-- `ripcom-provider/src/game/WinCelebration.tsx` — overlay autoral de Big Win / Mega Win.
-- `ripcom-provider/src/juice.css` — partículas, símbolos vencedores, Big/Mega Win e botão de som.
+- `ripcom-provider/src/game/WinCelebration.tsx` — overlay autoral GREAT WIN / BIG WIN / MEGA WIN.
+- `ripcom-provider/src/juice.css` — partículas, símbolos vencedores, celebrações e botão de som.
 - `ripcom-provider/src/bonus-mode.css` — HUD do bônus, free spins, resumo final e estados visuais.
 - `ripcom-provider/src/cinematic-vfx.css` — animação cinematográfica sol/lua/serpente.
 - `supabase/functions/ripcom-player-runtime/index.ts` — runtime público do player por token de sessão.
@@ -104,27 +104,28 @@ Eventos sonoros atuais:
 - `freeSpin()` — início de rodada grátis;
 - `tease()` — suspense crescente do quase bônus;
 - `bonusHit()` — confirmação do Eclipse Bonus;
-- `win(multiplier)` — vitória normal, Big Win ou Mega Win;
+- `win(multiplier)` — vitória normal, Great Win, Big Win ou Mega Win;
 - `bonusComplete()` — encerramento das 8 rodadas.
 
 Há botão de som no cabeçalho do player. Navegadores exigem uma interação do usuário antes de liberar áudio; por isso o motor é desbloqueado no primeiro toque/clique.
 
-## Big Win / Mega Win
+## GREAT WIN / BIG WIN / MEGA WIN
 
-A matemática não é alterada por essa camada. A classificação serve apenas para apresentação audiovisual:
+Essa classificação é somente de apresentação audiovisual; ela não muda RNG, saldo ou matemática.
 
-- `BIG WIN`: multiplicador da rodada `>= 8x`.
+- `GREAT WIN`: multiplicador da rodada `>= 5x` e `< 10x`.
+- `BIG WIN`: multiplicador da rodada `>= 10x` e `< 25x`.
 - `MEGA WIN`: multiplicador da rodada `>= 25x`.
 
-Quando ocorre:
+Quando ocorre uma celebração:
 
 - a sequência automática de free spins pausa temporariamente;
 - entra overlay de celebração;
 - partículas explodem radialmente;
 - anéis de energia se expandem;
-- texto e valor ganham destaque;
+- texto, valor e multiplicador ganham destaque;
 - símbolos vencedores pulsam;
-- o áudio usa uma sequência harmônica maior;
+- cada faixa possui sequência sonora própria;
 - após a animação, o fluxo normal continua.
 
 ## Encerramento
@@ -175,7 +176,7 @@ Teste de homologação da release 1.1.0:
 ## Versionamento
 
 - `Eclipse Serpent = 1.1.0`
-- `RIPCOM Provider Frontend = 1.0.0-sandbox.5`
+- `RIPCOM Provider Frontend = 1.0.0-sandbox.6`
 - `ripcom-player-runtime = v1`
 
 ## Segurança
