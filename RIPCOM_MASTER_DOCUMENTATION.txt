@@ -27,7 +27,7 @@ Slug: eclipse-serpent
 Game Code: ripcom-slot:eclipse-serpent
 Launch Type: PROVIDER_SESSION
 Release matemática: 1.1.0
-Frontend RIPCOM: 1.0.0-sandbox.9
+Frontend RIPCOM: 1.0.0-sandbox.10
 Status: SANDBOX
 Modo: DEMO
 
@@ -38,37 +38,46 @@ Launch:
 <provider-base>/?play=<session_token>
 
 ============================================================
-3. SANDBOX.9 — APRESENTAÇÃO DIMENSIONAL
+3. SANDBOX.10 — SÍMBOLOS PREMIUM
 ============================================================
-A sandbox.9 remove a arte principal em emoji/ícones chapados.
+A sandbox.10 mantém a profundidade da sandbox.9 e redesenha os símbolos para uma leitura mais premium e atrativa.
 
-Símbolos autorais:
+Símbolos:
 ripcom-provider/src/game/SymbolArt.tsx
 
-Símbolos atuais:
-Runa
-Fragmento
-Núcleo
-Eclipse Bonus
-Wild
-Serpente Eclipse
-gema fallback
-
-Os SVGs usam gradientes, facetas, reflexos, sombra e profundidade.
+Apresentação visual:
+ripcom-provider/src/premium-symbols-stage10.css
 
 Camada de profundidade:
 ripcom-provider/src/depth-stage9.css
 
-Inclui:
-reels em perspectiva
-translateZ nos objetos
-moldura com profundidade
-reflexo de vidro/metal
-sombra projetada
-plano de chão em perspectiva
-botão SPIN com relevo
-camera tilt suave no desktop
-camera tilt desabilitado no mobile
+Materiais e cores:
+ouro
+esmeralda
+safira
+ametista
+rubi
+obsidiana
+
+Símbolos atuais:
+Runa = medalhão de safira com ouro
+Fragmento = cristal de ametista
+Núcleo = esfera esmeralda
+Eclipse Bonus = medalhão solar dourado com eclipse
+Wild = máscara/cabeça de serpente em esmeralda e ouro com olhos rubi
+Serpente Eclipse = serpente esmeralda sobre medalhão ametista/dourado
+Gema fallback = rubi facetado
+
+Mudanças visuais:
+símbolos maiores
+sem emoji como arte principal
+sem pequenos rótulos abaixo dos símbolos
+rolo contínuo em vez de grade de cards
+brilho e sombra por material
+rails metálicos entre rolos
+Wild e Bonus com animação própria
+símbolos vencedores avançam em profundidade
+brilho de joia em movimento
 
 SVG/CSS são somente apresentação. Não alteram RNG, saldo ou prêmio.
 
@@ -145,7 +154,10 @@ ripcom-provider/src/game/BonusTeaseOverlay.tsx
 ripcom-provider/src/game/SerpentRise.tsx
 ripcom-provider/src/game/WinCelebration.tsx
 ripcom-provider/src/game/AnimatedAmount.tsx
+ripcom-provider/src/game/SymbolArt.tsx
 ripcom-provider/src/symbol-vfx.css
+ripcom-provider/src/depth-stage9.css
+ripcom-provider/src/premium-symbols-stage10.css
 ripcom-provider/src/juice.css
 ripcom-provider/src/cinematic-vfx.css
 ripcom-provider/src/bonus-mode.css
@@ -320,13 +332,14 @@ sdk/README.md
 ============================================================
 18. PRÓXIMOS PASSOS
 ============================================================
-1. Validar sandbox.9 visualmente em desktop e celular.
-2. Decidir se 2.5D atende ou se próximo salto deve usar WebGL/canvas.
-3. Calibrar volume/timing em aparelho real.
-4. Medir FPS no celular.
-5. Smoke HTTP externo completo.
-6. Criar segundo jogo RIPCOM.
-7. Separar staging.
-8. Migrar para domínio próprio.
+1. Validar sandbox.10 visualmente em desktop e celular.
+2. Comparar força visual com a referência enviada sem copiar assets.
+3. Decidir se 2.5D atende ou se próximo salto deve usar WebGL/canvas.
+4. Calibrar volume/timing em aparelho real.
+5. Medir FPS no celular.
+6. Smoke HTTP externo completo.
+7. Criar segundo jogo RIPCOM.
+8. Separar staging.
+9. Migrar para domínio próprio.
 
 FIM DO DOCUMENTO
