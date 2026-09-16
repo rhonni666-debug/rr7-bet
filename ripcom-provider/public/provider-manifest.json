@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.9",
+  "version": "1.0.0-sandbox.10",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -46,7 +46,12 @@
     "perspective-reel-stage",
     "dimensional-control-deck",
     "cinematic-floor-plane",
-    "pointer-camera-tilt"
+    "pointer-camera-tilt",
+    "premium-jeweled-symbols",
+    "gold-metal-symbol-frames",
+    "multi-material-symbol-palette",
+    "continuous-reel-stage",
+    "label-free-symbol-presentation"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -60,7 +65,7 @@
       "name": "Eclipse Serpent",
       "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "dimensional-cinematic-v9",
+      "presentation": "premium-jeweled-v10",
       "bonus": {
         "trigger": "3 scatters",
         "freeSpins": 8,
@@ -73,8 +78,10 @@
         "progressiveCounter": true
       },
       "visualProfile": {
-        "symbolStyle": "original-dimensional-svg",
+        "symbolStyle": "premium-original-jeweled-svg",
         "flatEmojiSymbols": false,
+        "symbolLabelsVisible": false,
+        "materials": ["gold", "emerald", "sapphire", "amethyst", "ruby", "obsidian"],
         "perspectiveReels": true,
         "depthLighting": true,
         "floorPlane": true,
