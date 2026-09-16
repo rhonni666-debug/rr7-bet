@@ -47,7 +47,12 @@ export type RipcomSpin = {
   balance: number;
   grid: string[][];
   feature: Record<string, unknown>;
-  wins: Array<{ symbolId: string; ways: number; multiplier: number }>;
+  wins: Array<{
+    symbolId: string;
+    ways: number;
+    payPerWay: number;
+    multiplier: number;
+  }>;
   scatterCount: number;
   layout: number[];
   isFreeSpin: boolean;
