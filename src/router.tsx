@@ -12,6 +12,7 @@ import { ResetPasswordPage } from './pages/ResetPassword';
 import { AdminPage } from './pages/Admin';
 import { AdminCreditsPage } from './pages/AdminCredits';
 import { AdminOperationsPage } from './pages/AdminOperations';
+import { AdminHub88PocPage } from './pages/AdminHub88Poc';
 
 const rootRoute = createRootRoute({ component: () => <AppShell><Outlet /></AppShell> });
 const homeRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: HomePage });
@@ -34,6 +35,7 @@ const adminCreditsRoute = createRoute({ getParentRoute: () => rootRoute, path: '
 const adminSessionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/sessoes', component: () => <AdminOperationsPage section="sessions" /> });
 const adminTransactionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/transacoes', component: () => <AdminOperationsPage section="transactions" /> });
 const adminAuditRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/auditoria', component: () => <AdminPage section="audit" /> });
+const adminHub88PocRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin/hub88-poc', component: AdminHub88PocPage });
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
@@ -56,6 +58,7 @@ const routeTree = rootRoute.addChildren([
   adminSessionsRoute,
   adminTransactionsRoute,
   adminAuditRoute,
+  adminHub88PocRoute,
 ]);
 
 const rawBase = import.meta.env.BASE_URL;

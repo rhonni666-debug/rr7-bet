@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Blocks, CircleDollarSign, Coins, Gamepad2, Gift, Image, LayoutDashboard, ListTree, ScrollText, TimerReset, Users } from 'lucide-react';
+import { Blocks, CircleDollarSign, Coins, Gamepad2, Gauge, Gift, Image, LayoutDashboard, ListTree, ScrollText, TimerReset, Users } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
 const items = [
@@ -14,6 +14,7 @@ const items = [
   { to: '/admin/sessoes', label: 'Sessões', icon: TimerReset },
   { to: '/admin/transacoes', label: 'Transações', icon: CircleDollarSign },
   { to: '/admin/auditoria', label: 'Auditoria', icon: ScrollText },
+  { to: '/admin/hub88-poc', label: 'Hub88 POC', icon: Gauge },
 ] as const;
 
 export function AdminShell({ children }: { children: ReactNode }) {
