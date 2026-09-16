@@ -57,6 +57,47 @@ export type RoundOutcome = {
   newBalance: number;
 };
 
+export type SlotSymbol = {
+  id: string;
+  icon: string;
+  label: string;
+  weight: number;
+  pay: number;
+  wild?: boolean;
+  scatter?: boolean;
+};
+
+export type SlotConfig = {
+  gameId: string;
+  layout: number[];
+  symbols: SlotSymbol[];
+  feature: Record<string, unknown>;
+  theme: {
+    title?: string;
+    primary?: string;
+    secondary?: string;
+    background?: string;
+    glow?: string;
+    [key: string]: unknown;
+  };
+  active: boolean;
+  version: number;
+};
+
+export type SlotWin = {
+  symbolId: string;
+  ways: number;
+  multiplier: number;
+};
+
+export type SlotSpinOutcome = RoundOutcome & {
+  grid: string[][];
+  feature: Record<string, unknown>;
+  wins: SlotWin[];
+  scatterCount: number;
+  layout: number[];
+};
+
 export type Banner = {
   id: string;
   title: string;
