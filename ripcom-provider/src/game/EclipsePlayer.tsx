@@ -10,6 +10,16 @@ import { eclipseAudio } from './audio';
 import { classifyWin, WinCelebration } from './WinCelebration';
 
 type GamePhase = 'idle' | 'spinning' | 'tease' | 'bonus' | 'free-spins' | 'free-spinning' | 'bonus-outro' | 'reveal';
+type LineWinCue = { line: number; symbolId: string; payPerLine: number; amount: number };
+
+const BET_VALUES = [0.5, 1, 1.5, 2, 2.5, 5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40];
+const PAYLINES: Record<number, [number, number, number]> = {
+  1: [1, 1, 1],
+  2: [0, 0, 0],
+  3: [2, 2, 2],
+  4: [0, 1, 2],
+  5: [2, 1, 0],
+};
 
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -19,16 +29,53 @@ function formatMultiplier(value: number) {
   return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function formatBet(value: number) {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function Brand() {
   return <div className="brand"><div className="brand-mark">R</div><div><strong>RIPCOM</strong><span>ORIGINAL</span></div></div>;
 }
 
-function formatSymbolPay(symbol?: RipcomSymbol) {
-  if (!symbol) return '';
-  if (symbol.scatter) return 'BONUS';
-  const value = Number(symbol.pay);
-  if (!Number.isFinite(value)) return '';
-  return `${formatMultiplier(value)}×`;
+function BetPicker({ value, onChange, disabled }: { value: number; onChange: (value: number) => void; disabled: boolean }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (disabled) setOpen(false);
+  }, [disabled]);
+
+  return (
+    <div className={`bet-picker-stage16 ${open ? 'is-open' : ''}`}>
+      <button
+        className="bet-picker-trigger"
+        type="button"
+        disabled={disabled}
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <strong>{formatBet(value)}</strong><span>⌄</span>
+      </button>
+      {open && (
+        <div className="bet-picker-menu" role="listbox" aria-label="Valores de aposta">
+          {BET_VALUES.map((option) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={option === value}
+              className={option === value ? 'active' : ''}
+              key={option}
+              onClick={() => {
+                onChange(option);
+                setOpen(false);
+              }}
+            >
+              {formatBet(option)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function randomGrid(state: RipcomPlayerState) {
@@ -79,26 +126,6 @@ function BonusOutro({ totalWin }: { totalWin: number }) {
   );
 }
 
-function WinLinesBreakdown({ outcome, symbols }: { outcome: RipcomSpin; symbols: ReadonlyMap<string, RipcomSymbol> }) {
-  if (!outcome.wins.length) return null;
-  return (
-    <div className="win-ways-breakdown" aria-label="Detalhamento das linhas vencedoras">
-      {outcome.wins.map((win) => {
-        const symbol = symbols.get(win.symbolId);
-        const amount = Math.round(outcome.bet * win.multiplier * 100) / 100;
-        const lineList = win.lines.join(', ');
-        return (
-          <div className="win-way-row" key={win.symbolId}>
-            <span>{symbol?.wild ? 'WILD' : symbol?.label ?? win.symbolId}</span>
-            <strong>{formatMultiplier(win.payPerLine)}× × {win.lineCount} {win.lineCount === 1 ? 'LINHA' : 'LINHAS'} = {formatMultiplier(win.multiplier)}×</strong>
-            <em>{amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} CR · L{lineList}</em>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function EclipsePlayer({ token }: { token: string }) {
   const [state, setState] = useState<RipcomPlayerState | null>(null);
   const [grid, setGrid] = useState<string[][]>([]);
@@ -110,14 +137,16 @@ export function EclipsePlayer({ token }: { token: string }) {
   const [phase, setPhase] = useState<GamePhase>('idle');
   const [teaseColumn, setTeaseColumn] = useState<number | null>(null);
   const [bonusScatterCount, setBonusScatterCount] = useState(3);
+  const [activeWinLine, setActiveWinLine] = useState<LineWinCue | null>(null);
+  const [shownWinAmount, setShownWinAmount] = useState(0);
   const [error, setError] = useState('');
   const [loadingText, setLoadingText] = useState('Preparando Eclipse Serpent…');
 
   const symbols = useMemo(() => new Map((state?.config.symbols ?? []).map((symbol) => [symbol.id, symbol])), [state]);
-  const winning = useMemo(() => new Set(outcome?.wins.map((win) => win.symbolId) ?? []), [outcome]);
   const scatterId = useMemo(() => state?.config.symbols.find((symbol) => symbol.scatter)?.id, [state]);
   const wildId = useMemo(() => state?.config.symbols.find((symbol) => symbol.wild)?.id, [state]);
   const bonusActive = Boolean(state?.session.freeSpinsRemaining && state.session.freeSpinsRemaining > 0);
+  const activeLineRows = activeWinLine ? PAYLINES[activeWinLine.line] : null;
 
   useEffect(() => {
     eclipseAudio.setEnabled(soundOn);
@@ -167,6 +196,35 @@ export function EclipsePlayer({ token }: { token: string }) {
     } : current);
   }
 
+  async function presentWinningLines(result: RipcomSpin) {
+    const sequence = result.wins
+      .flatMap((win) => win.lines.map((line) => ({
+        line,
+        symbolId: win.symbolId,
+        payPerLine: win.payPerLine,
+        amount: Math.round(result.bet * win.payPerLine * 100) / 100,
+      })))
+      .sort((a, b) => a.line - b.line);
+
+    if (!sequence.length) {
+      setShownWinAmount(result.win);
+      return;
+    }
+
+    let accumulated = 0;
+    for (const cue of sequence) {
+      accumulated = Math.round((accumulated + cue.amount) * 100) / 100;
+      setActiveWinLine(cue);
+      setShownWinAmount(accumulated);
+      eclipseAudio.win(cue.payPerLine);
+      await sleep(900);
+    }
+
+    setActiveWinLine(null);
+    setShownWinAmount(result.win);
+    await sleep(260);
+  }
+
   async function celebrateWin(result: RipcomSpin) {
     if (result.win <= 0 || result.bonusAwarded === 8) return;
     eclipseAudio.win(result.multiplier);
@@ -192,6 +250,8 @@ export function EclipsePlayer({ token }: { token: string }) {
     setError('');
     setOutcome(null);
     setCelebration(null);
+    setActiveWinLine(null);
+    setShownWinAmount(0);
     setTeaseColumn(null);
     setPhase(freeSpin ? 'free-spinning' : 'spinning');
 
@@ -247,6 +307,7 @@ export function EclipsePlayer({ token }: { token: string }) {
         await sleep(7000);
         setPhase('free-spins');
       } else {
+        if (result.win > 0) await presentWinningLines(result);
         await celebrateWin(result);
         if (result.isFreeSpin && result.freeSpinsRemaining === 0) {
           eclipseAudio.bonusComplete();
@@ -266,6 +327,7 @@ export function EclipsePlayer({ token }: { token: string }) {
       window.clearInterval(spinTimer);
       if (teaseTimer) window.clearInterval(teaseTimer);
       setTeaseColumn(null);
+      setActiveWinLine(null);
       setBusy(false);
     }
   }
@@ -324,30 +386,37 @@ export function EclipsePlayer({ token }: { token: string }) {
         <div className="game-header"><Brand /><div><button className={`sound-toggle ${soundOn ? '' : 'is-muted'}`} type="button" onClick={() => void toggleSound()} aria-label={soundOn ? 'Desativar som' : 'Ativar som'}>{soundOn ? <Volume2 size={17} /> : <VolumeX size={17} />}</button><span className="pill green">DEMO</span><span className="balance">{state.session.balance.toLocaleString('pt-BR')} CR</span></div></div>
         <div className="game-title"><span>RIPCOM ORIGINAL</span><h1>{state.game.name}</h1><p>{visualBonusActive ? 'ECLIPSE BONUS • 8 FREE SPINS' : '3×3 • 5 LINHAS • ECLIPSE BONUS'}</p></div>
 
-        <div className={`reels ${busy ? 'spinning' : ''} ${visualBonusActive ? 'bonus-reels' : ''}`}>
+        <div className={`reels ${busy ? 'spinning' : ''} ${visualBonusActive ? 'bonus-reels' : ''} ${activeWinLine ? 'showing-line-win' : ''}`}>
           {grid.map((column, columnIndex) => (
             <div className={`reel ${phase === 'tease' && teaseColumn === columnIndex ? 'tease-target' : ''}`} key={columnIndex} style={{ '--delay': `${columnIndex * 180}ms` } as React.CSSProperties}>
               {column.map((symbolId, rowIndex) => {
                 const symbol = symbols.get(symbolId);
-                const isWinner = winning.has(symbolId);
-                const symbolClasses = ['symbol', isWinner ? 'winner' : '', symbol?.scatter ? 'scatter' : '', symbol?.wild ? 'wild' : '', phase === 'tease' && teaseColumn === columnIndex ? 'tease-hidden' : ''].filter(Boolean).join(' ');
-                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><SymbolArt symbol={symbol} /><span className={`symbol-pay-value ${symbol?.scatter ? 'is-bonus' : ''}`}>{formatSymbolPay(symbol)}</span><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
+                const isLineWinner = Boolean(activeLineRows && activeLineRows[columnIndex] === rowIndex);
+                const symbolClasses = ['symbol', isLineWinner ? 'line-win-active' : '', activeLineRows && !isLineWinner ? 'line-win-muted' : '', symbol?.scatter ? 'scatter' : '', symbol?.wild ? 'wild' : '', phase === 'tease' && teaseColumn === columnIndex ? 'tease-hidden' : ''].filter(Boolean).join(' ');
+                return <div className={symbolClasses} key={`${columnIndex}-${rowIndex}`}><SymbolArt symbol={symbol} /><small>{symbol?.wild ? 'WILD' : symbol?.scatter ? 'BONUS' : symbol?.label}</small></div>;
               })}
             </div>
           ))}
+          {activeWinLine && (
+            <>
+              <div className={`payline-trace payline-${activeWinLine.line}`} />
+              <div className="line-win-value">
+                <span>LINHA {activeWinLine.line}</span>
+                <strong>+{formatMultiplier(activeWinLine.payPerLine)}×</strong>
+                <em>+{formatBet(activeWinLine.amount)} CR</em>
+              </div>
+            </>
+          )}
         </div>
 
         {outcome && outcome.win > 0 && phase !== 'bonus' && phase !== 'bonus-outro' && (
-          <>
-            <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong><AnimatedAmount value={outcome.win} duration={980} prefix="+" suffix=" CR" /></strong><small>{formatMultiplier(outcome.multiplier)}×</small></div>
-            <WinLinesBreakdown outcome={outcome} symbols={symbols} />
-          </>
+          <div className={`win-banner ${outcome.isFreeSpin ? 'bonus-win-banner' : ''}`}><span>{outcome.isFreeSpin ? 'FREE SPIN WIN' : 'WIN'}</span><strong><AnimatedAmount value={shownWinAmount} duration={520} prefix="+" suffix=" CR" /></strong><small>{formatMultiplier(outcome.multiplier)}×</small></div>
         )}
 
         {error && <div className="game-error">{error}</div>}
 
         <div className="game-controls">
-          <div className="control"><small>{visualBonusActive ? 'BONUS BET' : 'BET'}</small><select value={visualBonusActive ? (state.session.bonusBet ?? bet) : bet} onChange={(event) => setBet(Number(event.target.value))} disabled={busy || visualBonusActive}>{[1,2,5,10,20,50,100].map((value) => <option key={value}>{value}</option>)}</select></div>
+          <div className="control bet-control-stage16"><small>{visualBonusActive ? 'BONUS BET' : 'BET'}</small><BetPicker value={visualBonusActive ? (state.session.bonusBet ?? bet) : bet} onChange={setBet} disabled={busy || visualBonusActive} /></div>
           <button className={`spin-button ${visualBonusActive ? 'bonus-spin-button' : ''}`} disabled={busy || visualBonusActive} onClick={() => void playRound(false)}><RefreshCw className={busy ? 'rotating' : ''} /><span>{phase === 'tease' ? 'BONUS?' : visualBonusActive ? `${state.session.freeSpinsRemaining} FREE` : busy ? 'SPINNING' : 'SPIN'}</span></button>
           <div className="control right"><small>{visualBonusActive ? 'FREE SPINS' : 'PAYOUT'}</small><b>{visualBonusActive ? `${state.session.freeSpinsRemaining}/8` : '5 LINHAS'}</b></div>
         </div>
