@@ -2,7 +2,7 @@
   "schema": "ripcom.provider-frontend/v1",
   "provider": "RIPCOM",
   "application": "ripcom-game-provider",
-  "version": "1.0.0-sandbox.3",
+  "version": "1.0.0-sandbox.4",
   "channel": "sandbox",
   "mode": "DEMO",
   "canonicalFrontend": true,
@@ -22,7 +22,10 @@
     "scatter-bonus-tease",
     "solar-lunar-eclipse-animation",
     "rising-serpent-animation",
-    "cinematic-bonus-intro-v3"
+    "persistent-bonus-session-state",
+    "8-free-spins",
+    "automatic-free-spins-sequence",
+    "bonus-win-summary"
   ],
   "security": {
     "operatorPrivateKeysInFrontend": false,
@@ -34,9 +37,14 @@
     {
       "gameCode": "ripcom-slot:eclipse-serpent",
       "name": "Eclipse Serpent",
-      "release": "1.0.0",
+      "release": "1.1.0",
       "status": "SANDBOX",
-      "presentation": "cinematic-vfx-v3"
+      "presentation": "cinematic-bonus-v4",
+      "bonus": {
+        "trigger": "3 scatters",
+        "freeSpins": 8,
+        "retrigger": false
+      }
     }
   ]
 }
