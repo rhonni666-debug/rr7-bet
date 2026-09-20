@@ -37,6 +37,9 @@ jobs:
       - name: Build FN-IA
         run: npm --prefix fn-ia-host run build -- --base=/rr7-bet/
 
+      - name: GitHub Pages SPA fallback
+        run: cp fn-ia-host/dist/index.html fn-ia-host/dist/404.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: fn-ia-host/dist
