@@ -1,8 +1,11 @@
-name: Deploy GitHub Pages
+name: Deploy FN-IA
 
 on:
   push:
     branches: [main]
+    paths:
+      - "fn-ia-host/**"
+      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -24,41 +27,19 @@ jobs:
         with:
           node-version: 22
       - uses: actions/configure-pages@v5
-      - name: Install RR7 dependencies
-        run: npm install --no-audit --no-fund
-      - name: Test RR7
-        run: npm run test
-      - name: Test RIPCOM SDK
-        run: npm run ripcom:sdk:test
-      - name: Typecheck RR7
-        run: npm run typecheck
-      - name: Build RR7
-        run: npm run build
-      - name: Install RIPCOM provider dependencies
-        run: npm --prefix ripcom-provider install --no-audit --no-fund
-      - name: Typecheck RIPCOM provider
-        run: npm --prefix ripcom-provider run typecheck
-      - name: Build RIPCOM provider
-        run: npm --prefix ripcom-provider run build
-      - name: Publish standalone RIPCOM app inside Pages artifact
-        run: |
-          mkdir -p dist/ripcom-provider
-          cp -R ripcom-provider/dist/. dist/ripcom-provider/
-      - name: Install FN-IA host dependencies
+
+      - name: Install FN-IA
         run: npm --prefix fn-ia-host install --no-audit --no-fund
-      - name: Typecheck FN-IA host
+
+      - name: Typecheck FN-IA
         run: npm --prefix fn-ia-host run typecheck
-      - name: Build FN-IA host
-        run: npm --prefix fn-ia-host run build -- --base=/rr7-bet/fn-ia/
-      - name: Publish FN-IA inside Pages artifact
-        run: |
-          mkdir -p dist/fn-ia
-          cp -R fn-ia-host/dist/. dist/fn-ia/
-      - name: RR7 SPA fallback
-        run: cp dist/index.html dist/404.html
+
+      - name: Build FN-IA
+        run: npm --prefix fn-ia-host run build -- --base=/rr7-bet/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: fn-ia-host/dist
 
   deploy:
     environment:
@@ -67,6 +48,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy FN-IA to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
