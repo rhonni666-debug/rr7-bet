@@ -2,7 +2,7 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [fn-ia-pages]
   workflow_dispatch:
 
 permissions:
@@ -44,6 +44,16 @@ jobs:
         run: |
           mkdir -p dist/ripcom-provider
           cp -R ripcom-provider/dist/. dist/ripcom-provider/
+      - name: Install FN-IA host dependencies
+        run: npm --prefix fn-ia-host install --no-audit --no-fund
+      - name: Typecheck FN-IA host
+        run: npm --prefix fn-ia-host run typecheck
+      - name: Build FN-IA host
+        run: npm --prefix fn-ia-host run build -- --base=/rr7-bet/fn-ia/
+      - name: Publish FN-IA inside Pages artifact
+        run: |
+          mkdir -p dist/fn-ia
+          cp -R fn-ia-host/dist/. dist/fn-ia/
       - name: RR7 SPA fallback
         run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
